@@ -206,6 +206,16 @@ namespace Unity.FPS.AvatarBoss
             State = newState;
             CurrentAttack = m_PendingAttack;
             Debug.Log($"[AvatarOfNature] Scheduler state -> {newState} (element={CurrentAttack?.Element.ToString() ?? "none"})", this);
+
+            if (newState == AvatarBossSchedulerState.Telegraph)
+                PlayTelegraphCue();
+        }
+
+        void PlayTelegraphCue()
+        {
+            var cues = GetComponentInParent<AvatarBossAudioCues>();
+            if (cues != null)
+                cues.Play(AvatarBossCue.Telegraph);
         }
     }
 }

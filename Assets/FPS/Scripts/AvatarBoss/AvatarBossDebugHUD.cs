@@ -46,11 +46,11 @@ namespace Unity.FPS.AvatarBoss
             {
                 string element = Boss.Scheduler.CurrentAttack != null
                     ? Boss.Scheduler.CurrentAttack.Element.ToString()
-                    : "-";
-                GUILayout.Label($"Attack: {Boss.Scheduler.State}  element: {element}");
+                    : "none";
+                GUILayout.Label($"Phase 2: {(Boss.PhaseTwo ? "ACTIVE" : "off")}   Attack: {Boss.Scheduler.State}  element: {element}");
             }
 
-            GUILayout.Label("Hit the boss to fill stagger -> attack interrupted, weak points expose for 3s");
+            GUILayout.Label("Events: stagger/phase/weakpoint changes are logged to Console.");
             GUILayout.EndArea();
         }
     }

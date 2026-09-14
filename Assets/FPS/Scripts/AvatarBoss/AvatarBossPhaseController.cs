@@ -107,6 +107,10 @@ namespace Unity.FPS.AvatarBoss
         {
             m_Boss.NotifyPhase2();
 
+            var cues = GetComponentInParent<AvatarBossAudioCues>();
+            if (cues != null)
+                cues.Play(AvatarBossCue.PhaseTwo);
+
             if (m_Stagger == null)
                 m_Stagger = m_Boss.Stagger;
             if (m_Stagger != null)

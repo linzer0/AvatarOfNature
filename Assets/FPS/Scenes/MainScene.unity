@@ -879,6 +879,9 @@ GameObject:
   - component: {fileID: 1099317693}
   - component: {fileID: 1099317695}
   - component: {fileID: 1099317694}
+  - component: {fileID: 1099317696}
+  - component: {fileID: 1099317698}
+  - component: {fileID: 1099317697}
   m_Layer: 0
   m_Name: AvatarOfNature
   m_TagString: Untagged
@@ -1058,8 +1061,58 @@ MonoBehaviour:
   TransitionDuration: 3
   TimingMultiplier: 0.7
   StaggerGainMultiplier: 0.75
+  StaggerThresholdMultiplier: 0.6
   PhaseTwoVulnerabilityDuration: 2.2
   EnableCombo: 1
+--- !u!114 &1099317696
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5770ba394d80534091495f0e56774ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossGameplayTestAgent
+  AutoRun: 0
+  ShotInterval: 0.15
+  StepTimeout: 60
+  AllowHybridNudge: 1
+--- !u!114 &1099317697
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ad6fb375cec8bc24099e22e17ed20276, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossVisualEffects
+  PhaseTwoBodyColor: {r: 1, g: 0.35, b: 0.18, a: 1}
+  PhaseTwoEmissiveIntensity: 0.6
+  ExposedWeakPointColor: {r: 0, g: 1, b: 0.55, a: 1}
+  HiddenWeakPointColor: {r: 1, g: 1, b: 1, a: 1}
+--- !u!114 &1099317698
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 47f4c1b25c8438349828c7ac02b96c91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossAudioCues
+  TelegraphClip: {fileID: 0}
+  StaggerBreakClip: {fileID: 0}
+  WeakPointOpenClip: {fileID: 0}
+  PhaseTwoClip: {fileID: 0}
+  BossDeathClip: {fileID: 0}
 --- !u!4 &1146676878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5963937743390997973, guid: 7042f8fe21debc944b5bdc894f478d63,

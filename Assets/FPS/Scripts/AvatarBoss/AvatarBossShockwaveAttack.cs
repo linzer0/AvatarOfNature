@@ -65,8 +65,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 s_RingMaterial = new Material(textureShader);
                 s_RingMaterial.color = new Color(1f, 0.7f, 0.15f, 0.75f);
-            }
-            if (s_RingMaterial != null)
+            }            if (s_RingMaterial != null)
                 ringRenderer.material = s_RingMaterial;
         }
 
@@ -84,12 +83,14 @@ namespace Unity.FPS.AvatarBoss
                 radius += WaveSpeed * Time.deltaTime;
                 m_Ring.transform.localScale = Vector3.one * (radius * 2f);
 
-                // pulse alpha for readability
-                MeshRenderer renderer = m_Ring.GetComponent<MeshRenderer>();
-                if (renderer != null && s_RingMaterial != null)
+                // pulse alpha for readability; white flash pumping on the wave front
+                if (m_Ring != null && s_RingMaterial != null)
                 {
-                    float a = Mathf.Lerp(0.45f, 0.85f, 0.5f + 0.5f * Mathf.Sin(Time.time * PulseSpeed));
-                    s_RingMaterial.color = new Color(1f, 0.7f, 0.15f, a);
+                    float a = Mathf.Lerp(0.45f, 0.9f, 0.5f + 0.5f * Mathf.Sin(Time.time * PulseSpeed));
+                    // wavefront flashes white every pulse
+                    float rhythm = Mathf.Repeat(Time.time * PulseSpeed, 1f);
+                    Color baseColor = new Color(1f, 0.7f, 0.15f, a);
+                    s_RingMaterial.color = Color.Lerp(baseColor, Color.white, Mathf.Pow(rhythm, 3f) * 0.6f);
                 }
 
                 if (!damageDone)

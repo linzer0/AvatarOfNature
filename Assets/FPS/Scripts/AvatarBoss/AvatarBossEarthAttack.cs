@@ -74,7 +74,8 @@ namespace Unity.FPS.AvatarBoss
                 if (s_DecalMaterial == null && textureShader != null)
                 {
                     s_DecalMaterial = new Material(textureShader);
-                    s_DecalMaterial.color = new Color(1f, 0.25f, 0.1f, 0.6f);
+                    // Earth: brown-gold dust palette (cracked-soil language)
+                    s_DecalMaterial.color = new Color(0.72f, 0.5f, 0.12f, 0.7f);
                 }
                 if (s_DecalMaterial != null)
                     decalRenderer.material = s_DecalMaterial;

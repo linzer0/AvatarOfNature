@@ -73,7 +73,8 @@ namespace Unity.FPS.AvatarBoss
                 if (s_DecalMaterial == null && textureShader != null)
                 {
                     s_DecalMaterial = new Material(textureShader);
-                    s_DecalMaterial.color = new Color(1f, 0.4f, 0.05f, 0.65f);
+                    // Fire: red-orange glow language
+                    s_DecalMaterial.color = new Color(1f, 0.35f, 0.05f, 0.7f);
                 }
                 if (s_DecalMaterial != null)
                     decalRenderer.material = s_DecalMaterial;
@@ -111,11 +112,11 @@ namespace Unity.FPS.AvatarBoss
 
             MeshRenderer rockRenderer = rock.GetComponent<MeshRenderer>();
             Shader textureShader = Shader.Find("Sprites/Default");
-            if (s_RockMaterial == null && textureShader != null)
-            {
-                s_RockMaterial = new Material(textureShader);
-                s_RockMaterial.color = new Color(0.8f, 0.3f, 0.1f, 1f);
-            }
+                if (s_RockMaterial == null && textureShader != null)
+                {
+                    s_RockMaterial = new Material(textureShader);
+                    s_RockMaterial.color = new Color(1f, 0.28f, 0.08f, 1f);
+                }
             if (s_RockMaterial != null)
                 rockRenderer.material = s_RockMaterial;
 

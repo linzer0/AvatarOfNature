@@ -69,6 +69,7 @@ namespace Unity.FPS.AvatarBoss
         {
             m_IsDead = true;
             Debug.Log("[AvatarOfNature] Boss died.", this);
+            PlayCue(AvatarBossCue.BossDeath);
             Stagger.ResetStagger();
 
             if (m_VulnerabilityRoutine != null)
@@ -96,6 +97,7 @@ namespace Unity.FPS.AvatarBoss
             if (m_IsDead)
                 return;
             Debug.Log("[AvatarOfNature] STAGGER BROKEN — weak points exposed!", this);
+            PlayCue(AvatarBossCue.StaggerBreak);
 
             if (Scheduler != null)
                 Scheduler.Interrupt();
@@ -106,6 +108,13 @@ namespace Unity.FPS.AvatarBoss
             if (m_VulnerabilityRoutine != null)
                 StopCoroutine(m_VulnerabilityRoutine);
             m_VulnerabilityRoutine = StartCoroutine(ExposeWeakPointsRoutine());
+        }
+
+        void PlayCue(AvatarBossCue cue)
+        {
+            var cues = GetComponentInChildren<AvatarBossAudioCues>();
+            if (cues != null)
+                cues.Play(cue);
         }
 
         /// <summary>Called by AvatarBossPhaseController at the end of the transition.</summary>
@@ -123,6 +132,7 @@ namespace Unity.FPS.AvatarBoss
                 if (PhaseTwo || !weakPoint.PhaseTwoAttached)
                     weakPoint.SetExposed(true);
             }
+            PlayCue(AvatarBossCue.WeakPointOpen);
 
             yield return new WaitForSeconds(VulnerabilityDuration);
 
