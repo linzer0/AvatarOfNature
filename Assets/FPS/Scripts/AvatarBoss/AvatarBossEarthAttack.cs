@@ -31,6 +31,8 @@ namespace Unity.FPS.AvatarBoss
         static Material s_DecalMaterial;
         static Material s_SpikeMaterial;
 
+        protected override AvatarBossElement ExpectedElement => AvatarBossElement.Earth;
+
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();

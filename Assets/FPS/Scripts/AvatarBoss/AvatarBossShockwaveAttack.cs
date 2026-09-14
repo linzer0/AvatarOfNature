@@ -29,6 +29,8 @@ namespace Unity.FPS.AvatarBoss
 
         static Material s_RingMaterial;
 
+        protected override AvatarBossElement ExpectedElement => AvatarBossElement.Shockwave;
+
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
