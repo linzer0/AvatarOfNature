@@ -15,6 +15,10 @@ namespace Unity.FPS.AvatarBoss
     /// M2: explicit state machine driver for boss attacks.
     public class AvatarBossAttackScheduler : MonoBehaviour
     {
+        [Header("Tunings")]
+        [Tooltip("Initial grace period: the first attack cycle starts no earlier than this (seconds after play start)")]
+        public float InitialGraceTime = 4f;
+
         [Header("Timings")]
         [Tooltip("Wind-up delay between telegraph and the attack landing")]
         public float WindupTime = 1f;
@@ -57,6 +61,7 @@ namespace Unity.FPS.AvatarBoss
             if (m_Initialized)
                 return;
             m_Initialized = true;
+            m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             m_Attacks = GetComponentsInChildren<AvatarBossAttack>();
             if (m_Attacks.Length == 0)
                 Debug.LogWarning("[AvatarOfNature] No AvatarBossAttack components in boss hierarchy.", this);

@@ -35,7 +35,6 @@ namespace Unity.FPS.AvatarBoss
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
         }
-
         public override void Prepare()
         {
             if (m_Player == null)
@@ -64,15 +63,34 @@ namespace Unity.FPS.AvatarBoss
             if (s_RingMaterial == null && textureShader != null)
             {
                 s_RingMaterial = new Material(textureShader);
-                s_RingMaterial.color = new Color(1f, 0.7f, 0.15f, 0.75f);
-            }            if (s_RingMaterial != null)
+                // white pre-telegraph: bright at Telegraph phase, switches to orange at Execute
+                s_RingMaterial.color = new Color(1f, 1f, 1f, 0.55f);
+            }
+            if (s_RingMaterial != null)
                 ringRenderer.material = s_RingMaterial;
+        }
+
+        IEnumerator PreTelegraphExpand()
+        {
+            // animate the ring from 0 to approximate warning radius during the telegraph phase
+            float t = 0f;
+            while (m_Ring != null && t < TelegraphTime)
+            {
+                t += Time.deltaTime;
+                float k = Mathf.Clamp01(t / TelegraphTime);
+                m_Ring.transform.localScale = Vector3.one * (4f + 4f * k); // small preview ring
+                yield return null;
+            }
         }
 
         public override IEnumerator Execute()
         {
             if (m_Ring == null || m_Player == null)
                 yield break;
+
+            // white pulse ends; the wave turns orange and expands
+            if (s_RingMaterial != null)
+                s_RingMaterial.color = new Color(1f, 0.7f, 0.15f, 0.85f);
 
             Vector3 center = m_Ring.transform.position;
             float radius = 0.5f;

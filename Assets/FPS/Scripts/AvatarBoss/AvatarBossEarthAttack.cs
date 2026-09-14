@@ -54,10 +54,11 @@ namespace Unity.FPS.AvatarBoss
 
             for (int i = 0; i < SpikeCount; i++)
             {
+                // telegraphs spawn AROUND the player on a safe radius, never inside the player/camera
                 Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
-                Vector3 center = i == 0
-                    ? m_Player.position
-                    : m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
+                if (rnd.magnitude < 2f)
+                    rnd = rnd.normalized * 2f;
+                Vector3 center = m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
 
                 center = SnapToGround(center + Vector3.up * 20f);
 
@@ -67,7 +68,7 @@ namespace Unity.FPS.AvatarBoss
                 decal.transform.SetPositionAndRotation(
                     center + Vector3.up * 0.08f,
                     Quaternion.Euler(-90f, Random.value * 360f, 0f));
-                decal.transform.localScale = Vector3.one * 5f;
+                decal.transform.localScale = Vector3.one * 3.5f;
 
                 MeshRenderer decalRenderer = decal.GetComponent<MeshRenderer>();
                 Shader textureShader = Shader.Find("Sprites/Default");

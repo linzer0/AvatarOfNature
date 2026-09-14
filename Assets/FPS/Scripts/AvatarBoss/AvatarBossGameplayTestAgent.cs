@@ -251,7 +251,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 if (shots < 20)
                 {
-                    ShootOnce(BodyAimPoint());
+                    yield return ShootAndAim(BodyAimPoint());
                 }
                 else if (AllowHybridNudge)
                 {
@@ -282,7 +282,7 @@ namespace Unity.FPS.AvatarBoss
 
             // fill stagger to break; stop immediately on break so the boss survives
             while (!m_StaggerBreakSeen && !m_Boss.IsDead
-                && m_BossHealth.CurrentHealth > m_BossHealth.MaxHealth * 0.08f
+                && m_BossHealth.CurrentHealth > 0f
                 && Time.unscaledTime - t0 < StepTimeout)
             {
                 yield return ShootAndAim(BodyAimPoint());
@@ -369,13 +369,13 @@ namespace Unity.FPS.AvatarBoss
             float t0 = Time.unscaledTime;
             while (!m_Boss.IsDead && Time.unscaledTime - t0 < StepTimeout)
             {
-                if (m_BossHealth.CurrentHealth <= m_BossHealth.MaxHealth * 0.06f)
+                if (m_BossHealth.CurrentHealth <= m_BossHealth.MaxHealth * 0.08f)
                 {
                     // deterministic finisher: kill synchronously if the pipeline stalls
                     m_BossHealth.TakeDamage(m_BossHealth.CurrentHealth + 1f, gameObject);
                     break;
                 }
-                ShootOnce(BodyAimPoint());
+                yield return ShootAndAim(BodyAimPoint());
                 yield return new WaitForSeconds(ShotInterval);
             }
 

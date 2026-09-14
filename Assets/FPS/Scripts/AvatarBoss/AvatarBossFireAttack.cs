@@ -55,10 +55,11 @@ namespace Unity.FPS.AvatarBoss
             int count = Mathf.Clamp(ImpactCount, 6, 8);
             for (int i = 0; i < count; i++)
             {
+                // impacts AROUND the player on a safe radius, never inside the player/camera
                 Vector2 rnd = Random.insideUnitCircle * ImpactSpread;
-                Vector3 center = i == 0
-                    ? m_Player.position
-                    : m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
+                if (rnd.magnitude < 2.5f)
+                    rnd = rnd.normalized * 2.5f;
+                Vector3 center = m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
 
                 center = SnapToGround(center + Vector3.up * 20f);
 
