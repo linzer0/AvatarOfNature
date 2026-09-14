@@ -95,10 +95,10 @@ namespace Unity.FPS.AvatarBoss
             {
                 if (attack.Element == element)
                 {
-                    SetState(AvatarBossSchedulerState.Telegraph);
                     m_PendingAttack = attack;
                     m_LastElement = element;
                     m_HasLastElement = true;
+                    SetState(AvatarBossSchedulerState.Telegraph);
                     attack.Prepare();
                     m_CycleRoutine = StartCoroutine(RunCycle(attack));
                     return;
@@ -121,6 +121,13 @@ namespace Unity.FPS.AvatarBoss
                     candidate = m_Attacks[Random.Range(0, m_Attacks.Length)];
             }
             return candidate;
+        }
+
+        /// <summary>Test-only hook: deterministically arms the next fixed combo cycle. Does not alter designer data.</summary>
+        public void DebugForceComboPending()
+        {
+            m_ComboPending = true;
+            m_NextAttackAllowedTime = Time.time;
         }
 
         void StartNewCycle()

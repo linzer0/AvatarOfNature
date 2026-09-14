@@ -3,7 +3,8 @@
     "references": [
         "fps.Game",
         "fps.Gameplay",
-        "fps.AI"
+        "fps.AI",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

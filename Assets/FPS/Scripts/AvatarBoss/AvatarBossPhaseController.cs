@@ -21,6 +21,8 @@ namespace Unity.FPS.AvatarBoss
         public float TimingMultiplier = 0.7f;
         [Tooltip("Stagger gain per damage multiplier in Phase 2 (lower = more persistent boss)")]
         public float StaggerGainMultiplier = 0.75f;
+        [Tooltip("Stagger threshold multiplier in Phase 2 (must keep the break reachable before death)")]
+        public float StaggerThresholdMultiplier = 0.6f;
         [Tooltip("Weak point vulnerability window duration in Phase 2 (direct value)")]
         public float PhaseTwoVulnerabilityDuration = 2.2f;
 
@@ -111,6 +113,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 m_Stagger.StaggerGainPerDamage *= StaggerGainMultiplier;
                 m_Stagger.DecayPerSecond *= StaggerGainMultiplier;
+                m_Stagger.MaxStagger *= StaggerThresholdMultiplier;
             }
 
             if (m_Scheduler != null)
