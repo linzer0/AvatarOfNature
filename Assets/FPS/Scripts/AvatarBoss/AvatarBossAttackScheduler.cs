@@ -94,6 +94,8 @@ namespace Unity.FPS.AvatarBoss
         void StartNewCycle()
         {
             m_PendingAttack = PickAttack();
+            m_LastElement = m_PendingAttack.Element; // recorded at cycle start so interrupted attacks still count
+            m_HasLastElement = true;
             SetState(AvatarBossSchedulerState.Telegraph);
             m_PendingAttack.Prepare();
             m_CycleRoutine = StartCoroutine(RunCycle(m_PendingAttack));
@@ -115,8 +117,6 @@ namespace Unity.FPS.AvatarBoss
             yield return new WaitForSeconds(RecoverTime);
 
             m_NextAttackAllowedTime = Time.time + attack.Cooldown;
-            m_LastElement = attack.Element;
-            m_HasLastElement = true;
             m_CycleRoutine = null;
             SetState(AvatarBossSchedulerState.Idle);
         }
