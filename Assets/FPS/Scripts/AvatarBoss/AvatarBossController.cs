@@ -16,6 +16,8 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossWeakPoint[] WeakPoints { get; private set; }
         public AvatarBossAttackScheduler Scheduler { get; private set; }
 
+        public bool PhaseTwo { get; private set; }
+
         Coroutine m_VulnerabilityRoutine;
         bool m_IsDead;
 
@@ -106,10 +108,21 @@ namespace Unity.FPS.AvatarBoss
             m_VulnerabilityRoutine = StartCoroutine(ExposeWeakPointsRoutine());
         }
 
+        /// <summary>Called by AvatarBossPhaseController at the end of the transition.</summary>
+        public void NotifyPhase2()
+        {
+            if (!PhaseTwo)
+                PhaseTwo = true;
+        }
+
         System.Collections.IEnumerator ExposeWeakPointsRoutine()
         {
             foreach (var weakPoint in WeakPoints)
-                weakPoint.SetExposed(true);
+            {
+                // Phase 1: WeakPointA only; Phase 2: all (rule set on WeakPoint.PhaseTwoAttached)
+                if (PhaseTwo || !weakPoint.PhaseTwoAttached)
+                    weakPoint.SetExposed(true);
+            }
 
             yield return new WaitForSeconds(VulnerabilityDuration);
 

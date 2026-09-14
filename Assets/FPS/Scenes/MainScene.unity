@@ -877,6 +877,8 @@ GameObject:
   - component: {fileID: 1099317692}
   - component: {fileID: 1099317691}
   - component: {fileID: 1099317693}
+  - component: {fileID: 1099317695}
+  - component: {fileID: 1099317694}
   m_Layer: 0
   m_Name: AvatarOfNature
   m_TagString: Untagged
@@ -996,6 +998,8 @@ MonoBehaviour:
   RecoverTime: 1
   AttackCooldown: 3
   StaggerRecoverTime: 3
+  EnableCombo: 0
+  ComboDelay: 1.5
 --- !u!114 &1099317693
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1016,6 +1020,46 @@ MonoBehaviour:
   MaxRadius: 28
   DamageBandWidth: 1.2
   PulseSpeed: 6
+--- !u!114 &1099317694
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 766600e108513a44e88eed29fe8178fe, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossFireAttack
+  Element: 2
+  TelegraphTime: 2
+  Damage: 25
+  Cooldown: 6
+  ImpactCount: 7
+  ImpactSpread: 7
+  ImpactInterval: 0.35
+  FallHeight: 10
+  FallTime: 0.7
+  RockSize: 0.9
+--- !u!114 &1099317695
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f6507120deb306449509572bf749624, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossPhaseController
+  PhaseTwoThreshold: 0.5
+  TransitionDuration: 3
+  TimingMultiplier: 0.7
+  StaggerGainMultiplier: 0.75
+  PhaseTwoVulnerabilityDuration: 2.2
+  EnableCombo: 1
 --- !u!4 &1146676878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5963937743390997973, guid: 7042f8fe21debc944b5bdc894f478d63,
@@ -1129,6 +1173,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossWeakPoint
   ExposedMultiplier: 2
+  PhaseTwoAttached: 0
 --- !u!114 &1333799604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1557,6 +1602,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossWeakPoint
   ExposedMultiplier: 2
+  PhaseTwoAttached: 1
 --- !u!114 &1586879364
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,6 +11,9 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Damageable.DamageMultiplier while exposed")]
         public float ExposedMultiplier = 2f;
 
+        [Tooltip("True = weak point available only from Phase 2 (WeakPointB)")]
+        public bool PhaseTwoAttached = false;
+
         public bool IsExposed { get; private set; }
 
         Damageable m_Damageable;

@@ -28,6 +28,11 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Grace delay before a new cycle after the boss was staggered")]
         public float StaggerRecoverTime = 3f;
 
+        [Header("Phase 2 Combo (fixed: Shockwave -> ComboDelay -> Earth)")]
+        public bool EnableCombo = false;
+        [Tooltip("Seconds between Shockwave finishing and the chained Earth attack")]
+        public float ComboDelay = 1.5f;
+
         public AvatarBossSchedulerState State { get; private set; } = AvatarBossSchedulerState.Idle;
         public AvatarBossAttack CurrentAttack { get; private set; }
 
@@ -38,6 +43,7 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossElement m_LastElement;
         bool m_HasLastElement;
         bool m_Initialized;
+        bool m_ComboPending;
 
         void Awake()
         {
@@ -71,8 +77,34 @@ namespace Unity.FPS.AvatarBoss
                 && Time.time >= m_NextAttackAllowedTime
                 && m_CycleRoutine == null)
             {
-                StartNewCycle();
+                if (m_ComboPending)
+                {
+                    m_ComboPending = false;
+                    StartFixedCycle(AvatarBossElement.Earth);
+                }
+                else
+                {
+                    StartNewCycle();
+                }
             }
+        }
+
+        void StartFixedCycle(AvatarBossElement element)
+        {
+            foreach (var attack in m_Attacks)
+            {
+                if (attack.Element == element)
+                {
+                    SetState(AvatarBossSchedulerState.Telegraph);
+                    m_PendingAttack = attack;
+                    m_LastElement = element;
+                    m_HasLastElement = true;
+                    attack.Prepare();
+                    m_CycleRoutine = StartCoroutine(RunCycle(attack));
+                    return;
+                }
+            }
+            Debug.LogWarning($"[AvatarOfNature] Combo target element '{element}' not found in boss hierarchy.", this);
         }
 
         AvatarBossAttack PickAttack()
@@ -116,7 +148,15 @@ namespace Unity.FPS.AvatarBoss
             SetState(AvatarBossSchedulerState.Recover);
             yield return new WaitForSeconds(RecoverTime);
 
-            m_NextAttackAllowedTime = Time.time + attack.Cooldown;
+            if (EnableCombo && attack.Element == AvatarBossElement.Shockwave)
+            {
+                m_ComboPending = true; // fixed combo: next must be Earth after ComboDelay
+                m_NextAttackAllowedTime = Time.time + ComboDelay;
+            }
+            else
+            {
+                m_NextAttackAllowedTime = Time.time + attack.Cooldown;
+            }
             m_CycleRoutine = null;
             SetState(AvatarBossSchedulerState.Idle);
         }
@@ -140,6 +180,7 @@ namespace Unity.FPS.AvatarBoss
 
             m_PendingAttack = null;
             CurrentAttack = null;
+            m_ComboPending = false; // interrupted or staggered: never sandwich a combo
             SetState(AvatarBossSchedulerState.Idle);
             m_NextAttackAllowedTime = Time.time + StaggerRecoverTime;
         }
