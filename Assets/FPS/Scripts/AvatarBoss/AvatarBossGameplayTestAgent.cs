@@ -18,9 +18,7 @@ namespace Unity.FPS.AvatarBoss
         public bool AutoRun = false;
 
 #if AVATAR_BOSS_TEST
-        public const bool TestSymbolDefined = true;
-#else
-        public const bool TestSymbolDefined = false;
+        // deliberately unused: the define just allows wiring an automated runner
 #endif
 
         [Header("Tunings")]
@@ -158,10 +156,10 @@ namespace Unity.FPS.AvatarBoss
             m_PlayerHealth.MaxHealth *= 100f;
             m_PlayerHealth.Heal(m_PlayerHealth.MaxHealth);
 
-            // place the player in the shooting line, in front of the boss (WeakPointA faces -Z)
+            // place the player ON THE GROUND in front of the boss (WeakPointA faces -Z)
             Transform body = m_Boss.transform.Find("BossBody");
             Vector3 origin = body != null ? body.position : m_Boss.transform.position;
-            m_Player.transform.position = origin + Vector3.back * 8f;
+            m_Player.transform.position = new Vector3(origin.x, 0.2f, origin.z - 8f);
             m_Player.transform.rotation = Quaternion.LookRotation(Vector3.forward);
 
             // deterministic stagger tracking

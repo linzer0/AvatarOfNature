@@ -40,6 +40,12 @@ namespace Unity.FPS.AvatarBoss
 
             m_WeakPoints = m_Boss.WeakPoints;
             BuildSilhouette();
+
+            // hit flash + stagger burst reactions (subscription on UnityActions)
+            if (m_Boss.BossHealth != null)
+                m_Boss.BossHealth.OnDamaged += OnBossDamaged;
+            if (m_Boss.Stagger != null)
+                m_Boss.Stagger.OnStaggerFull += OnStaggerBreak;
         }
 
         void BuildSilhouette()
@@ -118,6 +124,20 @@ namespace Unity.FPS.AvatarBoss
             if (m_Boss == null)
                 return;
 
+            // hit flash: brief white pulse on every damage tick
+            if (m_HitFlash > 0f)
+            {
+                m_HitFlash -= Time.deltaTime;
+                ApplySilhouetteFlash(Color.white, Mathf.Clamp01(m_HitFlash / 0.16f) * 0.7f);
+            }
+
+            // stagger burst: full-body golden pulse at break
+            if (m_StaggerFlash > 0f)
+            {
+                m_StaggerFlash -= Time.deltaTime;
+                ApplySilhouetteFlash(new Color(1f, 0.85f, 0.3f, 1f), Mathf.Clamp01(m_StaggerFlash / 0.5f));
+            }
+
             // phase-2 one-way visual change
             if (m_Boss.PhaseTwo && !m_PhaseTwoApplied)
             {
@@ -141,6 +161,45 @@ namespace Unity.FPS.AvatarBoss
             }
 
             PollWeakPointColors();
+        }
+
+        void OnBossDamaged(float damage, GameObject damageSource)
+        {
+            m_HitFlash = 0.16f;
+        }
+
+        void OnStaggerBreak()
+        {
+            m_StaggerFlash = 0.5f;
+        }
+
+        float m_HitFlash;
+        float m_StaggerFlash;
+
+        /// <summary>Overlays a color on every silhouette piece briefly. k=0..1.</summary>
+        void ApplySilhouetteFlash(Color flash, float k)
+        {
+            if (m_VisualRoot == null)
+                return;
+            foreach (Transform child in m_VisualRoot.transform)
+            {
+                if (child == null || !child.name.EndsWith("_Visual"))
+                    continue;
+                var r = child.GetComponent<MeshRenderer>();
+                if (r == null)
+                    continue;
+                var baseColor = child.name.Contains("Aura") ? m_AuraColor : BaseColorFor(child.name);
+                var mat = new Material(r.material);
+                mat.color = Color.Lerp(baseColor, Color.white, k);
+                r.material = mat;
+            }
+        }
+
+        Color BaseColorFor(string goName)
+        {
+            return goName.Contains("Crown") || goName.Contains("Core") || goName.Contains("Aura")
+                ? m_GoldColor
+                : m_StoneColor;
         }
 
         void PollWeakPointColors()

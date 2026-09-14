@@ -4,7 +4,8 @@
         "fps.Game",
         "fps.Gameplay",
         "fps.AI",
-        "Unity.InputSystem"
+        "Unity.InputSystem",
+        "UnityEngine.UI"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

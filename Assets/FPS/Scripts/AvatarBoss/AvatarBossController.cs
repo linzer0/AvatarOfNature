@@ -18,6 +18,9 @@ namespace Unity.FPS.AvatarBoss
 
         public bool PhaseTwo { get; private set; }
 
+        /// <summary>True while a summon intermission holds the boss. Blocks stagger breaks.</summary>
+        public bool SummonsActive { get; set; }
+
         Coroutine m_VulnerabilityRoutine;
         bool m_IsDead;
 
