@@ -159,6 +159,9 @@ namespace Unity.FPS.AvatarBoss
             if (bossHealth != null && !wasInvincible)
                 bossHealth.Invincible = false;
 
+            // fire impact language: explosion flash at the impact point
+            SpawnImpactEffect(target);
+
             m_Rocks.Remove(rock);
             Destroy(rock);
         }

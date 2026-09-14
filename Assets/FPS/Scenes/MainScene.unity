@@ -979,6 +979,8 @@ MonoBehaviour:
   TelegraphTime: 2
   Damage: 25
   Cooldown: 6
+  ImpactEffectPrefab: {fileID: 28905003217567910, guid: ecdbb7f81f59b934cb72306019ee7a41,
+    type: 3}
   SpikeCount: 5
   SpikeSpread: 6
   DamageRadius: 2.5
@@ -997,6 +999,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: da34532372abac1498af521a4693ed5a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossAttackScheduler
+  InitialGraceTime: 4
   WindupTime: 1
   RecoverTime: 1
   AttackCooldown: 3
@@ -1019,6 +1022,8 @@ MonoBehaviour:
   TelegraphTime: 2
   Damage: 25
   Cooldown: 6
+  ImpactEffectPrefab: {fileID: 8950624839484268180, guid: 45ce85b82008be84287f2c7e5bf07647,
+    type: 3}
   WaveSpeed: 12
   MaxRadius: 28
   DamageBandWidth: 1.2
@@ -1039,6 +1044,8 @@ MonoBehaviour:
   TelegraphTime: 2
   Damage: 25
   Cooldown: 6
+  ImpactEffectPrefab: {fileID: 8950624839484268180, guid: 45ce85b82008be84287f2c7e5bf07647,
+    type: 3}
   ImpactCount: 7
   ImpactSpread: 7
   ImpactInterval: 0.35
@@ -1093,9 +1100,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossVisualEffects
   PhaseTwoBodyColor: {r: 1, g: 0.35, b: 0.18, a: 1}
-  PhaseTwoEmissiveIntensity: 0.6
-  ExposedWeakPointColor: {r: 0, g: 1, b: 0.55, a: 1}
-  HiddenWeakPointColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1099317698
 MonoBehaviour:
   m_ObjectHideFlags: 0

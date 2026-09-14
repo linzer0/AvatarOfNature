@@ -157,6 +157,9 @@ namespace Unity.FPS.AvatarBoss
                     damageable.InflictDamage(Damage, false,
                         m_Boss != null ? m_Boss.gameObject : gameObject);
                 }
+
+                // earth impact language: dust burst at every spike
+                SpawnImpactEffect(center - Vector3.up * 0.5f);
             }
         }
 

@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.FPS.Game;
 using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
@@ -26,7 +27,10 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Seconds before the next attack cycle may start")]
         public float Cooldown = 6f;
 
-        /// <summary>Element this component type is designed to use. Overridden per concrete attack.</summary>
+        [Header("Impact VFX (reuses existing FPS prefabs, optional)")]
+        [Tooltip("Prefab instantiated at every impact point; wired per attack in the scene")]
+        public GameObject ImpactEffectPrefab;
+
         protected virtual AvatarBossElement ExpectedElement => Element;
 
         /// <summary>Validation guard: designer data must match the component's expected element.
@@ -37,6 +41,19 @@ namespace Unity.FPS.AvatarBoss
                 Debug.LogError(
                     $"[AvatarOfNature] {GetType().Name} has serialized Element '{Element}' but expects '{ExpectedElement}'. " +
                     "Fix the scene asset in the inspector; values are not repaired at runtime.", this);
+        }
+
+        /// <summary>Spawns the optional ImpactEffectPrefab at a position with a short lifetime.</summary>
+        public void SpawnImpactEffect(Vector3 position)
+        {
+            if (ImpactEffectPrefab == null)
+                return;
+
+            var fx = Instantiate(ImpactEffectPrefab, position, Quaternion.identity);
+            var timed = fx.GetComponent<TimedSelfDestruct>();
+            if (timed == null)
+                timed = fx.AddComponent<TimedSelfDestruct>();
+            timed.LifeTime = 2.5f;
         }
 
         /// <summary>Spawn all telegraph visuals. Called when the cycle enters the Telegraph state.</summary>

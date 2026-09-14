@@ -129,6 +129,8 @@ namespace Unity.FPS.AvatarBoss
                                     m_Boss != null ? m_Boss.gameObject : gameObject);
                                 damageDone = true;
                             }
+                            // shockwave language: ground impact burst where the wave lands
+                            SpawnImpactEffect(m_Player.position);
                         }
                     }
                 }
