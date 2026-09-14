@@ -1,0 +1,185 @@
+using System.Collections;
+using System.Collections.Generic;
+using Unity.FPS.Game;
+using Unity.FPS.Gameplay;
+using UnityEngine;
+
+namespace Unity.FPS.AvatarBoss
+{
+    /// Earth attack: telegraphed patches on the ground around the player,
+    /// then spikes rise and deal area damage at the moment they surface.
+    public class AvatarBossEarthAttack : AvatarBossAttack
+    {
+        [Header("Earth")]
+        [Tooltip("Number of telegraphed spike positions (the first targets the player)")]
+        public int SpikeCount = 5;
+        [Tooltip("Max distance of spike positions around the player")]
+        public float SpikeSpread = 6f;
+        [Tooltip("Radius inside which the spikes deal damage")]
+        public float DamageRadius = 2.5f;
+
+        [Header("Spike visuals")]
+        public float SpikeRiseTime = 0.25f;
+        public float SpikeHoldTime = 0.75f;
+        public float SpikeHeight = 3f;
+
+        Transform m_Player;
+        AvatarBossController m_Boss;
+        readonly List<GameObject> m_Telegraphs = new List<GameObject>();
+        readonly List<GameObject> m_Spikes = new List<GameObject>();
+
+        static Material s_DecalMaterial;
+        static Material s_SpikeMaterial;
+
+        void Awake()
+        {
+            m_Boss = GetComponentInParent<AvatarBossController>();
+        }
+
+        public override void Prepare()
+        {
+            if (m_Player == null)
+            {
+                var player = FindFirstObjectByType<PlayerCharacterController>();
+                m_Player = player != null ? player.transform : null;
+            }
+
+            if (m_Player == null)
+            {
+                Debug.LogWarning("[AvatarOfNature] No player found for Earth attack telegraph.", this);
+                return;
+            }
+
+            for (int i = 0; i < SpikeCount; i++)
+            {
+                Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
+                Vector3 center = i == 0
+                    ? m_Player.position
+                    : m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
+
+                center = SnapToGround(center + Vector3.up * 20f);
+
+                GameObject decal = GameObject.CreatePrimitive(PrimitiveType.Quad);
+                Object.Destroy(decal.GetComponent<Collider>());
+                decal.name = "EarthTelegraph";
+                decal.transform.SetPositionAndRotation(
+                    center + Vector3.up * 0.08f,
+                    Quaternion.Euler(-90f, Random.value * 360f, 0f));
+                decal.transform.localScale = Vector3.one * 5f;
+
+                MeshRenderer decalRenderer = decal.GetComponent<MeshRenderer>();
+                Shader textureShader = Shader.Find("Sprites/Default");
+                if (s_DecalMaterial == null && textureShader != null)
+                {
+                    s_DecalMaterial = new Material(textureShader);
+                    s_DecalMaterial.color = new Color(1f, 0.25f, 0.1f, 0.6f);
+                }
+                if (s_DecalMaterial != null)
+                    decalRenderer.material = s_DecalMaterial;
+
+                m_Telegraphs.Add(decal);
+            }
+        }
+
+        public override IEnumerator Execute()
+        {
+            if (m_Telegraphs.Count == 0)
+                yield break;
+
+            foreach (GameObject telegraph in m_Telegraphs)
+            {
+                GameObject spike = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                Object.Destroy(spike.GetComponent<Collider>()); // damage applied via OverlapSphere
+                spike.name = "EarthSpike";
+                spike.transform.position = telegraph.transform.position - Vector3.up * SpikeHeight;
+                spike.transform.rotation = Quaternion.identity;
+                spike.transform.localScale = new Vector3(0.8f, SpikeHeight, 0.8f);
+
+                MeshRenderer spikeRenderer = spike.GetComponent<MeshRenderer>();
+                Shader textureShader = Shader.Find("Sprites/Default");
+                if (s_SpikeMaterial == null && textureShader != null)
+                {
+                    s_SpikeMaterial = new Material(textureShader);
+                    s_SpikeMaterial.color = new Color(0.55f, 0.35f, 0.15f, 1f);
+                }
+                if (s_SpikeMaterial != null)
+                    spikeRenderer.material = s_SpikeMaterial;
+
+                m_Spikes.Add(spike);
+            }
+
+            float t = 0f;
+            while (t < SpikeRiseTime)
+            {
+                t += Time.deltaTime;
+                float step = SpikeHeight * Time.deltaTime / SpikeRiseTime;
+                foreach (var spike in m_Spikes)
+                    if (spike != null)
+                        spike.transform.position += Vector3.up * step;
+                yield return null;
+            }
+
+            DealDamage();
+
+            yield return new WaitForSeconds(SpikeHoldTime);
+
+            DestroySpikes();
+        }
+
+        void DealDamage()
+        {
+            foreach (var spike in m_Spikes)
+            {
+                if (spike == null)
+                    continue;
+
+                Vector3 center = spike.transform.position;
+                float fairnessRadius = DamageRadius + SpikeHeight * 0.5f;
+                Collider[] hits = Physics.OverlapSphere(center, fairnessRadius, Physics.AllLayers,
+                    QueryTriggerInteraction.Ignore);
+
+                var damaged = new HashSet<Health>();
+                foreach (var hit in hits)
+                {
+                    Damageable damageable = hit.GetComponent<Damageable>();
+                    if (damageable == null || damageable.Health == null || damaged.Contains(damageable.Health))
+                        continue;
+
+                    // never damage the boss hierarchy with its own attack
+                    if (m_Boss != null && damageable.transform.IsChildOf(m_Boss.transform))
+                        continue;
+
+                    damaged.Add(damageable.Health);
+                    damageable.InflictDamage(Damage, false,
+                        m_Boss != null ? m_Boss.gameObject : gameObject);
+                }
+            }
+        }
+
+        void DestroySpikes()
+        {
+            foreach (var spike in m_Spikes)
+                if (spike != null)
+                    Destroy(spike);
+            m_Spikes.Clear();
+        }
+
+        public override void Cleanup()
+        {
+            foreach (var decal in m_Telegraphs)
+                if (decal != null)
+                    Destroy(decal);
+            m_Telegraphs.Clear();
+
+            DestroySpikes();
+        }
+
+        Vector3 SnapToGround(Vector3 from)
+        {
+            if (Physics.Raycast(from, Vector3.down, out RaycastHit hit, 60f, Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore))
+                return hit.point;
+            return from - Vector3.up * 20f;
+        }
+    }
+}
