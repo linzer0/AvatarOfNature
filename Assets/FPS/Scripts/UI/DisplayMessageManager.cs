@@ -25,8 +25,15 @@ namespace Unity.FPS.UI
 
         void Update()
         {
+            // transient state can be lost across play-mode transitions (no-domain-reload mode); stay null-safe
+            if (m_PendingMessages == null)
+                return;
+
             foreach (var message in m_PendingMessages)
             {
+                if (message.notification == null)
+                    continue;
+
                 if (Time.time - message.timestamp > message.delay)
                 {
                     message.Item4.Initialize(message.message);

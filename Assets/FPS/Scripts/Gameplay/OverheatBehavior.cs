@@ -74,19 +74,25 @@ namespace Unity.FPS.Gameplay
 
         void Update()
         {
+            if (m_Weapon == null)
+                return;
+
             // visual smoke shooting out of the gun
             float currentAmmoRatio = m_Weapon.CurrentAmmoRatio;
             if (currentAmmoRatio != m_LastAmmoRatio)
             {
-                m_OverheatMaterialPropertyBlock.SetColor("_EmissionColor",
-                    OverheatGradient.Evaluate(1f - currentAmmoRatio));
-
-                foreach (var data in m_OverheatingRenderersData)
+                if (OverheatGradient != null && m_OverheatMaterialPropertyBlock != null)
                 {
-                    data.Renderer.SetPropertyBlock(m_OverheatMaterialPropertyBlock, data.MaterialIndex);
-                }
+                    m_OverheatMaterialPropertyBlock.SetColor("_EmissionColor",
+                        OverheatGradient.Evaluate(1f - currentAmmoRatio));
 
-                m_SteamVfxEmissionModule.rateOverTimeMultiplier = SteamVfxEmissionRateMax * (1f - currentAmmoRatio);
+                    foreach (var data in m_OverheatingRenderersData)
+                    {
+                        data.Renderer.SetPropertyBlock(m_OverheatMaterialPropertyBlock, data.MaterialIndex);
+                    }
+
+                    m_SteamVfxEmissionModule.rateOverTimeMultiplier = SteamVfxEmissionRateMax * (1f - currentAmmoRatio);
+                }
             }
 
             // cooling sound

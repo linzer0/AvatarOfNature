@@ -68,6 +68,8 @@ namespace Unity.FPS.AvatarBoss
             }
             if (s_RingMaterial != null)
                 ringRenderer.material = s_RingMaterial;
+
+            StartCoroutine(PreTelegraphExpand());
         }
 
         IEnumerator PreTelegraphExpand()
@@ -78,7 +80,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 t += Time.deltaTime;
                 float k = Mathf.Clamp01(t / TelegraphTime);
-                m_Ring.transform.localScale = Vector3.one * (4f + 4f * k); // small preview ring
+                m_Ring.transform.localScale = new Vector3(4f + 4f * k, 4f + 4f * k, 1f); // small preview ring
                 yield return null;
             }
         }
@@ -99,7 +101,7 @@ namespace Unity.FPS.AvatarBoss
             while (m_Ring != null && radius < MaxRadius)
             {
                 radius += WaveSpeed * Time.deltaTime;
-                m_Ring.transform.localScale = Vector3.one * (radius * 2f);
+                m_Ring.transform.localScale = new Vector3(radius * 2f, radius * 2f, 1f);
 
                 // pulse alpha for readability; white flash pumping on the wave front
                 if (m_Ring != null && s_RingMaterial != null)
@@ -150,9 +152,24 @@ namespace Unity.FPS.AvatarBoss
 
         Vector3 SnapToGround(Vector3 from)
         {
-            if (Physics.Raycast(from, Vector3.down, out RaycastHit hit, 60f, Physics.DefaultRaycastLayers,
-                QueryTriggerInteraction.Ignore))
-                return hit.point;
+            float maxDist = 60f;
+            var hits = Physics.RaycastAll(from, Vector3.down, maxDist, Physics.DefaultRaycastLayers,
+                QueryTriggerInteraction.Ignore);
+            RaycastHit best = default;
+            float bestDist = float.MaxValue;
+            foreach (var hit in hits)
+            {
+                // skip the boss's own body so the ring lands on the arena floor, not on the boss
+                if (m_Boss != null && hit.collider.transform.root == m_Boss.transform.root)
+                    continue;
+                if (hit.distance < bestDist)
+                {
+                    bestDist = hit.distance;
+                    best = hit;
+                }
+            }
+            if (bestDist < float.MaxValue)
+                return best.point;
             return from - Vector3.up * 20f;
         }
     }
