@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.FPS.Game;
 using UnityEngine;
 
@@ -21,8 +22,12 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>True while a summon intermission holds the boss. Blocks stagger breaks.</summary>
         public bool SummonsActive { get; set; }
 
+        /// <summary>Fired on a validated hit: (world position, final damage, isWeakPoint).</summary>
+        public event System.Action<Vector3, float, bool> OnBossHit;
+
         Coroutine m_VulnerabilityRoutine;
         bool m_IsDead;
+        readonly List<Damageable> m_PartDamageables = new List<Damageable>();
 
         public bool IsDead => m_IsDead;
 
@@ -55,6 +60,55 @@ namespace Unity.FPS.AvatarBoss
                 Stagger.OnStaggerFull += OnStaggerFull;
             if (Scheduler != null)
                 Scheduler.Initialize();
+
+            SubscribePartHitFeedbacks();
+        }
+
+        void SubscribePartHitFeedbacks()
+        {
+            var body = transform.Find("BossBody");
+            if (body != null)
+            {
+                var d = body.GetComponent<Damageable>();
+                if (d != null) SubscribePart(d);
+            }
+            foreach (var weakPoint in WeakPoints)
+            {
+                if (weakPoint == null) continue;
+                var d = weakPoint.GetComponent<Damageable>();
+                if (d != null && !m_PartDamageables.Contains(d)) SubscribePart(d);
+            }
+        }
+
+        void SubscribePart(Damageable d)
+        {
+            d.OnDamageInflicted += OnPartHit;
+            m_PartDamageables.Add(d);
+        }
+
+        void OnPartHit(float damage, Damageable part)
+        {
+            if (m_IsDead)
+                return;
+
+            float hpAfter = BossHealth != null ? BossHealth.CurrentHealth : 0f;
+            float hpBefore = Mathf.Min(BossHealth != null ? BossHealth.MaxHealth : 0f, hpAfter + damage);
+            float stagger = Stagger != null ? Stagger.CurrentStagger : 0f;
+            bool weakPoint = part != null && part.GetComponent<AvatarBossWeakPoint>() != null;
+
+            if (AvatarBossDebugHUD.F10DiagnosticsEnabled)
+                Debug.Log($"HIT target={(part != null ? part.name : "null")} damage={damage:F1} " +
+                          $"hpBefore={hpBefore:F1} hpAfter={hpAfter:F1} stagger={stagger:F1} weakPoint={weakPoint}", part);
+
+            Vector3 pos = part != null ? part.transform.position : transform.position;
+            if (part != null)
+            {
+                var col = part.GetComponent<Collider>();
+                if (col != null)
+                    pos = col.bounds.center;
+            }
+
+            OnBossHit?.Invoke(pos, damage, weakPoint);
         }
 
         void OnDestroy()
@@ -66,6 +120,11 @@ namespace Unity.FPS.AvatarBoss
             }
             if (Stagger != null)
                 Stagger.OnStaggerFull -= OnStaggerFull;
+
+            foreach (var d in m_PartDamageables)
+                if (d != null)
+                    d.OnDamageInflicted -= OnPartHit;
+            m_PartDamageables.Clear();
         }
 
         void OnBossDie()
@@ -74,6 +133,9 @@ namespace Unity.FPS.AvatarBoss
             Debug.Log("[AvatarOfNature] Boss died.", this);
             PlayCue(AvatarBossCue.BossDeath);
             Stagger.ResetStagger();
+
+            // damage is fully ignored after DEFEATED (no HP drop / stagger / feedback)
+            BossHealth.Invincible = true;
 
             if (m_VulnerabilityRoutine != null)
             {
@@ -91,6 +153,7 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_IsDead)
                 return;
+
             if (Stagger != null)
                 Stagger.AddStagger(damage, damageSource);
         }
@@ -125,6 +188,62 @@ namespace Unity.FPS.AvatarBoss
         {
             if (!PhaseTwo)
                 PhaseTwo = true;
+        }
+
+        /// <summary>Debug/test-only: set boss health to a ratio of max (ignored while dead).</summary>
+        public void DebugSetHealth(float ratio)
+        {
+            if (BossHealth == null || m_IsDead)
+                return;
+            BossHealth.CurrentHealth = Mathf.Clamp(BossHealth.MaxHealth * ratio, 0f, BossHealth.MaxHealth);
+        }
+
+        /// <summary>Debug/test-only: fully reset the boss to a clean phase-1 state without a scene
+        /// reload. Restores health/stagger/scheduler, closes weak points, clears phase 2, summons
+        /// and presentation state.</summary>
+        public void DebugResetBoss()
+        {
+            m_IsDead = false;
+            PhaseTwo = false;
+            SummonsActive = false;
+
+            if (m_VulnerabilityRoutine != null)
+            {
+                StopCoroutine(m_VulnerabilityRoutine);
+                m_VulnerabilityRoutine = null;
+            }
+
+            if (BossHealth != null)
+                BossHealth.ResetHealth();
+
+            if (Stagger != null)
+                Stagger.DebugReset();
+
+            if (WeakPoints != null)
+            {
+                foreach (var weakPoint in WeakPoints)
+                {
+                    if (weakPoint == null) continue;
+                    weakPoint.DebugReset();
+                }
+            }
+
+            if (Scheduler != null)
+                Scheduler.DebugReset();
+
+            var phase = GetComponentInChildren<AvatarBossPhaseController>();
+            if (phase != null)
+                phase.DebugResetPhase();
+
+            var summons = GetComponentInChildren<AvatarBossSummonController>();
+            if (summons != null)
+                summons.DebugReset();
+
+            var visual = GetComponentInChildren<AvatarBossVisualEffects>();
+            if (visual != null)
+                visual.DebugReset();
+
+            Debug.Log("[AvatarOfNature] Debug reset: boss restored to phase 1.", this);
         }
 
         System.Collections.IEnumerator ExposeWeakPointsRoutine()

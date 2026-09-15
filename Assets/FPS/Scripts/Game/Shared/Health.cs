@@ -71,6 +71,15 @@ namespace Unity.FPS.Game
             HandleDeath();
         }
 
+        /// <summary>Debug/test-only: clears death state, restores full health and clears invincibility.
+        /// Used by the AvatarBossShowcase debug panel to reset the boss without a scene reload.</summary>
+        public void ResetHealth()
+        {
+            m_IsDead = false;
+            CurrentHealth = MaxHealth;
+            Invincible = false;
+        }
+
         void HandleDeath()
         {
             if (m_IsDead)

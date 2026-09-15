@@ -123,6 +123,60 @@ namespace Unity.FPS.AvatarBoss
             EndSummon();
         }
 
+        /// <summary>Debug/test-only: destroy alive summons (runtime objects only).</summary>
+        public void DebugClearSummons()
+        {
+            foreach (var summon in m_Summons)
+                if (summon != null)
+                    Destroy(summon);
+            m_Summons.Clear();
+            DestroySummonTelegraphs();
+        }
+
+        /// <summary>Debug/test-only: kill all alive summons through their Health (real death pipeline).</summary>
+        public void DebugKillAllSummons()
+        {
+            foreach (var summon in m_Summons)
+            {
+                if (summon == null)
+                    continue;
+                var health = summon.GetComponentInChildren<Health>();
+                if (health != null)
+                    health.Kill();
+                else
+                    Destroy(summon);
+            }
+            m_Summons.RemoveAll(s => s == null);
+        }
+
+        /// <summary>Debug/test-only: immediately end the summon intermission and resume the boss.</summary>
+        public void DebugResumeBoss()
+        {
+            if (m_Boss.SummonsActive)
+                EndSummon();
+        }
+
+        /// <summary>Debug/test-only: stop any running summon flow, destroy summons/telegraphs,
+        /// and reset counters/timers to a clean pre-summon state.</summary>
+        public void DebugReset()
+        {
+            if (m_SummonRoutine != null)
+            {
+                StopCoroutine(m_SummonRoutine);
+                m_SummonRoutine = null;
+            }
+
+            foreach (var summon in m_Summons)
+                if (summon != null)
+                    Destroy(summon);
+            m_Summons.Clear();
+            DestroySummonTelegraphs();
+
+            Phase = AvatarBossSummonPhase.Idle;
+            SummonsDefeatedCount = 0;
+            m_NextSummonCheckTime = Time.time + FirstSummonDelay;
+        }
+
         IEnumerator SummonRoutine()
         {
             m_Boss.SummonsActive = true;

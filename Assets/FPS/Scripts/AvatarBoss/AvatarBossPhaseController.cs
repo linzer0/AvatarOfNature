@@ -151,5 +151,18 @@ namespace Unity.FPS.AvatarBoss
         {
             OnBossDamaged(0f, null);
         }
+
+        /// <summary>Debug/test-only: reset phase-2 state so the boss can re-enter phase 1.
+        /// Stops any in-progress transition coroutine and clears invincibility.</summary>
+        public void DebugResetPhase()
+        {
+            StopAllCoroutines();
+            PhaseTwo = false;
+            TransitionInProgress = false;
+            m_SchedulerTimingsOriginal = false;
+
+            if (m_Boss != null && m_Boss.BossHealth != null)
+                m_Boss.BossHealth.Invincible = false;
+        }
     }
 }

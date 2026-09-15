@@ -49,11 +49,29 @@ namespace Unity.FPS.AvatarBoss
         bool m_Initialized;
         bool m_ComboPending;
 
+        float m_InitWindup;
+        float m_InitRecover;
+        float m_InitCooldown;
+        bool m_InitCombo;
+        bool m_OriginalsCached;
+
         void Awake()
         {
+            CacheOriginals();
             // fallback self-init for schedulers used without a controller
             if (GetComponentInParent<AvatarBossController>() == null)
                 Initialize();
+        }
+
+        void CacheOriginals()
+        {
+            if (m_OriginalsCached)
+                return;
+            m_InitWindup = WindupTime;
+            m_InitRecover = RecoverTime;
+            m_InitCooldown = AttackCooldown;
+            m_InitCombo = EnableCombo;
+            m_OriginalsCached = true;
         }
 
         public void Initialize()
@@ -135,6 +153,58 @@ namespace Unity.FPS.AvatarBoss
             m_NextAttackAllowedTime = Time.time;
         }
 
+        /// <summary>Debug/test-only: interrupt whatever is running and force a specific attack
+        /// into its Telegraph state. Ignored while the boss is dead.</summary>
+        public void DebugForceAttack(AvatarBossElement element)
+        {
+            if (!m_Initialized)
+                Initialize();
+
+            var boss = GetComponentInParent<AvatarBossController>();
+            if (boss != null && boss.IsDead)
+            {
+                Debug.LogWarning("[AvatarOfNature] DebugForceAttack ignored: boss is dead.", this);
+                return;
+            }
+
+            Interrupt();
+            StartFixedCycle(element);
+        }
+
+        /// <summary>Debug/test-only: force the full Shockwave -> Earth combo chain.</summary>
+        public void DebugForceCombo()
+        {
+            if (!m_Initialized)
+                Initialize();
+
+            var boss = GetComponentInParent<AvatarBossController>();
+            if (boss != null && boss.IsDead)
+                return;
+
+            EnableCombo = true; // test-only convenience: guarantee the chain resolves
+            Interrupt();
+            StartFixedCycle(AvatarBossElement.Shockwave);
+        }
+
+        /// <summary>Debug/test-only: restore serialized tunables, re-enable the scheduler and
+        /// return the state machine to a clean Idle with a fresh initial grace window.</summary>
+        public void DebugReset()
+        {
+            CacheOriginals();
+            WindupTime = m_InitWindup;
+            RecoverTime = m_InitRecover;
+            AttackCooldown = m_InitCooldown;
+            EnableCombo = m_InitCombo;
+
+            Interrupt();
+            enabled = true;
+            m_ComboPending = false;
+            m_HasLastElement = false;
+            m_NextAttackAllowedTime = Time.time + InitialGraceTime;
+            State = AvatarBossSchedulerState.Idle;
+            CurrentAttack = null;
+        }
+
         void StartNewCycle()
         {
             m_PendingAttack = PickAttack();
@@ -187,7 +257,7 @@ namespace Unity.FPS.AvatarBoss
                 m_CycleRoutine = null;
             }
 
-            foreach (var attack in m_Attacks)
+            foreach (var attack in m_Attacks != null ? m_Attacks : System.Array.Empty<AvatarBossAttack>())
                 attack.Cleanup();
 
             m_PendingAttack = null;

@@ -284,9 +284,18 @@ namespace Unity.FPS.AvatarBoss
             float t0 = Time.unscaledTime;
             m_StaggerBreakSeen = false; // fresh mark for the phase-2 break
 
-            // the auto-summon (Phase-2 + FirstSummonDelay) can be in flight: wait it out
-            while (m_Boss.SummonsActive && !m_Boss.IsDead && Time.unscaledTime - t0 < StepTimeout)
-                yield return new WaitForSeconds(0.5f);
+            // test-only determinism: while this step verifies stagger->weak points,
+            // the 20s summon cooldown cycle must not interrupt with invulnerability
+            if (AllowHybridNudge && m_Summons != null)
+            {
+                m_Summons.EnableSummons = false;
+                if (m_Boss.SummonsActive)
+                {
+                    Debug.Log($"[{Tag}] hybrid nudge: force-clearing acted summons before phase2 verification");
+                    m_Summons.ForceClearSummonsForTest();
+                    yield return null;
+                }
+            }
 
             // fill stagger to break; stop immediately on break or if a summon re-enters
             while (!m_StaggerBreakSeen && !m_Boss.IsDead
@@ -406,8 +415,12 @@ namespace Unity.FPS.AvatarBoss
 
             if (m_Summons == null || !m_Summons.EnableSummons)
             {
-                m_Report.StepResult("SummonStarted", "summon controller absent", t0, CaptureSnapshot());
-                yield break;
+                m_Summons.EnableSummons = m_Summons != null; // restore normal summon flow if a test step suppressed it
+                if (m_Summons == null)
+                {
+                    m_Report.StepResult("SummonStarted", "summon controller absent", t0, CaptureSnapshot());
+                    yield break;
+                }
             }
 
             if (!m_Boss.SummonsActive)

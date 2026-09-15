@@ -10,6 +10,9 @@ namespace Unity.FPS.Game
         [Range(0, 1)] [Tooltip("Multiplier to apply to self damage")]
         public float SensibilityToSelfdamage = 0.5f;
 
+        /// <summary>Optional diagnostic/feedback hook: fires after damage is applied, with the final damage and the part hit.</summary>
+        public System.Action<float, Damageable> OnDamageInflicted;
+
         public Health Health { get; private set; }
 
         void Awake()
@@ -42,6 +45,8 @@ namespace Unity.FPS.Game
 
                 // apply the damages
                 Health.TakeDamage(totalDamage, damageSource);
+
+                OnDamageInflicted?.Invoke(totalDamage, this);
             }
         }
     }

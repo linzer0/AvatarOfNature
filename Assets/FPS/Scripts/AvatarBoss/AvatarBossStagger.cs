@@ -25,6 +25,17 @@ namespace Unity.FPS.AvatarBoss
         float m_LastDamageTime;
         bool m_Full;
 
+        float m_MaxStaggerInit;
+        float m_GainInit;
+        float m_DecayInit;
+
+        void Awake()
+        {
+            m_MaxStaggerInit = MaxStagger;
+            m_GainInit = StaggerGainPerDamage;
+            m_DecayInit = DecayPerSecond;
+        }
+
         void Update()
         {
             if (m_Full || Time.time - m_LastDamageTime < DecayDelay)
@@ -40,7 +51,7 @@ namespace Unity.FPS.AvatarBoss
                 return;
 
             m_LastDamageTime = Time.time;
-            CurrentStagger = Mathf.Min(MaxStagger, CurrentStagger + damage * StaggerGainPerDamage);
+            CurrentStagger = Mathf.Clamp(CurrentStagger + damage * StaggerGainPerDamage, 0f, MaxStagger);
             Debug.Log($"[AvatarOfNature] Stagger +{damage * StaggerGainPerDamage:F1} " +
                       $"({CurrentStagger:F0}/{MaxStagger:F0}) from {(damageSource != null ? damageSource.name : "null")}", this);
 
@@ -56,6 +67,32 @@ namespace Unity.FPS.AvatarBoss
             CurrentStagger = 0f;
             m_Full = false;
             m_LastDamageTime = -999f;
+        }
+
+        /// <summary>Debug/test-only: adds raw stagger points directly to the meter.</summary>
+        public void DebugAddStagger(float amount)
+        {
+            if (m_Full)
+                return;
+
+            m_LastDamageTime = Time.time;
+            CurrentStagger = Mathf.Clamp(CurrentStagger + amount, 0f, MaxStagger);
+
+            if (IsFull)
+            {
+                m_Full = true;
+                OnStaggerFull?.Invoke();
+            }
+        }
+
+        /// <summary>Debug/test-only: restores the serialized tunables (reversing any phase-2
+        /// multipliers) and clears the meter.</summary>
+        public void DebugReset()
+        {
+            MaxStagger = m_MaxStaggerInit;
+            StaggerGainPerDamage = m_GainInit;
+            DecayPerSecond = m_DecayInit;
+            ResetStagger();
         }
     }
 }

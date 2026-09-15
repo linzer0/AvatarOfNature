@@ -16,7 +16,12 @@ namespace Unity.FPS.UI
         void Awake()
         {
             m_Compass = FindFirstObjectByType<Compass>();
-            DebugUtility.HandleErrorIfNullFindObject<Compass, CompassElement>(m_Compass, this);
+
+            if (m_Compass == null)
+            {
+                Destroy(this);
+                return;
+            }
 
             var markerInstance = Instantiate(CompassMarkerPrefab);
 

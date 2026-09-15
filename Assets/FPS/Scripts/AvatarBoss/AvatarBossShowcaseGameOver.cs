@@ -60,8 +60,7 @@ namespace Unity.FPS.AvatarBoss
             }
 
             m_PlayerHealth = player.GetComponent<Health>();
-            m_PlayerHealth.OnDamaged += OnPlayerDamaged;
-            m_PlayerHealth.OnDie += OnPlayerDie;
+                        m_PlayerHealth.OnDie += OnPlayerDie;
             m_Subscribed = true;
             BuildUI();
         }
@@ -70,26 +69,7 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_Subscribed && m_PlayerHealth != null)
             {
-                m_PlayerHealth.OnDamaged -= OnPlayerDamaged;
-                m_PlayerHealth.OnDie -= OnPlayerDie;
-            }
-        }
-
-        void OnPlayerDamaged(float damage, GameObject damageSource)
-        {
-            if (m_Shown)
-                return;
-
-            if (m_Overlay == null)
-                BuildUI(); // deterministic fallback if Start-time build failed
-
-            // pre-death interception: freeze the player before Health fires OnDie
-            // so the Microgame GameFlowManager (which listens to PlayerDeathEvent)
-            // never transitions to the LoseScene in the showcase.
-            if (m_PlayerHealth.GetRatio() <= 0.15f)
-            {
-                m_PlayerHealth.Invincible = true;
-                ShowOverlay();
+                                m_PlayerHealth.OnDie -= OnPlayerDie;
             }
         }
 

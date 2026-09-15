@@ -18,9 +18,11 @@ namespace Unity.FPS.AvatarBoss
 
         Damageable m_Damageable;
         float m_Multiplier;
+        bool m_PhaseTwoAttachedInit;
 
         void Awake()
         {
+            m_PhaseTwoAttachedInit = PhaseTwoAttached;
             m_Damageable = GetComponent<Damageable>();
             m_Multiplier = m_Damageable.DamageMultiplier;
             SetExposed(false);
@@ -29,11 +31,30 @@ namespace Unity.FPS.AvatarBoss
         public void SetExposed(bool exposed)
         {
             IsExposed = exposed;
-            m_Damageable.DamageMultiplier = exposed ? ExposedMultiplier : m_Multiplier;
+            if (m_Damageable == null)
+            {
+                // lazy init: Awake may not run in edit-mode tools/tests
+                m_Damageable = GetComponent<Damageable>();
+                m_Multiplier = m_Damageable != null ? m_Damageable.DamageMultiplier : 1f;
+            }
+            if (m_Damageable != null)
+                m_Damageable.DamageMultiplier = exposed ? ExposedMultiplier : m_Multiplier;
 
             Collider col = GetComponent<Collider>();
             if (col != null)
                 col.enabled = exposed;
+
+            // weak point VFX only show while the window is open
+            var renderer = GetComponent<MeshRenderer>();
+            if (renderer != null)
+                renderer.enabled = exposed;
+        }
+
+        /// <summary>Debug/test-only: restore the designer PhaseTwoAttached value and close the point.</summary>
+        public void DebugReset()
+        {
+            PhaseTwoAttached = m_PhaseTwoAttachedInit;
+            SetExposed(false);
         }
     }
 }
