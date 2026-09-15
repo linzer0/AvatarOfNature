@@ -10,7 +10,7 @@ namespace Unity.FPS.AvatarBoss
     {
         [Header("Vulnerability Window")]
         [Tooltip("Seconds that weak points stay exposed after a stagger break")]
-        public float VulnerabilityDuration = 3f;
+        public float VulnerabilityDuration = 3.5f;
 
         public Health BossHealth { get; private set; }
         public AvatarBossStagger Stagger { get; private set; }

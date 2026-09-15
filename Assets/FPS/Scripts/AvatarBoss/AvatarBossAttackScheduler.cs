@@ -21,10 +21,10 @@ namespace Unity.FPS.AvatarBoss
 
         [Header("Timings")]
         [Tooltip("Wind-up delay between telegraph and the attack landing")]
-        public float WindupTime = 1f;
+        public float WindupTime = 0.9f;
 
         [Tooltip("Recovery delay after an attack before returning to Idle")]
-        public float RecoverTime = 1f;
+        public float RecoverTime = 1.5f;
 
         [Tooltip("Grace delay before starting a new cycle after one finished normally")]
         public float AttackCooldown = 3f;
@@ -36,9 +36,28 @@ namespace Unity.FPS.AvatarBoss
         public bool EnableCombo = false;
         [Tooltip("Seconds between Shockwave finishing and the chained Earth attack")]
         public float ComboDelay = 1.5f;
+        [Tooltip("Min seconds that must pass between two combos")]
+        public float ComboCooldownMin = 22f;
+        [Tooltip("Max seconds that must pass between two combos")]
+        public float ComboCooldownMax = 30f;
+        [Tooltip("Mandatory idle after a combo's final attack, before the next telegraph")]
+        public float ComboPostRecoverTime = 2f;
+
+        [Header("Meteor Rain gating")]
+        [Tooltip("Min seconds between two Meteor Rain attacks")]
+        public float MeteorRainCooldownMin = 22f;
+        [Tooltip("Max seconds between two Meteor Rain attacks")]
+        public float MeteorRainCooldownMax = 30f;
 
         public AvatarBossSchedulerState State { get; private set; } = AvatarBossSchedulerState.Idle;
         public AvatarBossAttack CurrentAttack { get; private set; }
+
+        /// <summary>Number of attack cycles started (diagnostic/metric counter).</summary>
+        public int AttackCount { get; private set; }
+        /// <summary>Number of Shockwave->Earth combos that actually chained (metric).</summary>
+        public int ComboCount { get; private set; }
+        /// <summary>Number of Meteor Rain attacks that completed (metric).</summary>
+        public int MeteorRainCount { get; private set; }
 
         AvatarBossAttack[] m_Attacks;
         AvatarBossAttack m_PendingAttack;
@@ -48,6 +67,9 @@ namespace Unity.FPS.AvatarBoss
         bool m_HasLastElement;
         bool m_Initialized;
         bool m_ComboPending;
+        bool m_InComboChain;
+        float m_NextComboAllowedTime;
+        float m_NextMeteorRainAllowedTime;
 
         float m_InitWindup;
         float m_InitRecover;
@@ -118,6 +140,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 if (attack.Element == element)
                 {
+                    AttackCount++;
                     m_PendingAttack = attack;
                     m_LastElement = element;
                     m_HasLastElement = true;
@@ -135,12 +158,15 @@ namespace Unity.FPS.AvatarBoss
             if (m_Attacks.Length == 1)
                 return m_Attacks[0];
 
-            // avoid picking the same element twice in a row
+            // avoid picking the same element twice in a row and respect Meteor Rain gating
+            bool meteorGated = Time.time < m_NextMeteorRainAllowedTime;
             AvatarBossAttack candidate = m_Attacks[Random.Range(0, m_Attacks.Length)];
-            if (m_HasLastElement)
+            if (m_HasLastElement || meteorGated)
             {
                 int guard = 0;
-                while (candidate.Element == m_LastElement && guard++ < 16)
+                while (guard++ < 16
+                    && ((m_HasLastElement && candidate.Element == m_LastElement)
+                        || (meteorGated && candidate.Element == AvatarBossElement.Fire)))
                     candidate = m_Attacks[Random.Range(0, m_Attacks.Length)];
             }
             return candidate;
@@ -199,14 +225,21 @@ namespace Unity.FPS.AvatarBoss
             Interrupt();
             enabled = true;
             m_ComboPending = false;
+            m_InComboChain = false;
+            m_NextComboAllowedTime = 0f;
+            m_NextMeteorRainAllowedTime = 0f;
             m_HasLastElement = false;
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             State = AvatarBossSchedulerState.Idle;
             CurrentAttack = null;
+            AttackCount = 0;
+            ComboCount = 0;
+            MeteorRainCount = 0;
         }
 
         void StartNewCycle()
         {
+            AttackCount++;
             m_PendingAttack = PickAttack();
             m_LastElement = m_PendingAttack.Element; // recorded at cycle start so interrupted attacks still count
             m_HasLastElement = true;
@@ -230,14 +263,30 @@ namespace Unity.FPS.AvatarBoss
             SetState(AvatarBossSchedulerState.Recover);
             yield return new WaitForSeconds(RecoverTime);
 
-            if (EnableCombo && attack.Element == AvatarBossElement.Shockwave)
+            if (m_InComboChain)
+            {
+                // combo's final attack done: mandatory post-combo recover replaces the normal cooldown
+                m_InComboChain = false;
+                m_NextAttackAllowedTime = Time.time + ComboPostRecoverTime;
+            }
+            else if (EnableCombo
+                && attack.Element == AvatarBossElement.Shockwave
+                && Time.time >= m_NextComboAllowedTime)
             {
                 m_ComboPending = true; // fixed combo: next must be Earth after ComboDelay
+                m_InComboChain = true;
+                ComboCount++;
+                m_NextComboAllowedTime = Time.time + Random.Range(ComboCooldownMin, ComboCooldownMax);
                 m_NextAttackAllowedTime = Time.time + ComboDelay;
             }
             else
             {
                 m_NextAttackAllowedTime = Time.time + attack.Cooldown;
+                if (attack.Element == AvatarBossElement.Fire)
+                {
+                    MeteorRainCount++;
+                    m_NextMeteorRainAllowedTime = Time.time + Random.Range(MeteorRainCooldownMin, MeteorRainCooldownMax);
+                }
             }
             m_CycleRoutine = null;
             SetState(AvatarBossSchedulerState.Idle);
@@ -263,6 +312,7 @@ namespace Unity.FPS.AvatarBoss
             m_PendingAttack = null;
             CurrentAttack = null;
             m_ComboPending = false; // interrupted or staggered: never sandwich a combo
+            m_InComboChain = false;
             SetState(AvatarBossSchedulerState.Idle);
             m_NextAttackAllowedTime = Time.time + StaggerRecoverTime;
         }

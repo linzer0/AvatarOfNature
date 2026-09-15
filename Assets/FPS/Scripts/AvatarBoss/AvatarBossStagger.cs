@@ -13,8 +13,8 @@ namespace Unity.FPS.AvatarBoss
         public float StaggerGainPerDamage = 0.5f;
 
         [Header("Decay (does not run while the meter is full during break)")]
-        public float DecayPerSecond = 5f;
-        public float DecayDelay = 2f;
+        public float DecayPerSecond = 8f;
+        public float DecayDelay = 2.5f;
 
         public float CurrentStagger { get; private set; }
         public float Ratio => MaxStagger > 0f ? CurrentStagger / MaxStagger : 0f;

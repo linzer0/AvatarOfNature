@@ -12,7 +12,7 @@ namespace Unity.FPS.AvatarBoss
     {
         [Header("Meteor Rain")]
         [Tooltip("Number of telegraphed impacts (6-8 recommended)")]
-        public int ImpactCount = 7;
+        public int ImpactCount = 6;
         [Tooltip("Max distance of impact positions around the player")]
         public float ImpactSpread = 7f;
         [Tooltip("Seconds between impacts (staggered bomb layout)")]

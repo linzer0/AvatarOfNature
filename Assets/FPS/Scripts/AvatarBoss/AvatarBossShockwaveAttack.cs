@@ -10,8 +10,8 @@ namespace Unity.FPS.AvatarBoss
     public class AvatarBossShockwaveAttack : AvatarBossAttack
     {
         [Header("Shockwave")]
-        [Tooltip("Speed of the wave front, metres per second")]
-        public float WaveSpeed = 12f;
+        [Tooltip("Speed of the wave front, metres per second (tuned so Execute stays in the 1.0-1.5 s window)")]
+        public float WaveSpeed = 20f;
 
         [Tooltip("Radius at which the wave dissipates")]
         public float MaxRadius = 28f;

@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.FPS.Game;
 using UnityEngine;
 
@@ -17,14 +18,30 @@ namespace Unity.FPS.AvatarBoss
         public float TransitionDuration = 3f;
 
         [Header("Phase 2 tunables (multipliers applied to existing values)")]
-        [Tooltip("Scheduler wind-up / recover / attack cooldown multiplier")]
-        public float TimingMultiplier = 0.7f;
+        [Tooltip("Scheduler wind-up / recover / attack cooldown multiplier (floors enforce the exact values)")]
+        public float TimingMultiplier = 0.77f;
+        [Tooltip("Attack telegraph time multiplier (floors enforce the exact values)")]
+        public float TelegraphMultiplier = 0.8f;
         [Tooltip("Stagger gain per damage multiplier in Phase 2 (lower = more persistent boss)")]
         public float StaggerGainMultiplier = 0.75f;
         [Tooltip("Stagger threshold multiplier in Phase 2 (must keep the break reachable before death)")]
         public float StaggerThresholdMultiplier = 0.6f;
+        [Tooltip("Stagger decay speed multiplier in Phase 2")]
+        public float StaggerDecayMultiplier = 1.25f;
+        [Tooltip("Stagger decay delay multiplier in Phase 2")]
+        public float StaggerDecayDelayMultiplier = 0.8f;
         [Tooltip("Weak point vulnerability window duration in Phase 2 (direct value)")]
-        public float PhaseTwoVulnerabilityDuration = 2.2f;
+        public float PhaseTwoVulnerabilityDuration = 2.5f;
+        [Tooltip("Meteor Rain damage in Phase 2 (direct value)")]
+        public float PhaseTwoMeteorDamage = 22f;
+        [Tooltip("Shockwave wave speed in Phase 2 (direct value)")]
+        public float PhaseTwoShockwaveSpeed = 24f;
+
+        [Header("Phase 2 floors (timings never below these)")]
+        public float PhaseTwoMinCooldown = 2.1f;
+        public float PhaseTwoMinTelegraph = 1.3f;
+        public float PhaseTwoMinWindup = 0.7f;
+        public float PhaseTwoMinRecover = 1.2f;
 
         [Header("Combo (fixed Shockwave ->ComboDelay-> Earth)")]
         public bool EnableCombo = true;
@@ -35,7 +52,13 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossController m_Boss;
         AvatarBossAttackScheduler m_Scheduler;
         AvatarBossStagger m_Stagger;
-
+        AvatarBossAttack[] m_Attacks;
+        readonly List<float> m_AttackTelegraphOriginals = new List<float>();
+        readonly List<float> m_AttackCooldownOriginals = new List<float>();
+        readonly List<float> m_AttackDamageOriginals = new List<float>();
+        AvatarBossShockwaveAttack m_ShockwaveAttack;
+        float m_ShockwaveSpeedOriginal;
+        float m_BossVulnerabilityOriginal;
         bool m_SchedulerTimingsOriginal;
 
         void Awake()
@@ -116,7 +139,8 @@ namespace Unity.FPS.AvatarBoss
             if (m_Stagger != null)
             {
                 m_Stagger.StaggerGainPerDamage *= StaggerGainMultiplier;
-                m_Stagger.DecayPerSecond *= StaggerGainMultiplier;
+                m_Stagger.DecayPerSecond *= StaggerDecayMultiplier;
+                m_Stagger.DecayDelay *= StaggerDecayDelayMultiplier;
                 m_Stagger.MaxStagger *= StaggerThresholdMultiplier;
             }
 
@@ -124,9 +148,40 @@ namespace Unity.FPS.AvatarBoss
             {
                 if (!m_SchedulerTimingsOriginal)
                 {
-                    m_Scheduler.WindupTime *= TimingMultiplier;
-                    m_Scheduler.RecoverTime *= TimingMultiplier;
-                    m_Scheduler.AttackCooldown *= TimingMultiplier;
+                    m_Scheduler.WindupTime = Mathf.Max(
+                        m_Scheduler.WindupTime * TimingMultiplier, PhaseTwoMinWindup);
+                    m_Scheduler.RecoverTime = Mathf.Max(
+                        m_Scheduler.RecoverTime * TimingMultiplier, PhaseTwoMinRecover);
+                    m_Scheduler.AttackCooldown = Mathf.Max(
+                        m_Scheduler.AttackCooldown * TimingMultiplier, PhaseTwoMinCooldown);
+
+                    m_BossVulnerabilityOriginal = m_Boss.VulnerabilityDuration;
+                    m_Boss.VulnerabilityDuration = PhaseTwoVulnerabilityDuration;
+
+                    m_Attacks = m_Boss.GetComponentsInChildren<AvatarBossAttack>();
+                    m_AttackTelegraphOriginals.Clear();
+                    m_AttackCooldownOriginals.Clear();
+                    m_AttackDamageOriginals.Clear();
+                    foreach (var attack in m_Attacks)
+                    {
+                        m_AttackTelegraphOriginals.Add(attack.TelegraphTime);
+                        m_AttackCooldownOriginals.Add(attack.Cooldown);
+                        m_AttackDamageOriginals.Add(attack.Damage);
+                        attack.TelegraphTime = Mathf.Max(
+                            attack.TelegraphTime * TelegraphMultiplier, PhaseTwoMinTelegraph);
+                        attack.Cooldown = Mathf.Max(
+                            attack.Cooldown * TimingMultiplier, PhaseTwoMinCooldown);
+
+                        if (attack is AvatarBossFireAttack)
+                            attack.Damage = PhaseTwoMeteorDamage;
+                        if (attack is AvatarBossShockwaveAttack shock)
+                        {
+                            m_ShockwaveAttack = shock;
+                            m_ShockwaveSpeedOriginal = shock.WaveSpeed;
+                            shock.WaveSpeed = PhaseTwoShockwaveSpeed;
+                        }
+                    }
+
                     m_Scheduler.EnableCombo = EnableCombo;
                     m_SchedulerTimingsOriginal = true;
                 }
@@ -153,16 +208,44 @@ namespace Unity.FPS.AvatarBoss
         }
 
         /// <summary>Debug/test-only: reset phase-2 state so the boss can re-enter phase 1.
-        /// Stops any in-progress transition coroutine and clears invincibility.</summary>
+        /// Stops any in-progress transition coroutine, clears invincibility and restores
+        /// all phase-2 tweaked timings back to their phase-1 originals.</summary>
         public void DebugResetPhase()
         {
             StopAllCoroutines();
             PhaseTwo = false;
             TransitionInProgress = false;
-            m_SchedulerTimingsOriginal = false;
 
-            if (m_Boss != null && m_Boss.BossHealth != null)
-                m_Boss.BossHealth.Invincible = false;
+            if (m_Scheduler != null)
+            {
+                if (m_Attacks != null && m_AttackTelegraphOriginals.Count == m_Attacks.Length)
+                {
+                    for (int i = 0; i < m_Attacks.Length; i++)
+                    {
+                        m_Attacks[i].TelegraphTime = m_AttackTelegraphOriginals[i];
+                        m_Attacks[i].Cooldown = m_AttackCooldownOriginals[i];
+                        m_Attacks[i].Damage = m_AttackDamageOriginals[i];
+                    }
+                }
+                if (m_ShockwaveAttack != null)
+                    m_ShockwaveAttack.WaveSpeed = m_ShockwaveSpeedOriginal;
+            }
+
+            if (m_Boss != null)
+            {
+                if (m_BossVulnerabilityOriginal > 0f)
+                    m_Boss.VulnerabilityDuration = m_BossVulnerabilityOriginal;
+                if (m_Boss.BossHealth != null)
+                    m_Boss.BossHealth.Invincible = false;
+            }
+
+            m_AttackTelegraphOriginals.Clear();
+            m_AttackCooldownOriginals.Clear();
+            m_AttackDamageOriginals.Clear();
+            m_ShockwaveAttack = null;
+            m_ShockwaveSpeedOriginal = 0f;
+            m_BossVulnerabilityOriginal = 0f;
+            m_SchedulerTimingsOriginal = false;
         }
     }
 }

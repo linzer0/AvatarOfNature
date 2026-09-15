@@ -26,7 +26,10 @@ namespace Unity.FPS.AvatarBoss
         public bool EnableSummons = true;
 
         [Tooltip("Delay before the first summon after Phase 2 starts")]
-        public float FirstSummonDelay = 8f;
+        public float FirstSummonDelay = 30f;
+
+        [Tooltip("Delay after all summons are dead before the boss resumes attacking")]
+        public float ResumeDelay = 2f;
 
         [Tooltip("Cooldown between summon intermissions")]
         public float CooldownBetweenSummons = 20f;
@@ -55,6 +58,10 @@ namespace Unity.FPS.AvatarBoss
 
         Coroutine m_SummonRoutine;
         float m_NextSummonCheckTime;
+        bool m_WasPhaseTwo;
+        bool m_SummonsUsedThisPhase;
+
+        int m_CurrentSummonCount;
 
         GameObject m_HoverbotPrefab;
         GameObject m_TurretPrefab;
@@ -82,7 +89,21 @@ namespace Unity.FPS.AvatarBoss
 
         void Update()
         {
-            if (m_Boss == null || !m_Boss.PhaseTwo || m_Boss.IsDead || m_Boss.SummonsActive)
+            if (m_Boss == null || m_Boss.IsDead || m_Boss.SummonsActive)
+                return;
+
+            // re-arm the timer the moment Phase 2 begins
+            if (m_Boss.PhaseTwo != m_WasPhaseTwo)
+            {
+                m_WasPhaseTwo = m_Boss.PhaseTwo;
+                if (m_WasPhaseTwo)
+                    m_NextSummonCheckTime = Time.time + FirstSummonDelay;
+            }
+
+            if (!m_Boss.PhaseTwo)
+                return;
+
+            if (m_SummonsUsedThisPhase)
                 return;
 
             if (m_SummonRoutine != null || Time.time < m_NextSummonCheckTime)
@@ -98,6 +119,7 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_SummonRoutine != null)
                 return;
+            m_SummonsUsedThisPhase = true;
             m_SummonRoutine = StartCoroutine(SummonRoutine());
         }
 
@@ -174,15 +196,29 @@ namespace Unity.FPS.AvatarBoss
 
             Phase = AvatarBossSummonPhase.Idle;
             SummonsDefeatedCount = 0;
+            m_WasPhaseTwo = m_Boss != null && m_Boss.PhaseTwo;
+            m_SummonsUsedThisPhase = false;
             m_NextSummonCheckTime = Time.time + FirstSummonDelay;
+        }
+
+        /// <summary>2-3 summons per intermission (capped by MaxActiveSummons).</summary>
+        int GetSummonCount()
+        {
+            int cap = Mathf.Min(MaxActiveSummons, 3);
+            return Random.Range(Mathf.Min(2, cap), cap + 1);
         }
 
         IEnumerator SummonRoutine()
         {
             m_Boss.SummonsActive = true;
+            m_CurrentSummonCount = GetSummonCount();
             Phase = AvatarBossSummonPhase.Telegraph;
             Debug.Log("[AvatarOfNature] SUMMON PHASE begins", this);
             m_Scheduler.Interrupt();
+
+            // weak points must be closed during the intermission
+            foreach (var weakPoint in m_Boss.WeakPoints)
+                weakPoint.SetExposed(false);
 
             // boss is invulnerable and cannot take damage during the whole intermission
             m_Boss.BossHealth.Invincible = true;
@@ -205,7 +241,6 @@ namespace Unity.FPS.AvatarBoss
             DestroySummonTelegraphs();
             Phase = AvatarBossSummonPhase.Spawned;
             SpawnSummons();
-
             int lastCount = -1;
             while (m_Summons.Count > 0)
             {
@@ -220,12 +255,15 @@ namespace Unity.FPS.AvatarBoss
                 yield return null;
             }
 
+            // resume delay: brief pause after the last summon dies before the boss resumes
+            yield return new WaitForSeconds(ResumeDelay);
+
             EndSummon();
         }
 
         void SpawnTelegraphs()
         {
-            int count = Mathf.Min(MaxActiveSummons, 3);
+            int count = m_CurrentSummonCount;
             for (int i = 0; i < count; i++)
             {
                 Vector3 anchor = GetAnchor(i);
@@ -254,7 +292,7 @@ namespace Unity.FPS.AvatarBoss
 
         void SpawnSummons()
         {
-            int count = Mathf.Min(MaxActiveSummons, 3);
+            int count = m_CurrentSummonCount;
             for (int i = 0; i < count; i++)
             {
                 var prefab = i % 2 == 0 ? m_HoverbotPrefab : m_TurretPrefab;
@@ -270,7 +308,7 @@ namespace Unity.FPS.AvatarBoss
 
         Vector3 GetAnchor(int i)
         {
-            float angle = (i * 360f / Mathf.Max(1, Mathf.Min(MaxActiveSummons, 3))) * Mathf.Deg2Rad;
+            float angle = (i * 360f / Mathf.Max(1, Mathf.Min(m_CurrentSummonCount, 3))) * Mathf.Deg2Rad;
             Vector3 center = m_Boss.transform.position;
             return center + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * AnchorRadius;
         }
