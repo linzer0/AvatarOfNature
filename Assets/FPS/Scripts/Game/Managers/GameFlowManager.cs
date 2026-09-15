@@ -33,6 +33,8 @@ namespace Unity.FPS.Game
         float m_TimeLoadEndGameScene;
         string m_SceneToLoad;
 
+        bool m_FadeGroupProvisional;
+
         void Awake()
         {
             EventManager.AddListener<AllObjectivesCompletedEvent>(OnAllObjectivesCompleted);
@@ -42,12 +44,35 @@ namespace Unity.FPS.Game
         void Start()
         {
             AudioUtility.SetMasterVolume(1);
+
+            // safety net: if no fade canvas group is assigned in this scene
+            // (e.g. minimal showcase setup), create a silent one so the
+            // end-game flow never throws. Scenes with a real group are untouched.
+            if (EndGameFadeCanvasGroup == null)
+            {
+                var go = new GameObject("GameFlowManagerFadeProvisional");
+                go.transform.SetParent(transform, false);
+                var cg = go.AddComponent<CanvasGroup>();
+                cg.alpha = 0f;
+                cg.blocksRaycasts = false;
+                cg.interactable = false;
+                go.SetActive(false);
+                EndGameFadeCanvasGroup = cg;
+                m_FadeGroupProvisional = true;
+            }
+            else
+            {
+                m_FadeGroupProvisional = false;
+            }
         }
 
         void Update()
         {
             if (GameIsEnding)
             {
+                if (EndGameFadeCanvasGroup == null)
+                    return;
+
                 float timeRatio = 1 - (m_TimeLoadEndGameScene - Time.time) / EndSceneLoadDelay;
                 EndGameFadeCanvasGroup.alpha = timeRatio;
 
@@ -73,7 +98,8 @@ namespace Unity.FPS.Game
 
             // Remember that we need to load the appropriate end scene after a delay
             GameIsEnding = true;
-            EndGameFadeCanvasGroup.gameObject.SetActive(true);
+            if (EndGameFadeCanvasGroup != null)
+                EndGameFadeCanvasGroup.gameObject.SetActive(true);
             if (win)
             {
                 m_SceneToLoad = WinSceneName;
