@@ -3,19 +3,31 @@ using UnityEngine;
 namespace Unity.FPS.AvatarBoss
 {
     /// M1: minimal debug overlay for boss health, stagger and weak points.
+    /// Disabled by default; F10 toggles it during play (never ships to players).
     public class AvatarBossDebugHUD : MonoBehaviour
     {
         public AvatarBossController Boss;
+        public bool ShowOnStart = false;
+
+        bool m_Shown;
 
         void Start()
         {
             if (Boss == null)
                 Boss = GetComponentInParent<AvatarBossController>();
+            m_Shown = ShowOnStart;
+        }
+
+        void Update()
+        {
+            var kb = UnityEngine.InputSystem.Keyboard.current;
+            if (kb != null && kb.f10Key.wasPressedThisFrame)
+                m_Shown = !m_Shown;
         }
 
         void OnGUI()
         {
-            if (Boss == null || Boss.BossHealth == null)
+            if (!m_Shown || Boss == null || Boss.BossHealth == null)
                 return;
 
             float hp = Boss.BossHealth.CurrentHealth;

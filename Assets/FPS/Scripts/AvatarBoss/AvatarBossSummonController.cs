@@ -45,6 +45,9 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Number of intermissions that completed successfully.</summary>
         public int SummonsDefeatedCount { get; private set; }
 
+        /// <summary>Currently alive summons (read-only, used by the boss HUD).</summary>
+        public int ActiveSummonCount { get { return m_Summons.Count; } }
+
         AvatarBossController m_Boss;
         AvatarBossAttackScheduler m_Scheduler;
         AvatarBossStagger m_Stagger;
