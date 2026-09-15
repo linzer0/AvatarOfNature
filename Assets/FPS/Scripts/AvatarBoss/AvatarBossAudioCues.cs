@@ -10,6 +10,7 @@ namespace Unity.FPS.AvatarBoss
         PhaseTwo,
         BossDeath,
         Summon,
+        AttackLaunch,
     }
 
     /// Minimal audio cues for the Avatar of Nature. Designer clips are optional;
@@ -24,6 +25,7 @@ namespace Unity.FPS.AvatarBoss
         public AudioClip PhaseTwoClip;
         public AudioClip BossDeathClip;
         public AudioClip SummonClip;
+        public AudioClip AttackLaunchClip;
 
         public void Play(AvatarBossCue cue)
         {
@@ -49,6 +51,8 @@ namespace Unity.FPS.AvatarBoss
                     return PhaseTwoClip != null ? PhaseTwoClip : GetOrCreateTone(ref m_TonePhaseTwo, 320f, 0.25f);
                 case AvatarBossCue.Summon:
                     return SummonClip != null ? SummonClip : GetOrCreateTone(ref m_ToneSummon, 660f, 0.3f);
+                case AvatarBossCue.AttackLaunch:
+                    return AttackLaunchClip != null ? AttackLaunchClip : GetOrCreateTone(ref m_ToneLaunch, 240f, 0.35f);
                 case AvatarBossCue.BossDeath:
                     return BossDeathClip != null ? BossDeathClip : GetOrCreateTone(ref m_ToneDeath, 110f, 0.5f);
                 default:
@@ -62,6 +66,7 @@ namespace Unity.FPS.AvatarBoss
         AudioClip m_TonePhaseTwo;
         AudioClip m_ToneDeath;
         AudioClip m_ToneSummon;
+        AudioClip m_ToneLaunch;
 
         static AudioClip GetOrCreateTone(ref AudioClip cache, float frequency, float seconds)
         {

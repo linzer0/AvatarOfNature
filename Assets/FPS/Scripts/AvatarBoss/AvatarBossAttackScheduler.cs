@@ -214,6 +214,8 @@ namespace Unity.FPS.AvatarBoss
 
             if (newState == AvatarBossSchedulerState.Telegraph)
                 PlayTelegraphCue();
+            if (newState == AvatarBossSchedulerState.Execute)
+                PlayLaunchCue();
         }
 
         void PlayTelegraphCue()
@@ -221,6 +223,13 @@ namespace Unity.FPS.AvatarBoss
             var cues = GetComponentInParent<AvatarBossAudioCues>();
             if (cues != null)
                 cues.Play(AvatarBossCue.Telegraph);
+        }
+
+        void PlayLaunchCue()
+        {
+            var cues = GetComponentInParent<AvatarBossAudioCues>();
+            if (cues != null)
+                cues.Play(AvatarBossCue.AttackLaunch);
         }
     }
 }
