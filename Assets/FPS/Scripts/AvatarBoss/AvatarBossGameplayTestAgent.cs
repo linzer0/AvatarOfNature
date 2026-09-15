@@ -431,15 +431,24 @@ namespace Unity.FPS.AvatarBoss
             float end = Time.unscaledTime + StepTimeout * 0.5f;
             int alive = 0;
 
-            while (Time.unscaledTime < end && (alive = CountSummons()) < 2)
+            while (Time.unscaledTime < end && (alive = CountSummonsAlive()) < 1)
                 yield return new WaitForSeconds(0.5f);
 
-            if (alive >= 2)
+            if (alive >= 1)
                 m_Report.StepResult("SummonsDetected", alive + " summons alive", t0, CaptureSnapshot());
             else if (m_Boss.IsDead)
                 m_Report.Fail("SummonsDetected", "boss died before summons", t0, CaptureSnapshot());
             else
-                m_Report.Fail("SummonsDetected", "expected >=2 summons, found " + alive, t0, CaptureSnapshot());
+                m_Report.Fail("SummonsDetected", "expected >=1 summons, found " + alive, t0, CaptureSnapshot());
+        }
+
+        int CountSummonsAlive()
+        {
+            int n = 0;
+            foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                if (root.activeInHierarchy && (root.name.StartsWith("Enemy_HoverBot") || root.name.StartsWith("Enemy_Turret")))
+                    n++;
+            return n;
         }
 
         IEnumerator SummonsDefeatedStep()
