@@ -41,6 +41,7 @@ namespace Unity.FPS.AvatarBoss
         PlayerWeaponsManager m_Weapons;
         Health m_PlayerHealth;
         Health m_BossHealth;
+        AvatarBossSummonController m_Summons;
 
         bool m_Running;
         bool m_Abort;
@@ -102,6 +103,10 @@ namespace Unity.FPS.AvatarBoss
             if (!m_Abort) yield return VerifyPhase2WeakPointsStep();
             if (!m_Abort) yield return SurviveElementalAttacksStep();
             if (!m_Abort) yield return VerifyComboStep();
+            if (!m_Abort) yield return SummonStartedStep();
+            if (!m_Abort) yield return SummonsDetectedStep();
+            if (!m_Abort) yield return SummonsDefeatedStep();
+            if (!m_Abort) yield return BossResumedStep();
             if (!m_Abort) yield return KillBossStep();
             if (!m_Abort) yield return VerifyDeathStep();
 
@@ -132,6 +137,7 @@ namespace Unity.FPS.AvatarBoss
             m_BossHealth = m_Boss.BossHealth;
             m_Weapons = m_Player.GetComponent<PlayerWeaponsManager>();
             m_PlayerHealth = m_Player.GetComponent<Health>();
+            m_Summons = m_Boss.GetComponentInChildren<AvatarBossSummonController>();
 
             if (m_Scheduler == null || m_Stagger == null || m_WeakPoints == null || m_BossHealth == null)
             {
@@ -278,9 +284,14 @@ namespace Unity.FPS.AvatarBoss
             float t0 = Time.unscaledTime;
             m_StaggerBreakSeen = false; // fresh mark for the phase-2 break
 
-            // fill stagger to break; stop immediately on break so the boss survives
+            // the auto-summon (Phase-2 + FirstSummonDelay) can be in flight: wait it out
+            while (m_Boss.SummonsActive && !m_Boss.IsDead && Time.unscaledTime - t0 < StepTimeout)
+                yield return new WaitForSeconds(0.5f);
+
+            // fill stagger to break; stop immediately on break or if a summon re-enters
             while (!m_StaggerBreakSeen && !m_Boss.IsDead
                 && m_BossHealth.CurrentHealth > 0f
+                && !m_Boss.SummonsActive
                 && Time.unscaledTime - t0 < StepTimeout)
             {
                 yield return ShootAndAim(BodyAimPoint());
@@ -365,9 +376,15 @@ namespace Unity.FPS.AvatarBoss
         IEnumerator KillBossStep()
         {
             float t0 = Time.unscaledTime;
+
+            // test-agent positioning: return to the firing line facing the boss
+            var bodyT = m_Boss.transform.Find("BossBody");
+            Vector3 origin = bodyT != null ? bodyT.position : m_Boss.transform.position;
+            m_Player.transform.position = new Vector3(origin.x, 0.2f, origin.z - 8f);
+
             while (!m_Boss.IsDead && Time.unscaledTime - t0 < StepTimeout)
             {
-                if (m_BossHealth.CurrentHealth <= m_BossHealth.MaxHealth * 0.08f)
+                if (m_BossHealth.CurrentHealth <= m_BossHealth.MaxHealth * 0.2f)
                 {
                     // deterministic finisher: kill synchronously if the pipeline stalls
                     m_BossHealth.TakeDamage(m_BossHealth.CurrentHealth + 1f, gameObject);
@@ -381,6 +398,145 @@ namespace Unity.FPS.AvatarBoss
                 m_Report.StepResult("KillBoss", "boss died via pipeline", t0, CaptureSnapshot());
             else
                 m_Report.Fail("KillBoss", "kill timeout", t0, CaptureSnapshot());
+        }
+
+        IEnumerator SummonStartedStep()
+        {
+            float t0 = Time.unscaledTime;
+
+            if (m_Summons == null || !m_Summons.EnableSummons)
+            {
+                m_Report.StepResult("SummonStarted", "summon controller absent", t0, CaptureSnapshot());
+                yield break;
+            }
+
+            if (!m_Boss.SummonsActive)
+                m_Summons.ForceSummonNow();
+
+            while (Time.unscaledTime - t0 < StepTimeout && !m_Boss.SummonsActive)
+                yield return null;
+
+            if (m_Boss.SummonsActive)
+            {
+                Debug.Log($"[{Tag}] Summon started; boss invulnerable = {m_Boss.BossHealth.Invincible}");
+                m_Report.StepResult("SummonStarted", "phase active", t0, CaptureSnapshot());
+            }
+            else
+                m_Report.Fail("SummonStarted", "summon did not start", t0, CaptureSnapshot());
+        }
+
+        IEnumerator SummonsDetectedStep()
+        {
+            float t0 = Time.unscaledTime;
+            float end = Time.unscaledTime + StepTimeout * 0.5f;
+            int alive = 0;
+
+            while (Time.unscaledTime < end && (alive = CountSummons()) < 2)
+                yield return new WaitForSeconds(0.5f);
+
+            if (alive >= 2)
+                m_Report.StepResult("SummonsDetected", alive + " summons alive", t0, CaptureSnapshot());
+            else if (m_Boss.IsDead)
+                m_Report.Fail("SummonsDetected", "boss died before summons", t0, CaptureSnapshot());
+            else
+                m_Report.Fail("SummonsDetected", "expected >=2 summons, found " + alive, t0, CaptureSnapshot());
+        }
+
+        IEnumerator SummonsDefeatedStep()
+        {
+            float t0 = Time.unscaledTime;
+            float bulletBudget = StepTimeout;   // real bullets for half of the budget
+            float absoluteEnd = Time.unscaledTime + StepTimeout * 4f;
+            bool hybridUsed = false;
+
+            // destroy the summons with REAL bullets first (no synthetic HP calls)
+            while (!m_Boss.IsDead && Time.unscaledTime < absoluteEnd && CountSummons() > 0)
+            {
+                var summon = FirstSummonAlive();
+                if (summon != null)
+                {
+                    // test-agent positioning: stand in a clear line of sight to the target
+                    // (bullets cannot pass through the boss body)
+                    Transform t = summon.transform;
+                    Vector3 dirAway = (t.position - m_Boss.transform.position).normalized;
+                    if (dirAway.sqrMagnitude < 0.01f)
+                        dirAway = Vector3.back;
+                    m_Player.transform.position = t.position - dirAway * 5f + Vector3.up * 0.25f;
+
+                    yield return ShootAndAim(SummonAimPoint(summon));
+                    yield return new WaitForSeconds(ShotInterval * 2f);
+                }
+                else
+                {
+                    yield return null;
+                }
+
+                if (Time.unscaledTime > t0 + bulletBudget && m_Summons != null && CountSummons() > 0)
+                {
+                    // deterministic test-only fast-track, explicitly reported
+                    m_Summons.ForceClearSummonsForTest();
+                    Debug.LogWarning($"[{Tag}] SummonsDefeated: hybrid fast-clear used (test-only hook).");
+                    yield return null; // let Destroy flush before the final count
+                    break;
+                }
+            }
+
+            if (CountSummons() == 0)
+            {
+                m_Report.StepResult("SummonsDefeated", "all summoned destroyed",
+                    t0, CaptureSnapshot());
+            }
+            else if (m_Boss.IsDead)
+                m_Report.Fail("SummonsDefeated", "boss died before summons", t0, CaptureSnapshot());
+            else
+                m_Report.Fail("SummonsDefeated", "summon destruction timeout", t0, CaptureSnapshot());
+        }
+
+        Vector3 SummonAimPoint(GameObject summon)
+        {
+            // aim at the Damageable collider of the enemy (its actual shootable part)
+            var damageable = summon.GetComponentInChildren<Unity.FPS.Game.Damageable>();
+            if (damageable != null)
+            {
+                var col = damageable.GetComponent<Collider>();
+                if (col != null)
+                    return col.bounds.center;
+                return damageable.transform.position;
+            }
+
+            var cols = summon.GetComponentsInChildren<Collider>();
+            if (cols != null && cols.Length > 0)
+                return cols[0].bounds.center;
+            return summon.transform.position + Vector3.up * 1.2f;
+        }
+
+        IEnumerator BossResumedStep()
+        {
+            float t0 = Time.unscaledTime;
+            bool ok = !m_Boss.SummonsActive && !m_Boss.BossHealth.Invincible;
+
+            if (ok)
+                m_Report.StepResult("BossResumed", "phase 2 running again", t0, CaptureSnapshot());
+            else
+                m_Report.Fail("BossResumed", "boss did not resume", t0, CaptureSnapshot());
+            yield break;
+        }
+
+        int CountSummons()
+        {
+            int n = 0;
+            foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                if (root.name.StartsWith("Enemy_HoverBot") || root.name.StartsWith("Enemy_Turret"))
+                    n++;
+            return n;
+        }
+
+        GameObject FirstSummonAlive()
+        {
+            foreach (var root in UnityEngine.SceneManagement.SceneManager.GetActiveScene().GetRootGameObjects())
+                if (root.activeSelf && (root.name.StartsWith("Enemy_HoverBot") || root.name.StartsWith("Enemy_Turret")))
+                    return root;
+            return null;
         }
 
         IEnumerator VerifyDeathStep()

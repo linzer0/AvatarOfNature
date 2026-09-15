@@ -882,6 +882,8 @@ GameObject:
   - component: {fileID: 1099317696}
   - component: {fileID: 1099317698}
   - component: {fileID: 1099317697}
+  - component: {fileID: 1099317699}
+  - component: {fileID: 1099317700}
   m_Layer: 0
   m_Name: AvatarOfNature
   m_TagString: Untagged
@@ -1117,6 +1119,43 @@ MonoBehaviour:
   WeakPointOpenClip: {fileID: 0}
   PhaseTwoClip: {fileID: 0}
   BossDeathClip: {fileID: 0}
+  SummonClip: {fileID: 0}
+--- !u!114 &1099317699
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 020490862541c8444ae76e5920f3cf4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossSummonController
+  EnableSummons: 1
+  FirstSummonDelay: 8
+  CooldownBetweenSummons: 20
+  MaxActiveSummons: 3
+  SummonTelegraphTime: 2
+  AnchorRadius: 13
+--- !u!114 &1099317700
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1099317685}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 020490862541c8444ae76e5920f3cf4a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossSummonController
+  EnableSummons: 1
+  FirstSummonDelay: 8
+  CooldownBetweenSummons: 20
+  MaxActiveSummons: 3
+  SummonTelegraphTime: 2
+  AnchorRadius: 13
 --- !u!4 &1146676878 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 5963937743390997973, guid: 7042f8fe21debc944b5bdc894f478d63,

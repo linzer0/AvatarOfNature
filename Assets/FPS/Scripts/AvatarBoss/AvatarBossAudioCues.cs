@@ -9,6 +9,7 @@ namespace Unity.FPS.AvatarBoss
         WeakPointOpen,
         PhaseTwo,
         BossDeath,
+        Summon,
     }
 
     /// Minimal audio cues for the Avatar of Nature. Designer clips are optional;
@@ -22,6 +23,7 @@ namespace Unity.FPS.AvatarBoss
         public AudioClip WeakPointOpenClip;
         public AudioClip PhaseTwoClip;
         public AudioClip BossDeathClip;
+        public AudioClip SummonClip;
 
         public void Play(AvatarBossCue cue)
         {
@@ -45,6 +47,8 @@ namespace Unity.FPS.AvatarBoss
                     return WeakPointOpenClip != null ? WeakPointOpenClip : GetOrCreateTone(ref m_ToneWeakPoint, 940f, 0.1f);
                 case AvatarBossCue.PhaseTwo:
                     return PhaseTwoClip != null ? PhaseTwoClip : GetOrCreateTone(ref m_TonePhaseTwo, 320f, 0.25f);
+                case AvatarBossCue.Summon:
+                    return SummonClip != null ? SummonClip : GetOrCreateTone(ref m_ToneSummon, 660f, 0.3f);
                 case AvatarBossCue.BossDeath:
                     return BossDeathClip != null ? BossDeathClip : GetOrCreateTone(ref m_ToneDeath, 110f, 0.5f);
                 default:
@@ -57,6 +61,7 @@ namespace Unity.FPS.AvatarBoss
         AudioClip m_ToneWeakPoint;
         AudioClip m_TonePhaseTwo;
         AudioClip m_ToneDeath;
+        AudioClip m_ToneSummon;
 
         static AudioClip GetOrCreateTone(ref AudioClip cache, float frequency, float seconds)
         {
