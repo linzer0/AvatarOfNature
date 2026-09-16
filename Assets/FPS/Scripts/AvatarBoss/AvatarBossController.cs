@@ -16,6 +16,7 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossStagger Stagger { get; private set; }
         public AvatarBossWeakPoint[] WeakPoints { get; private set; }
         public AvatarBossAttackScheduler Scheduler { get; private set; }
+        public AvatarBossHealingOrbs HealingOrbs { get; private set; }
 
         public bool PhaseTwo { get; private set; }
 
@@ -40,6 +41,7 @@ namespace Unity.FPS.AvatarBoss
             Stagger = GetComponentInChildren<AvatarBossStagger>();
             WeakPoints = GetComponentsInChildren<AvatarBossWeakPoint>();
             Scheduler = GetComponentInChildren<AvatarBossAttackScheduler>();
+            HealingOrbs = GetComponentInChildren<AvatarBossHealingOrbs>();
 
             if (BossHealth == null)
                 Debug.LogError($"[{nameof(AvatarBossController)}] No Health found on '{name}' or its parents.", this);
@@ -60,6 +62,11 @@ namespace Unity.FPS.AvatarBoss
                 Stagger.OnStaggerFull += OnStaggerFull;
             if (Scheduler != null)
                 Scheduler.Initialize();
+            if (HealingOrbs != null)
+            {
+                HealingOrbs.RecoveryStarted += OnRecoveryStarted;
+                HealingOrbs.RecoveryFinished += OnRecoveryFinished;
+            }
 
             SubscribePartHitFeedbacks();
         }
@@ -125,15 +132,58 @@ namespace Unity.FPS.AvatarBoss
             if (Stagger != null)
                 Stagger.OnStaggerFull -= OnStaggerFull;
 
+            if (HealingOrbs != null)
+            {
+                HealingOrbs.RecoveryStarted -= OnRecoveryStarted;
+                HealingOrbs.RecoveryFinished -= OnRecoveryFinished;
+            }
+
             foreach (var d in m_PartDamageables)
                 if (d != null)
                     d.OnDamageInflicted -= OnPartHit;
             m_PartDamageables.Clear();
         }
 
+        void OnRecoveryStarted()
+        {
+            if (m_IsDead)
+                return;
+
+            if (Scheduler != null)
+                Scheduler.Interrupt();
+            if (BossHealth != null)
+                BossHealth.Invincible = true;
+            CloseWeakPoints();
+            Debug.Log("[AvatarOfNature] RECOVERY started — destroy healing orbs.", this);
+        }
+
+        void OnRecoveryFinished()
+        {
+            if (m_IsDead)
+                return;
+
+            if (BossHealth != null)
+                BossHealth.Invincible = false;
+            CloseWeakPoints();
+            if (Scheduler != null)
+                Scheduler.NotifyRecoveryFinished();
+            Debug.Log("[AvatarOfNature] RECOVERY finished — boss vulnerable.", this);
+        }
+
+        void CloseWeakPoints()
+        {
+            if (WeakPoints == null)
+                return;
+            foreach (var weakPoint in WeakPoints)
+                if (weakPoint != null)
+                    weakPoint.SetExposed(false);
+        }
+
         void OnBossDie()
         {
             m_IsDead = true;
+            if (HealingOrbs != null)
+                HealingOrbs.ClearHealingOrbs();
             Debug.Log("[AvatarOfNature] Boss died.", this);
             PlayCue(AvatarBossCue.BossDeath);
             Stagger.ResetStagger();
@@ -208,7 +258,9 @@ namespace Unity.FPS.AvatarBoss
         public void DebugResetBoss()
         {
             m_IsDead = false;
-            PhaseTwo = false;
+            PhaseTwo = false;            if (HealingOrbs != null)
+                HealingOrbs.ClearHealingOrbs();
+
             SummonsActive = false;
 
             if (m_VulnerabilityRoutine != null)

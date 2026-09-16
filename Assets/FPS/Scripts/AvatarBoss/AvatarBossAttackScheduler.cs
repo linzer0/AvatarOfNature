@@ -34,6 +34,7 @@ namespace Unity.FPS.AvatarBoss
 
         [Header("Phase 2 Combo (fixed: Shockwave -> ComboDelay -> Earth)")]
         public bool EnableCombo = false;
+        [Range(0f, 1f)] public float ComboFrequency = 1f;
         [Tooltip("Seconds between Shockwave finishing and the chained Earth attack")]
         public float ComboDelay = 1.5f;
         [Tooltip("Min seconds that must pass between two combos")]
@@ -48,6 +49,12 @@ namespace Unity.FPS.AvatarBoss
         public float MeteorRainCooldownMin = 22f;
         [Tooltip("Max seconds between two Meteor Rain attacks")]
         public float MeteorRainCooldownMax = 30f;
+
+        [Header("Recovery")]
+        public AvatarBossHealingOrbs HealingOrbs;
+        public bool EnableRecovery = true;
+        [Range(0.1f, 0.95f)] public float RecoveryHealthThreshold = 0.65f;
+        [Min(0f)] public float RecoveryPostDelay = 2f;
 
         public AvatarBossSchedulerState State { get; private set; } = AvatarBossSchedulerState.Idle;
         public AvatarBossAttack CurrentAttack { get; private set; }
@@ -76,6 +83,7 @@ namespace Unity.FPS.AvatarBoss
         float m_InitCooldown;
         bool m_InitCombo;
         bool m_OriginalsCached;
+        AvatarBossController m_Boss;
 
         void Awake()
         {
@@ -101,6 +109,9 @@ namespace Unity.FPS.AvatarBoss
             if (m_Initialized)
                 return;
             m_Initialized = true;
+            m_Boss = GetComponentInParent<AvatarBossController>();
+            if (HealingOrbs == null)
+                HealingOrbs = GetComponentInParent<AvatarBossHealingOrbs>();
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             m_Attacks = GetComponentsInChildren<AvatarBossAttack>();
             if (m_Attacks.Length == 0)
@@ -122,6 +133,9 @@ namespace Unity.FPS.AvatarBoss
                 && Time.time >= m_NextAttackAllowedTime
                 && m_CycleRoutine == null)
             {
+                if (TryStartRecovery())
+                    return;
+
                 if (m_ComboPending)
                 {
                     m_ComboPending = false;
@@ -132,6 +146,31 @@ namespace Unity.FPS.AvatarBoss
                     StartNewCycle();
                 }
             }
+        }
+
+        bool TryStartRecovery()
+        {
+            if (!EnableRecovery || HealingOrbs == null || m_Boss == null
+                || m_Boss.IsDead || m_Boss.SummonsActive
+                || Time.time < InitialGraceTime
+                || HealingOrbs.RecoveryActive
+                || m_Boss.BossHealth == null
+                || m_Boss.BossHealth.GetRatio() > RecoveryHealthThreshold)
+                return false;
+
+            if (!HealingOrbs.BeginRecovery())
+                return false;
+
+            Interrupt();
+            return true;
+        }
+
+        /// <summary>Called by the controller after all recovery orbs resolve.</summary>
+        public void NotifyRecoveryFinished()
+        {
+            m_ComboPending = false;
+            m_InComboChain = false;
+            m_NextAttackAllowedTime = Time.time + RecoveryPostDelay;
         }
 
         void StartFixedCycle(AvatarBossElement element)
@@ -271,7 +310,8 @@ namespace Unity.FPS.AvatarBoss
             }
             else if (EnableCombo
                 && attack.Element == AvatarBossElement.Shockwave
-                && Time.time >= m_NextComboAllowedTime)
+                && Time.time >= m_NextComboAllowedTime
+                && Random.value <= ComboFrequency)
             {
                 m_ComboPending = true; // fixed combo: next must be Earth after ComboDelay
                 m_InComboChain = true;
