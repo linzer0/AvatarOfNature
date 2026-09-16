@@ -52,6 +52,13 @@ namespace Unity.FPS.AvatarBoss
                 return;
             HideMicrogameCompass();
             m_Boss.OnBossHit += OnBossHit;
+            if (m_Boss.HealingOrbs != null)
+            {
+                m_Boss.HealingOrbs.RecoveryStarted += OnRecoveryStarted;
+                m_Boss.HealingOrbs.OrbDestroyed += OnOrbDestroyed;
+                m_Boss.HealingOrbs.BossHealed += OnBossHealed;
+                m_Boss.HealingOrbs.OrbReachedWithoutHealing += OnOrbReachedWithoutHealing;
+            }
         }
 
         void OnDestroy()
@@ -60,7 +67,19 @@ namespace Unity.FPS.AvatarBoss
             if (!Application.isPlaying || m_Boss == null)
                 return;
             m_Boss.OnBossHit -= OnBossHit;
+            if (m_Boss.HealingOrbs != null)
+            {
+                m_Boss.HealingOrbs.RecoveryStarted -= OnRecoveryStarted;
+                m_Boss.HealingOrbs.OrbDestroyed -= OnOrbDestroyed;
+                m_Boss.HealingOrbs.BossHealed -= OnBossHealed;
+                m_Boss.HealingOrbs.OrbReachedWithoutHealing -= OnOrbReachedWithoutHealing;
+            }
         }
+
+        void OnRecoveryStarted() => ShowMessage("BOSS RECOVERING · DESTROY THE ORBS", new Color(0.3f, 1f, 0.65f, 1f), 2f);
+        void OnOrbDestroyed(int index) => ShowMessage("ORB DESTROYED", new Color(0.7f, 1f, 0.8f, 1f));
+        void OnBossHealed(float amount) => ShowMessage($"BOSS HEALED +{amount / m_Boss.BossHealth.MaxHealth * 100f:F0}%", new Color(0.4f, 1f, 0.5f, 1f));
+        void OnOrbReachedWithoutHealing() => ShowMessage("PHASE 2 — ORBS ARE A DISTRACTION", new Color(1f, 0.45f, 0.25f, 1f), 1.8f);
 
         float m_LastHitMessage;
 
@@ -276,8 +295,12 @@ namespace Unity.FPS.AvatarBoss
                 : "";
             var healing = m_Boss.HealingOrbs;
             if (healing != null && healing.RecoveryActive)
+            {
+                if (m_Boss.PhaseTwo && !healing.HealEnabledInPhaseTwo)
+                    return difficultyText + "PHASE 2 — ORBS ARE A DISTRACTION · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount;
                 return difficultyText + "BOSS RECOVERING · DESTROY THE ORBS · ORBS: "
                     + healing.ActiveOrbCount + " / " + healing.OrbCount;
+            }
             string phase = m_Boss.PhaseTwo ? "PHASE 2" : "PHASE 1";
             string state = "IDLE";
             var sched = m_Boss.Scheduler;

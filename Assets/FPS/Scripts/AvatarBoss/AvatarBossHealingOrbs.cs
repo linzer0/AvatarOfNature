@@ -32,6 +32,8 @@ namespace Unity.FPS.AvatarBoss
         [Min(0.1f)] public float SpawnRingRadius = 13f;
         [Min(0f)] public float SpawnHeight = 1.4f;
         [Min(0.1f)] public float OrbRadius = 0.45f;
+        [Range(1f, 2f)] public float VisualScaleMultiplier = 1.6f;
+        public bool HealEnabledInPhaseTwo = false;
         [Min(0f)] public float CameraClearDistance = 2.5f;
         [Min(0f)] public float RecoveryCooldown = 40f;
 
@@ -57,6 +59,7 @@ namespace Unity.FPS.AvatarBoss
         public event Action RecoveryStarted;
         public event Action<int> OrbDestroyed;
         public event Action<float> BossHealed;
+        public event Action OrbReachedWithoutHealing;
         public event Action RecoveryFinished;
 
         readonly List<OrbState> m_Orbs = new List<OrbState>();
@@ -193,7 +196,7 @@ namespace Unity.FPS.AvatarBoss
                     orb.Root.transform.position, target, OrbSpeed * Time.deltaTime);
                 UpdateTrail(orb);
 
-                if (Vector3.Distance(orb.Root.transform.position, target) <= OrbRadius + 0.15f)
+                if (Vector3.Distance(orb.Root.transform.position, target) <= OrbRadius * VisualScaleMultiplier + 0.15f)
                 {
                     ResolveOrb(orb, true);
                     yield break;
@@ -208,7 +211,7 @@ namespace Unity.FPS.AvatarBoss
             var root = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             root.name = $"HealingOrb_{index + 1}";
             root.transform.position = position;
-            root.transform.localScale = Vector3.one * (OrbRadius * 2f);
+            root.transform.localScale = Vector3.one * (OrbRadius * 2f * VisualScaleMultiplier);
 
             var renderer = root.GetComponent<Renderer>();
             if (renderer != null)
@@ -216,7 +219,21 @@ namespace Unity.FPS.AvatarBoss
                 renderer.sharedMaterial = OrbMaterial != null
                     ? OrbMaterial
                     : CreateFallbackMaterial(OrbColor);
+                var emission = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(emission);
+                emission.SetColor("_EmissionColor", OrbColor * 2.5f);
+                renderer.SetPropertyBlock(emission);
             }
+
+            var collider = root.GetComponent<SphereCollider>();
+            if (collider != null)
+                collider.radius = 0.5f / VisualScaleMultiplier;
+
+            var glow = root.AddComponent<Light>();
+            glow.type = LightType.Point;
+            glow.color = OrbColor;
+            glow.range = 2.5f;
+            glow.intensity = 1.2f;
 
             var health = root.AddComponent<Health>();
             health.MaxHealth = OrbHealth;
@@ -226,8 +243,8 @@ namespace Unity.FPS.AvatarBoss
 
             var trail = root.AddComponent<LineRenderer>();
             trail.positionCount = 2;
-            trail.startWidth = 0.035f;
-            trail.endWidth = 0.01f;
+            trail.startWidth = 0.08f;
+            trail.endWidth = 0.018f;
             trail.startColor = TrailColor;
             trail.endColor = new Color(TrailColor.r, TrailColor.g, TrailColor.b, 0f);
             trail.material = TrailMaterial != null
@@ -242,8 +259,9 @@ namespace Unity.FPS.AvatarBoss
                 Trail = trail,
                 Index = index
             };
-            health.OnDie += () => ResolveOrb(orb, false);
-            damageable.OnDamageInflicted += (_, __) => OrbCountChanged?.Invoke(ActiveOrbCount, SpawnedOrbCount);
+            health.OnDie += () => { SpawnBurst(root.transform.position, new Color(0.4f, 1f, 0.7f), 18); ResolveOrb(orb, false); };
+            damageable.OnDamageInflicted += (_, __) => { SpawnBurst(root.transform.position, Color.white, 6); OrbCountChanged?.Invoke(ActiveOrbCount, SpawnedOrbCount); };
+            SpawnBurst(position, OrbColor, 10);
             UpdateTrail(orb);
             return orb;
         }
@@ -258,13 +276,19 @@ namespace Unity.FPS.AvatarBoss
                 StopCoroutine(orb.MoveRoutine);
 
             m_Orbs.Remove(orb);
-            if (reachedBoss && Boss != null && Boss.BossHealth != null && !Boss.IsDead)
+            if (reachedBoss && Boss != null && Boss.BossHealth != null && !Boss.IsDead
+                && (!Boss.PhaseTwo || HealEnabledInPhaseTwo))
             {
                 var amount = Boss.BossHealth.MaxHealth * HealPercentOfMaxHealth;
                 Boss.BossHealth.Heal(amount);
                 HealingReceived += amount;
                 ReachedBossCount++;
                 BossHealed?.Invoke(amount);
+            }
+            else if (reachedBoss && Boss != null && Boss.PhaseTwo && !HealEnabledInPhaseTwo)
+            {
+                OrbReachedWithoutHealing?.Invoke();
+                SpawnBurst(OrbTarget != null ? OrbTarget.position : transform.position, new Color(1f, 0.35f, 0.2f), 12);
             }
             else
             {
@@ -335,6 +359,29 @@ namespace Unity.FPS.AvatarBoss
                 return;
             orb.Trail.SetPosition(0, orb.Root.transform.position);
             orb.Trail.SetPosition(1, OrbTarget.position);
+        }
+
+        void SpawnBurst(Vector3 position, Color color, int count)
+        {
+            var go = new GameObject("HealingOrbFeedback");
+            go.transform.position = position;
+            var ps = go.AddComponent<ParticleSystem>();
+            ps.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            var main = ps.main;
+            main.duration = 0.35f;
+            main.startLifetime = 0.45f;
+            main.startSpeed = 2.2f;
+            main.startSize = 0.08f;
+            main.startColor = color;
+            main.maxParticles = count;
+            var emission = ps.emission;
+            emission.rateOverTime = 0f;
+            emission.SetBursts(new[] { new ParticleSystem.Burst(0f, (short)count) });
+            var shape = ps.shape;
+            shape.shapeType = ParticleSystemShapeType.Sphere;
+            shape.radius = 0.12f;
+            ps.Play();
+            Destroy(go, 1.1f);
         }
 
         static Material CreateFallbackMaterial(Color color)
