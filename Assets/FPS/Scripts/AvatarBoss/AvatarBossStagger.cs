@@ -9,8 +9,8 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Meter value required for stagger break")]
         public float MaxStagger = 100f;
 
-        [Tooltip("Stagger meter gained per point of damage dealt to any part")]
-        public float StaggerGainPerDamage = 0.5f;
+        [Tooltip("Effective stagger meter gained per post-multiplier damage point. Difficulty controller normalizes this to the 0.11 designer-scale target.")]
+        public float StaggerGainPerDamage = 1.2f;
 
         [Header("Decay (does not run while the meter is full during break)")]
         public float DecayPerSecond = 8f;
