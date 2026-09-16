@@ -18,6 +18,8 @@ EditorBuildSettings:
     path: Assets/FPS/Scenes/MainScene.unity
     guid: d794a2ef8ba31d847ad3c19d03e2ddb9
   m_configObjects:
+    com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f,
+      type: 2}
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 05b4aeda8533b704f9be24b556a43d98,
       type: 3}
   m_UseUCBPForAssetBundles: 0

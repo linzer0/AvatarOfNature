@@ -40,6 +40,9 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Human-like reaction latency before the bot responds to a telegraph (seconds)")]
         public float ReactionLatency = 0.3f;
 
+        [Tooltip("Body-only mode: never target exposed weak points (used for the body-gating check)")]
+        public bool BodyOnlyMode = false;
+
         const string Tag = "AVATAR_BOSS_FREE_RUN";
 
         public bool IsRunning { get; private set; }
@@ -57,6 +60,9 @@ namespace Unity.FPS.AvatarBoss
         public int Combos => m_Scheduler != null ? m_Scheduler.ComboCount : -1;
         public int Meteors => m_Scheduler != null ? m_Scheduler.MeteorRainCount : -1;
         public int SummonPhases => m_SummonPhases;
+        public int StaggerBreaks => m_StaggerBreaks;
+        public float BodyDamageByBoss => m_BodyDamageByBoss;
+        public float WeakPointDamageByBoss => m_WeakPointDamageByBoss;
 
         AvatarBossController m_Boss;
         AvatarBossAttackScheduler m_Scheduler;
@@ -77,6 +83,9 @@ namespace Unity.FPS.AvatarBoss
         int m_TotalHits;
         int m_UnfairHits;
         int m_SummonPhases;
+        int m_StaggerBreaks;
+        float m_BodyDamageByBoss;
+        float m_WeakPointDamageByBoss;
         bool m_WasSummonsActive;
         float m_LastTelegraphSeenTime = -999f;
         float m_TelegraphBeganAt = -1f;
@@ -112,7 +121,7 @@ namespace Unity.FPS.AvatarBoss
             }
 
             m_FightStart = Time.unscaledTime;
-            Debug.Log($"[{Tag}] FREE-RUN START playerHp={m_PlayerHealth.MaxHealth} bossHp={m_BossHealth.MaxHealth}");
+            Debug.Log($"[{Tag}] FREE-RUN START playerHp={m_PlayerHealth.MaxHealth} bossHp={m_BossHealth.MaxHealth} bodyOnly={BodyOnlyMode}");
 
             while (!m_Boss.IsDead && !m_Player.IsDead && Time.unscaledTime - m_FightStart < RunTimeout)
             {
@@ -140,6 +149,7 @@ namespace Unity.FPS.AvatarBoss
 
             sb.AppendLine($"[{Tag}] playerDamageTaken={m_PlayerDamageTaken:F1} totalHits={m_TotalHits} unfairHits={m_UnfairHits}");
             sb.AppendLine($"[{Tag}] deaths={m_Deaths}");
+            sb.AppendLine($"[{Tag}] staggerBreaks={m_StaggerBreaks} bodyDmg={m_BodyDamageByBoss:F1} weakPointDmg={m_WeakPointDamageByBoss:F1}");
             sb.AppendLine($"[{Tag}] attacks={attacks} combos={combos} meteors={meteors}");
             sb.AppendLine($"[{Tag}] summonPhases={m_SummonPhases} summonsDefeated={summonsDefeated}");
             Debug.Log(sb.ToString());
@@ -185,6 +195,8 @@ namespace Unity.FPS.AvatarBoss
             }
             if (m_Stagger != null)
                 m_Stagger.OnStaggerFull += OnStaggerFull;
+            if (m_Boss != null)
+                m_Boss.OnBossHit += OnBossHitSplit;
 
             // wait for the weapon loadout to equip
             float t0 = Time.unscaledTime;
@@ -207,6 +219,8 @@ namespace Unity.FPS.AvatarBoss
             }
             if (m_Stagger != null)
                 m_Stagger.OnStaggerFull -= OnStaggerFull;
+            if (m_Boss != null)
+                m_Boss.OnBossHit -= OnBossHitSplit;
         }
 
         void OnPlayerDamaged(float damage, GameObject source)
@@ -234,8 +248,18 @@ namespace Unity.FPS.AvatarBoss
 
         void OnStaggerFull()
         {
+            m_StaggerBreaks++;
             if (m_FirstStaggerTime < 0f)
                 m_FirstStaggerTime = Time.unscaledTime;
+        }
+
+        /// <summary>Test/лаб hook: splits boss HP loss into body vs weak point damage.</summary>
+        void OnBossHitSplit(Vector3 position, float damage, bool isWeakPoint)
+        {
+            if (isWeakPoint)
+                m_WeakPointDamageByBoss += damage;
+            else
+                m_BodyDamageByBoss += damage;
         }
 
         void TrackMilestones()
@@ -280,10 +304,13 @@ namespace Unity.FPS.AvatarBoss
                     return SummonAimPoint(summon);
             }
 
-            foreach (var wp in m_WeakPoints)
+            if (!BodyOnlyMode)
             {
-                if (wp != null && wp.IsExposed)
-                    return wp.transform.position;
+                foreach (var wp in m_WeakPoints)
+                {
+                    if (wp != null && wp.IsExposed)
+                        return wp.transform.position;
+                }
             }
 
             var body = m_Boss.transform.Find("BossBody");

@@ -92,13 +92,17 @@ namespace Unity.FPS.AvatarBoss
                 return;
 
             float hpAfter = BossHealth != null ? BossHealth.CurrentHealth : 0f;
-            float hpBefore = Mathf.Min(BossHealth != null ? BossHealth.MaxHealth : 0f, hpAfter + damage);
             float stagger = Stagger != null ? Stagger.CurrentStagger : 0f;
             bool weakPoint = part != null && part.GetComponent<AvatarBossWeakPoint>() != null;
 
             if (AvatarBossDebugHUD.F10DiagnosticsEnabled)
-                Debug.Log($"HIT target={(part != null ? part.name : "null")} damage={damage:F1} " +
-                          $"hpBefore={hpBefore:F1} hpAfter={hpAfter:F1} stagger={stagger:F1} weakPoint={weakPoint}", part);
+            {
+                float mult = part != null ? part.DamageMultiplier : 1f;
+                float applied = damage;
+                float raw = mult > 0.0001f ? damage / mult : damage;
+                Debug.Log($"HIT target={(part != null ? part.name : "null")} rawDamage={raw:F1} " +
+                          $"appliedDamage={applied:F1} multiplier={mult:F2} hpAfter={hpAfter:F1} stagger={stagger:F1}", part);
+            }
 
             Vector3 pos = part != null ? part.transform.position : transform.position;
             if (part != null)
