@@ -89,7 +89,8 @@ namespace Unity.FPS.AvatarBoss
 
         void Update()
         {
-            if (m_Boss == null || m_Boss.IsDead || m_Boss.SummonsActive)
+            if (m_Boss == null || m_Boss.IsDead || m_Boss.SummonsActive
+                || (m_Boss.HealingOrbs != null && m_Boss.HealingOrbs.RecoveryActive))
                 return;
 
             // re-arm the timer the moment Phase 2 begins
@@ -127,7 +128,8 @@ namespace Unity.FPS.AvatarBoss
         [ContextMenu("Force Start Summon (Test Only)")]
         public void ForceSummonNow()
         {
-            if (!m_Boss.SummonsActive)
+            if (!m_Boss.SummonsActive
+                && (m_Boss.HealingOrbs == null || !m_Boss.HealingOrbs.RecoveryActive))
                 StartSummon();
         }
 

@@ -34,6 +34,8 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossStagger m_Stagger;
         AvatarBossPhaseController m_Phase;
         AvatarBossSummonController m_Summons;
+        AvatarBossHealingOrbs m_HealingOrbs;
+        AvatarBossDifficultyController m_Difficulty;
         PlayerCharacterController m_Player;
 
         void Start()
@@ -59,6 +61,8 @@ namespace Unity.FPS.AvatarBoss
             m_Stagger = Boss.Stagger;
             m_Phase = Boss.GetComponentInChildren<AvatarBossPhaseController>();
             m_Summons = Boss.GetComponentInChildren<AvatarBossSummonController>();
+            m_HealingOrbs = Boss.GetComponentInChildren<AvatarBossHealingOrbs>();
+            m_Difficulty = Boss.GetComponentInChildren<AvatarBossDifficultyController>();
             m_Player = FindFirstObjectByType<PlayerCharacterController>();
         }
 
@@ -89,6 +93,10 @@ namespace Unity.FPS.AvatarBoss
             DrawSnapshot();
             GUILayout.Space(6f);
             DrawBossStateControls();
+            GUILayout.Space(6f);
+            DrawDifficultyControls();
+            GUILayout.Space(6f);
+            DrawHealingOrbControls();
             GUILayout.Space(6f);
             DrawAttackControls();
             GUILayout.Space(6f);
@@ -135,6 +143,15 @@ namespace Unity.FPS.AvatarBoss
 
             int summons = m_Summons != null ? m_Summons.ActiveSummonCount : 0;
             GUILayout.Label($"SUMMONS: {summons}");
+
+            if (m_Difficulty != null)
+            {
+                GUILayout.Label($"DIFFICULTY: {m_Difficulty.CurrentDifficulty.ToString().ToUpperInvariant()}");
+                var profile = m_Difficulty.ActiveProfile;
+                GUILayout.Label($"PROFILE: atk x{profile.AttackCooldownMultiplier:F2} · telegraph x{profile.TelegraphMultiplier:F2} · orb speed {profile.OrbSpeed:F1}");
+            }
+            if (m_HealingOrbs != null)
+                GUILayout.Label($"HEALING ORBS ALIVE: {m_HealingOrbs.ActiveOrbCount} · HEALING RECEIVED: {m_HealingOrbs.HealingReceived:F0}");
 
             bool schedEnabled = m_Scheduler != null && m_Scheduler.enabled;
             GUI.color = schedEnabled ? Color.white : Color.yellow;
@@ -205,6 +222,27 @@ namespace Unity.FPS.AvatarBoss
             if (Button("EXPOSE WEAK POINTS")) SetWeakPointsExposed(true);
             if (Button("CLOSE WEAK POINTS")) SetWeakPointsExposed(false);
             if (Button("KILL BOSS")) Boss.BossHealth.Kill();
+        }
+
+        void DrawDifficultyControls()
+        {
+            if (m_Difficulty == null)
+                return;
+            GUILayout.Label("DIFFICULTY", GUI.skin.box);
+            if (Button("EASY")) m_Difficulty.ApplyDifficulty(AvatarBossDifficulty.Easy);
+            if (Button("NORMAL")) m_Difficulty.ApplyDifficulty(AvatarBossDifficulty.Normal);
+            if (Button("HARD")) m_Difficulty.ApplyDifficulty(AvatarBossDifficulty.Hard);
+            if (Button("APPLY DIFFICULTY")) m_Difficulty.ApplyDifficulty(m_Difficulty.CurrentDifficulty);
+        }
+
+        void DrawHealingOrbControls()
+        {
+            if (m_HealingOrbs == null)
+                return;
+            GUILayout.Label("RECOVERY", GUI.skin.box);
+            if (Button("FORCE RECOVERY")) m_HealingOrbs.ForceRecovery();
+            if (Button("SPAWN HEALING ORBS")) m_HealingOrbs.SpawnHealingOrbs();
+            if (Button("CLEAR HEALING ORBS")) m_HealingOrbs.ClearHealingOrbs();
         }
 
         void DrawAttackControls()

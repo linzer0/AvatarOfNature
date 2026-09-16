@@ -20,6 +20,12 @@ namespace Unity.FPS.AvatarBoss
         public int WeakPointCount;
         public bool[] WeakPointsExposed;
         public string[] WeakPointNames;
+        public int HealingOrbsAlive;
+        public int HealingOrbsSpawned;
+        public int HealingOrbsDestroyed;
+        public int HealingOrbsReachedBoss;
+        public float HealingReceived;
+        public AvatarBossDifficulty Difficulty;
 
         public int ExposedCount()
         {
@@ -32,9 +38,9 @@ namespace Unity.FPS.AvatarBoss
 
         public override string ToString()
         {
-            return string.Format("hp={0:F0}/{1:F0} phase2={2} dead={3} sched={4}({5},{6}) stagger={7:P0} wps={8}/{9}",
+            return string.Format("hp={0:F0}/{1:F0} phase2={2} dead={3} sched={4}({5},{6}) stagger={7:P0} wps={8}/{9} orbs={10}/{11} heal={12:F0}",
                 BossHp, BossMaxHp, PhaseTwo, IsDead, SchedulerEnabled, SchedulerState, SchedulerElement,
-                StaggerRatio, ExposedCount(), WeakPointCount);
+                StaggerRatio, ExposedCount(), WeakPointCount, HealingOrbsAlive, HealingOrbsSpawned, HealingReceived);
         }
     }
 
@@ -59,6 +65,18 @@ namespace Unity.FPS.AvatarBoss
                 s.StaggerRatio = boss.Stagger.Ratio;
 
             s.PhaseTwo = boss.PhaseTwo;
+            var healing = boss.HealingOrbs;
+            if (healing != null)
+            {
+                s.HealingOrbsAlive = healing.ActiveOrbCount;
+                s.HealingOrbsSpawned = healing.SpawnedOrbCount;
+                s.HealingOrbsDestroyed = healing.DestroyedOrbCount;
+                s.HealingOrbsReachedBoss = healing.ReachedBossCount;
+                s.HealingReceived = healing.HealingReceived;
+            }
+            var difficulty = boss.GetComponent<AvatarBossDifficultyController>();
+            if (difficulty != null)
+                s.Difficulty = difficulty.CurrentDifficulty;
             s.SchedulerEnabled = boss.Scheduler != null && boss.Scheduler.enabled;
             s.SchedulerState = boss.Scheduler != null
                 ? boss.Scheduler.State

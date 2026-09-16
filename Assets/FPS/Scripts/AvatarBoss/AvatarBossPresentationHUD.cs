@@ -270,6 +270,14 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_Boss.IsDead)
                 return "DEFEATED";
+            var difficulty = m_Boss.GetComponent<AvatarBossDifficultyController>();
+            string difficultyText = difficulty != null
+                ? difficulty.CurrentDifficulty.ToString().ToUpperInvariant() + " · "
+                : "";
+            var healing = m_Boss.HealingOrbs;
+            if (healing != null && healing.RecoveryActive)
+                return difficultyText + "BOSS RECOVERING · DESTROY THE ORBS · ORBS: "
+                    + healing.ActiveOrbCount + " / " + healing.OrbCount;
             string phase = m_Boss.PhaseTwo ? "PHASE 2" : "PHASE 1";
             string state = "IDLE";
             var sched = m_Boss.Scheduler;
@@ -291,7 +299,10 @@ namespace Unity.FPS.AvatarBoss
                         break;
                 }
             }
-            return phase + " · " + state;
+            string orbSuffix = healing != null && healing.SpawnedOrbCount > 0
+                ? " · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount
+                : "";
+            return difficultyText + phase + " · " + state + orbSuffix;
         }
 
         string ElementName(AvatarBossAttackScheduler sched)
