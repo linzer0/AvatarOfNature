@@ -60,9 +60,8 @@ namespace Unity.FPS.AvatarBoss
             }
 
             m_PlayerHealth = player.GetComponent<Health>();
-                        m_PlayerHealth.OnDie += OnPlayerDie;
+            m_PlayerHealth.OnDie += OnPlayerDie;
             m_Subscribed = true;
-            BuildUI();
         }
 
         void OnDestroy()
@@ -85,6 +84,9 @@ namespace Unity.FPS.AvatarBoss
             if (m_Shown)
                 return;
             m_Shown = true;
+
+            if (m_Overlay == null)
+                BuildUI();
 
             // freeze real gameplay without breaking the boss state machine
             var player = GameObject.Find("Player");

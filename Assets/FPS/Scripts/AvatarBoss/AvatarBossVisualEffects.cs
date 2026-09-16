@@ -32,6 +32,7 @@ namespace Unity.FPS.AvatarBoss
         readonly Dictionary<string, Color> m_BaseColors = new Dictionary<string, Color>();
         bool m_PhaseTwoApplied;
         bool m_Dead;
+        bool m_Built;
         float m_LastMarkerSpawn;
 
         struct FloatingMarker
@@ -64,7 +65,11 @@ namespace Unity.FPS.AvatarBoss
             if (body != null)
                 m_BodyRenderer = body.GetComponent<MeshRenderer>();
 
-            BuildSilhouette();
+            var gate = m_Boss.GetComponent<AvatarBossShowcaseDifficultySelect>();
+            if (gate != null && !gate.FightStarted)
+                gate.FightStartedEvent += BuildDeferred;
+            else
+                BuildSilhouette();
 
             // presentation-only reaction subscriptions (precise per-part hit feedback)
             m_Boss.OnBossHit += OnBossHit;
@@ -79,6 +84,9 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_Boss != null)
             {
+                var gate = m_Boss.GetComponent<AvatarBossShowcaseDifficultySelect>();
+                if (gate != null)
+                    gate.FightStartedEvent -= BuildDeferred;
                 m_Boss.OnBossHit -= OnBossHit;
                 if (m_Boss.BossHealth != null)
                     m_Boss.BossHealth.OnDie -= OnBossDie;
@@ -217,6 +225,7 @@ namespace Unity.FPS.AvatarBoss
             {
                 m_VisualRoot = existing.gameObject;
                 BuildWeakPointMarkers();
+                m_Built = true;
                 return; // a VisualRoot already exists in the scene
             }
 
@@ -283,6 +292,7 @@ namespace Unity.FPS.AvatarBoss
                 m_BodyRenderer.enabled = false;
 
             BuildWeakPointMarkers();
+            m_Built = true;
         }
 
         void BuildWeakPointMarkers()
@@ -339,6 +349,18 @@ namespace Unity.FPS.AvatarBoss
                 marker.SetActive(false);
                 m_Markers.Add(new WeakPointMarker { Point = wp, Marker = marker });
             }
+        }
+
+        void BuildDeferred()
+        {
+            if (!m_Built)
+                StartCoroutine(BuildDeferredRoutine());
+        }
+
+        System.Collections.IEnumerator BuildDeferredRoutine()
+        {
+            yield return null;
+            BuildSilhouette();
         }
 
         void Update()
