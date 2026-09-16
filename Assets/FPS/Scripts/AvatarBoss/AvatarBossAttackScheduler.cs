@@ -84,6 +84,7 @@ namespace Unity.FPS.AvatarBoss
         bool m_InitCombo;
         bool m_OriginalsCached;
         AvatarBossController m_Boss;
+        AvatarBossShowcaseDifficultySelect m_DifficultySelect;
 
         void Awake()
         {
@@ -110,6 +111,7 @@ namespace Unity.FPS.AvatarBoss
                 return;
             m_Initialized = true;
             m_Boss = GetComponentInParent<AvatarBossController>();
+            m_DifficultySelect = GetComponentInParent<AvatarBossShowcaseDifficultySelect>();
             if (HealingOrbs == null)
                 HealingOrbs = GetComponentInParent<AvatarBossHealingOrbs>();
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
@@ -127,6 +129,12 @@ namespace Unity.FPS.AvatarBoss
 
         void Update()
         {
+            if (m_DifficultySelect != null && !m_DifficultySelect.FightStarted)
+            {
+                if (State != AvatarBossSchedulerState.Idle)
+                    SetState(AvatarBossSchedulerState.Idle);
+                return;
+            }
             if (!m_Initialized || m_Attacks == null)
                 return;
             if (State == AvatarBossSchedulerState.Idle

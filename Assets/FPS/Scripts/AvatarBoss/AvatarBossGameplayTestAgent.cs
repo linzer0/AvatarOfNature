@@ -28,6 +28,8 @@ namespace Unity.FPS.AvatarBoss
         public float StepTimeout = 60f;
         [Tooltip("Hybrid: after 20 natural shots, deterministically nudge boss HP to the phase threshold")]
         public bool AllowHybridNudge = true;
+        [Tooltip("Explicit test-only bypass: starts Showcase at Normal before running the bot")]
+        public bool TestOnlyBypassNormal = false;
 
         public AvatarBossTestReport Report { get { return m_Report; } }
         public bool IsRunning { get { return m_Running; } }
@@ -77,7 +79,7 @@ namespace Unity.FPS.AvatarBoss
                 return;
 
             if (kb.f8Key.wasPressedThisFrame && !m_Running)
-                Run();
+                RunTestOnlyNormal();
             if (kb.f9Key.wasPressedThisFrame && m_Running)
             {
                 Debug.LogWarning($"[{Tag}] F9: stop requested, aborting scenario.");
@@ -95,7 +97,24 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_Running)
                 return;
+            var select = GetComponent<AvatarBossShowcaseDifficultySelect>();
+            if (select != null && !select.FightStarted)
+            {
+                if (!TestOnlyBypassNormal)
+                {
+                    Debug.LogWarning("[AVATAR_BOSS_TEST] Run blocked until difficulty select is confirmed. Use explicit Normal bypass.", this);
+                    return;
+                }
+                select.BeginFight(AvatarBossDifficulty.Normal, true);
+            }
             StartCoroutine(RunScenario());
+        }
+
+        [ContextMenu("Run Gameplay Test (Normal Bypass)")]
+        public void RunTestOnlyNormal()
+        {
+            TestOnlyBypassNormal = true;
+            Run();
         }
 
         IEnumerator RunScenario()
