@@ -493,17 +493,54 @@ namespace Unity.FPS.AvatarBoss
             if (m_Torso != null)
                 m_Torso.localScale = m_TorsoBaseScale * (1f + pulse * 0.035f + burst * 0.08f);
             if (m_Head != null)
-                m_Head.localRotation = Quaternion.Euler(-pulse * 8f, 0f, 0f);
+            {
+                float headTilt = element == AvatarBossElement.Shockwave ? -pulse * 16f : -pulse * 8f;
+                m_Head.localRotation = Quaternion.Euler(headTilt, 0f,
+                    element == AvatarBossElement.Fire ? Mathf.Sin(Time.time * 3f) * pulse * 7f : 0f);
+            }
             if (m_Crown != null)
-                m_Crown.localRotation = Quaternion.Euler(0f, Time.time * (m_Boss.PhaseTwo ? 130f : 85f), pulse * 12f);
+            {
+                float crownRoll = element == AvatarBossElement.Earth ? pulse * 18f : pulse * 12f;
+                m_Crown.localRotation = Quaternion.Euler(0f,
+                    Time.time * (m_Boss.PhaseTwo ? 130f : 85f), crownRoll);
+            }
             if (m_ShoulderL != null)
-                m_ShoulderL.localRotation = Quaternion.Euler(0f, Time.time * 38f, pulse * 7f);
+                m_ShoulderL.localRotation = Quaternion.Euler(0f, Time.time * 38f,
+                    pulse * (element == AvatarBossElement.Shockwave ? 18f : 7f));
             if (m_ShoulderR != null)
-                m_ShoulderR.localRotation = Quaternion.Euler(0f, -Time.time * 38f, -pulse * 7f);
+                m_ShoulderR.localRotation = Quaternion.Euler(0f, -Time.time * 38f,
+                    -pulse * (element == AvatarBossElement.Shockwave ? 18f : 7f));
+
+            float leftArmAngle = 18f + pulse * 42f + burst * 16f;
+            float rightArmAngle = -18f - pulse * 42f - burst * 16f;
+            float elementLean = 0f;
+            switch (element)
+            {
+                case AvatarBossElement.Earth:
+                    // Heavy overhead slam: elbows tuck in, then the shoulders drop.
+                    leftArmAngle = 28f + pulse * 30f + burst * 24f;
+                    rightArmAngle = -28f - pulse * 30f - burst * 24f;
+                    elementLean = -pulse * 4f;
+                    break;
+                case AvatarBossElement.Fire:
+                    // Meteor cast: both hands visibly rise above the shoulders.
+                    leftArmAngle = 66f + pulse * 22f + burst * 18f;
+                    rightArmAngle = -66f - pulse * 22f - burst * 18f;
+                    elementLean = pulse * 4f;
+                    break;
+                case AvatarBossElement.Shockwave:
+                    // Shockwave wind-up: wide cruciform pose, easy to read at range.
+                    leftArmAngle = 92f + pulse * 12f + burst * 20f;
+                    rightArmAngle = -92f - pulse * 12f - burst * 20f;
+                    elementLean = -pulse * 2f;
+                    break;
+            }
+            m_VisualRoot.transform.localRotation = m_VisualRootBaseRotation
+                * Quaternion.Euler(lean + elementLean, 0f, 0f);
             if (m_ArmL != null)
-                m_ArmL.localRotation = Quaternion.Euler(0f, 0f, 18f + pulse * 42f + burst * 16f);
+                m_ArmL.localRotation = Quaternion.Euler(0f, 0f, leftArmAngle);
             if (m_ArmR != null)
-                m_ArmR.localRotation = Quaternion.Euler(0f, 0f, -18f - pulse * 42f - burst * 16f);
+                m_ArmR.localRotation = Quaternion.Euler(0f, 0f, rightArmAngle);
 
             bool casting = state == AvatarBossSchedulerState.Telegraph
                 || state == AvatarBossSchedulerState.Windup;
