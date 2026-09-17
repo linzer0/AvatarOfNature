@@ -67,7 +67,7 @@ namespace Unity.FPS.Gameplay
         public float WeaponFovMultiplier = 1f;
 
         [Header("Combat camera feel")]
-        [Min(0f)] public float CombatFovPunch = 7f;
+        [Min(0f)] public float CombatFovPunch = 4f;
         [Min(0.1f)] public float CombatFovDecay = 10f;
 
         [Tooltip("Delay before switching weapon a second time, to avoid recieving multiple inputs from mouse wheel")]
@@ -233,11 +233,13 @@ namespace Unity.FPS.Gameplay
 
         void OnCameraImpulse(CameraImpulseEvent evt)
         {
-            if (evt == null)
+            // Keep ordinary body-hit feedback positional only. FOV is reserved for
+            // meaningful combat beats so machine-gun fire cannot zoom the player in.
+            if (evt == null || evt.Strength < 0.12f)
                 return;
             float durationBoost = Mathf.Clamp01(evt.Duration / 0.2f);
             float punch = evt.Strength * CombatFovPunch * (0.75f + 0.25f * durationBoost);
-            m_CombatFovPunch = Mathf.Clamp(m_CombatFovPunch + punch, 0f, CombatFovPunch);
+            m_CombatFovPunch = Mathf.Clamp(Mathf.Max(m_CombatFovPunch, punch), 0f, CombatFovPunch);
         }
 
         // Iterate on all weapon slots to find the next valid weapon to switch to

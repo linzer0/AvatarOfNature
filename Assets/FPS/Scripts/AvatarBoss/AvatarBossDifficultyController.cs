@@ -116,16 +116,31 @@ namespace Unity.FPS.AvatarBoss
             {
                 m_Scheduler.ComboFrequency = ActiveProfile.ComboFrequency;
                 m_Scheduler.AttackCooldown = 3f * ActiveProfile.AttackCooldownMultiplier;
-                m_Scheduler.WindupTime = Mathf.Max(0.85f, 0.9f * ActiveProfile.WindupMultiplier);
+                m_Scheduler.InitialGraceTime = 4f * ActiveProfile.AttackCooldownMultiplier;
+                m_Scheduler.RecoverTime = 1.5f * ActiveProfile.AttackCooldownMultiplier;
+                m_Scheduler.WindupTime = Mathf.Max(0.6f, 0.9f * ActiveProfile.WindupMultiplier);
                 m_Scheduler.ComboCooldownMin = ActiveProfile.ComboCooldownMin;
                 m_Scheduler.ComboCooldownMax = ActiveProfile.ComboCooldownMax;
                 m_Scheduler.MeteorRainCooldownMin = ActiveProfile.MeteorCooldownMin;
                 m_Scheduler.MeteorRainCooldownMax = ActiveProfile.MeteorCooldownMax;
             }
 
-            if (m_Earth != null) { m_Earth.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier; m_Earth.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; }
+            int arenaTargetCells = difficulty == AvatarBossDifficulty.Easy ? 1 :
+                difficulty == AvatarBossDifficulty.Hard ? 3 : 2;
+            if (m_Earth != null)
+            {
+                m_Earth.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier;
+                m_Earth.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier;
+                m_Earth.TargetCellCount = arenaTargetCells;
+            }
             if (m_Shockwave != null) { m_Shockwave.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier; m_Shockwave.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Shockwave.WaveSpeed = 22f * ActiveProfile.ShockwaveSpeedMultiplier; }
-            if (m_Fire != null) { m_Fire.TelegraphTime = 1.8f * ActiveProfile.TelegraphMultiplier; m_Fire.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Fire.Damage = ActiveProfile.MeteorDamage; }
+            if (m_Fire != null)
+            {
+                m_Fire.TelegraphTime = 1.8f * ActiveProfile.TelegraphMultiplier;
+                m_Fire.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier;
+                m_Fire.Damage = ActiveProfile.MeteorDamage;
+                m_Fire.TargetCellCount = arenaTargetCells;
+            }
             if (m_Boss != null) m_Boss.VulnerabilityDuration = ActiveProfile.VulnerabilityDuration;
             var duel = GetComponent<AvatarBossDuelController>();
             if (duel != null)

@@ -68,7 +68,9 @@ namespace Unity.FPS.AvatarBoss
             m_IntentController?.MarkSectorDestroyed(sector);
         }
 
-        /// Fired when an attack enters Execute, including the selected intent.
+        /// Fired after an attack has actually executed, including the selected intent.
+        /// Arena resolution listens here so a cell changes state when the impact is
+        /// visible, not at the start of the cast animation.
         public event System.Action<AvatarBossAttack, AvatarBossIntent> AttackExecuted;
 
         /// <summary>Number of attack cycles started (diagnostic/metric counter).</summary>
@@ -361,9 +363,9 @@ namespace Unity.FPS.AvatarBoss
             yield return new WaitForSeconds(WindupTime);
 
             SetState(AvatarBossSchedulerState.Execute);
+            yield return attack.Execute();
             if (HasCurrentIntent)
                 AttackExecuted?.Invoke(attack, CurrentIntent);
-            yield return attack.Execute();
 
             CleanupCurrent();
 
