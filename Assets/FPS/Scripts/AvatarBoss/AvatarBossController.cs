@@ -182,6 +182,9 @@ namespace Unity.FPS.AvatarBoss
         void OnBossDie()
         {
             m_IsDead = true;
+            var duel = GetComponent<AvatarBossDuelController>();
+            if (duel != null)
+                duel.DebugReset();
             if (HealingOrbs != null)
                 HealingOrbs.ClearHealingOrbs();
             Debug.Log("[AvatarOfNature] Boss died.", this);
@@ -227,7 +230,22 @@ namespace Unity.FPS.AvatarBoss
 
             if (m_VulnerabilityRoutine != null)
                 StopCoroutine(m_VulnerabilityRoutine);
-            m_VulnerabilityRoutine = StartCoroutine(ExposeWeakPointsRoutine());
+            TriggerDuelWindow(VulnerabilityDuration);
+        }
+
+        /// <summary>
+        /// Opens the existing weak-point window for a duel resolution. The stagger path
+        /// and the arena-duel path share the same cleanup behavior.
+        /// </summary>
+        public bool TriggerDuelWindow(float duration)
+        {
+            if (m_IsDead || WeakPoints == null || WeakPoints.Length == 0)
+                return false;
+
+            if (m_VulnerabilityRoutine != null)
+                StopCoroutine(m_VulnerabilityRoutine);
+            m_VulnerabilityRoutine = StartCoroutine(ExposeWeakPointsRoutine(duration));
+            return true;
         }
 
         void PlayCue(AvatarBossCue cue)
@@ -299,10 +317,14 @@ namespace Unity.FPS.AvatarBoss
             if (visual != null)
                 visual.DebugReset();
 
+            var duel = GetComponent<AvatarBossDuelController>();
+            if (duel != null)
+                duel.DebugReset();
+
             Debug.Log("[AvatarOfNature] Debug reset: boss restored to phase 1.", this);
         }
 
-        System.Collections.IEnumerator ExposeWeakPointsRoutine()
+        System.Collections.IEnumerator ExposeWeakPointsRoutine(float duration)
         {
             foreach (var weakPoint in WeakPoints)
             {
@@ -312,7 +334,7 @@ namespace Unity.FPS.AvatarBoss
             }
             PlayCue(AvatarBossCue.WeakPointOpen);
 
-            yield return new WaitForSeconds(VulnerabilityDuration);
+            yield return new WaitForSeconds(duration);
 
             foreach (var weakPoint in WeakPoints)
                 weakPoint.SetExposed(false);

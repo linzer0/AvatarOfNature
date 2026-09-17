@@ -1,4 +1,5 @@
 using System.Collections;
+using Unity.FPS.Gameplay;
 using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
@@ -58,6 +59,11 @@ namespace Unity.FPS.AvatarBoss
 
         public AvatarBossSchedulerState State { get; private set; } = AvatarBossSchedulerState.Idle;
         public AvatarBossAttack CurrentAttack { get; private set; }
+        public AvatarBossIntent CurrentIntent { get; private set; }
+        public bool HasCurrentIntent { get; private set; }
+
+        /// Fired when an attack enters Execute, including the selected intent.
+        public event System.Action<AvatarBossAttack, AvatarBossIntent> AttackExecuted;
 
         /// <summary>Number of attack cycles started (diagnostic/metric counter).</summary>
         public int AttackCount { get; private set; }
@@ -85,6 +91,12 @@ namespace Unity.FPS.AvatarBoss
         bool m_OriginalsCached;
         AvatarBossController m_Boss;
         AvatarBossShowcaseDifficultySelect m_DifficultySelect;
+        AvatarBossArenaController m_Arena;
+        AvatarBossIntentController m_IntentController;
+
+        [Header("Intent integration")]
+        public bool UseIntentController = true;
+        public int IntentSeed = 1337;
 
         void Awake()
         {
@@ -114,6 +126,15 @@ namespace Unity.FPS.AvatarBoss
             m_DifficultySelect = GetComponentInParent<AvatarBossShowcaseDifficultySelect>();
             if (HealingOrbs == null)
                 HealingOrbs = GetComponentInParent<AvatarBossHealingOrbs>();
+            m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            if (UseIntentController)
+            {
+                int sectorCount = m_Arena != null
+                    ? m_Arena.Sectors.Count
+                    : AvatarBossIntentController.DefaultSectorCount;
+                Vector3 center = m_Arena != null ? m_Arena.transform.position : transform.position;
+                m_IntentController = new AvatarBossIntentController(IntentSeed, sectorCount, center);
+            }
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             m_Attacks = GetComponentsInChildren<AvatarBossAttack>();
             if (m_Attacks.Length == 0)
@@ -276,6 +297,9 @@ namespace Unity.FPS.AvatarBoss
             m_NextComboAllowedTime = 0f;
             m_NextMeteorRainAllowedTime = 0f;
             m_HasLastElement = false;
+            HasCurrentIntent = false;
+            CurrentIntent = default;
+            m_IntentController?.Reset();
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             State = AvatarBossSchedulerState.Idle;
             CurrentAttack = null;
@@ -287,12 +311,34 @@ namespace Unity.FPS.AvatarBoss
         void StartNewCycle()
         {
             AttackCount++;
-            m_PendingAttack = PickAttack();
+            m_PendingAttack = PickIntentAttack();
             m_LastElement = m_PendingAttack.Element; // recorded at cycle start so interrupted attacks still count
             m_HasLastElement = true;
             SetState(AvatarBossSchedulerState.Telegraph);
             m_PendingAttack.Prepare();
             m_CycleRoutine = StartCoroutine(RunCycle(m_PendingAttack));
+        }
+
+        AvatarBossAttack PickIntentAttack()
+        {
+            if (m_IntentController != null)
+            {
+                var player = FindFirstObjectByType<PlayerCharacterController>();
+                if (player != null)
+                    m_IntentController.SetLastPlayerPosition(player.transform.position);
+
+                if (m_IntentController.TryGetNextIntent(out var intent))
+                {
+                    CurrentIntent = intent;
+                    HasCurrentIntent = true;
+                    foreach (var attack in m_Attacks)
+                        if (attack.Element == intent.AttackType)
+                            return attack;
+                }
+            }
+
+            HasCurrentIntent = false;
+            return PickAttack();
         }
 
         IEnumerator RunCycle(AvatarBossAttack attack)
@@ -303,6 +349,8 @@ namespace Unity.FPS.AvatarBoss
             yield return new WaitForSeconds(WindupTime);
 
             SetState(AvatarBossSchedulerState.Execute);
+            if (HasCurrentIntent)
+                AttackExecuted?.Invoke(attack, CurrentIntent);
             yield return attack.Execute();
 
             CleanupCurrent();
