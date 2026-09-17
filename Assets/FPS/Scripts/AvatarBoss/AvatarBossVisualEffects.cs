@@ -44,11 +44,11 @@ namespace Unity.FPS.AvatarBoss
             public float Life;
         }
 
-        readonly Color m_TorsoColor = new Color(0.34f, 0.27f, 0.18f, 1f);   // deep earth stone
-        readonly Color m_HeadColor = new Color(0.16f, 0.13f, 0.10f, 1f);   // near-black mask
+        readonly Color m_TorsoColor = new Color(0.18f, 0.28f, 0.24f, 1f);   // deep nature stone
+        readonly Color m_HeadColor = new Color(0.09f, 0.13f, 0.14f, 1f);   // dark ceremonial mask
         readonly Color m_CrownColor = new Color(0.92f, 0.72f, 0.18f, 1f);  // emissive gold
-        readonly Color m_ShoulderColor = new Color(0.45f, 0.30f, 0.16f, 1f); // bronze
-        readonly Color m_ArmColor = new Color(0.42f, 0.35f, 0.24f, 1f);    // lighter stone
+        readonly Color m_ShoulderColor = new Color(0.50f, 0.36f, 0.20f, 1f); // bronze
+        readonly Color m_ArmColor = new Color(0.32f, 0.42f, 0.30f, 1f);    // lighter stone
         readonly Color m_AuraColor = new Color(0.55f, 0.85f, 0.65f, 0.10f); // nature aura
         readonly Color m_PhaseTwoTint = new Color(1f, 0.32f, 0.14f, 1f);   // phase-2 fire accent
 
@@ -191,11 +191,10 @@ namespace Unity.FPS.AvatarBoss
             {
                 mat = new Material(litShader);
                 mat.SetFloat("_Smoothness", 0.25f);
-                if (emissive)
-                {
-                    mat.EnableKeyword("_EMISSION");
-                    mat.SetColor("_EmissionColor", color * 1.6f);
-                }
+                // A restrained fill emission keeps the silhouette readable in the
+                // arena's deep teal lighting. Important accents use a stronger value.
+                mat.EnableKeyword("_EMISSION");
+                mat.SetColor("_EmissionColor", color * (emissive ? 1.6f : 0.22f));
             }
             else
             {
@@ -332,20 +331,6 @@ namespace Unity.FPS.AvatarBoss
                 halo.transform.localScale = new Vector3(Mathf.Max(0.9f, bounds.x * 1.6f),
                     Mathf.Max(0.9f, bounds.y * 1.6f), Mathf.Max(0.9f, bounds.z * 1.6f));
 
-                var labelGo = new GameObject("WeakPointLabel");
-                labelGo.transform.SetParent(marker.transform, false);
-                var label = labelGo.AddComponent<TextMesh>();
-                label.text = "WEAK POINT";
-                label.fontSize = 11;
-                label.anchor = TextAnchor.MiddleCenter;
-                label.color = new Color(0.6f, 1f, 0.5f, 0.95f);
-                var font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
-                label.font = font;
-                labelGo.GetComponent<MeshRenderer>().material = font.material;
-                labelGo.AddComponent<MeshRenderer>();
-                // label above the halo; billboard in Update
-                labelGo.transform.localPosition = new Vector3(0f, bounds.y * 1.4f + 0.4f, 0f);
-
                 marker.SetActive(false);
                 m_Markers.Add(new WeakPointMarker { Point = wp, Marker = marker });
             }
@@ -376,7 +361,9 @@ namespace Unity.FPS.AvatarBoss
             if (m_HitFlash > 0f)
             {
                 m_HitFlash -= Time.deltaTime;
-                Color flash = m_HitFlashIsWeakPoint ? new Color(0.3f, 1f, 0.7f, 1f) : Color.white;
+                Color flash = m_HitFlashIsWeakPoint
+                    ? new Color(0.3f, 1f, 0.7f, 1f)
+                    : new Color(0.4f, 0.72f, 0.92f, 1f);
                 ApplySilhouetteFlash(flash, Mathf.Clamp01(m_HitFlash / 0.16f) * 0.7f);
             }
 
@@ -461,8 +448,11 @@ namespace Unity.FPS.AvatarBoss
                     continue;
                 }
                 bool show = m.Point.IsExposed;
+                bool wasVisible = m.Marker.activeSelf;
                 if (m.Marker.activeSelf != show)
                     m.Marker.SetActive(show);
+                if (show && !wasVisible)
+                    SpawnExposureBurst(m.Point.transform.position);
                 if (!show) continue;
 
                 // impact flash: halo pulses white
@@ -484,9 +474,6 @@ namespace Unity.FPS.AvatarBoss
                         Mathf.Max(wave, pulse));
                 }
 
-                var label = m.Marker.transform.Find("WeakPointLabel");
-                if (label != null && cam != null)
-                    label.rotation = Quaternion.LookRotation(label.position - cam.transform.position);
             }
         }
 
@@ -502,6 +489,14 @@ namespace Unity.FPS.AvatarBoss
             for (int i = 0; i < m_Markers.Count; i++)
                 if (m_Markers[i].Point != null && m_Markers[i].Point.IsExposed)
                     m_Markers[i] = new WeakPointMarker { Point = m_Markers[i].Point, Marker = m_Markers[i].Marker, Flash = 0.2f };
+
+            // Body hits get a crisp armor reaction, but no damage number: a normal
+            // number here falsely suggests that the player is piercing the shell.
+            if (!weakPoint)
+            {
+                SpawnArmorDeflection(pos);
+                return;
+            }
 
             // floating damage marker (throttled against machine-gun tick spam)
             if (Time.time - m_LastMarkerSpawn < 0.08f)
@@ -547,6 +542,40 @@ namespace Unity.FPS.AvatarBoss
             if (col != null)
                 Object.Destroy(col);
             Object.Destroy(go, 0.22f);
+        }
+
+        void SpawnArmorDeflection(Vector3 position)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = "ArmorDeflection";
+            go.transform.position = position;
+            go.transform.localScale = new Vector3(0.58f, 0.08f, 0.58f);
+            var renderer = go.GetComponent<MeshRenderer>();
+            var mat = new Material(Shader.Find("Sprites/Default"));
+            mat.color = new Color(0.45f, 0.8f, 1f, 0.8f);
+            renderer.material = mat;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var collider = go.GetComponent<Collider>();
+            if (collider != null)
+                Object.Destroy(collider);
+            Object.Destroy(go, 0.12f);
+        }
+
+        void SpawnExposureBurst(Vector3 position)
+        {
+            var go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            go.name = "WeakPointExposureBurst";
+            go.transform.position = position;
+            go.transform.localScale = Vector3.one * 0.32f;
+            var renderer = go.GetComponent<MeshRenderer>();
+            var mat = new Material(Shader.Find("Sprites/Default"));
+            mat.color = new Color(0.35f, 1f, 0.55f, 0.95f);
+            renderer.material = mat;
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var collider = go.GetComponent<Collider>();
+            if (collider != null)
+                Object.Destroy(collider);
+            Object.Destroy(go, 0.35f);
         }
 
         void OnStaggerBreak()

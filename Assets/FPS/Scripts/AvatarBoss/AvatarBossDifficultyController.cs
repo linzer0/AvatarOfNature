@@ -127,6 +127,9 @@ namespace Unity.FPS.AvatarBoss
             if (m_Shockwave != null) { m_Shockwave.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier; m_Shockwave.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Shockwave.WaveSpeed = 22f * ActiveProfile.ShockwaveSpeedMultiplier; }
             if (m_Fire != null) { m_Fire.TelegraphTime = 1.8f * ActiveProfile.TelegraphMultiplier; m_Fire.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Fire.Damage = ActiveProfile.MeteorDamage; }
             if (m_Boss != null) m_Boss.VulnerabilityDuration = ActiveProfile.VulnerabilityDuration;
+            var duel = GetComponent<AvatarBossDuelController>();
+            if (duel != null)
+                duel.ApplyDifficultyTuning(ActiveProfile.BodyDamageMultiplier, ActiveProfile.VulnerabilityDuration);
             if (m_Stagger != null)
             {
                 m_Stagger.MaxStagger = 100f;

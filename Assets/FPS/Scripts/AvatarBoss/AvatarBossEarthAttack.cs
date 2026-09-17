@@ -20,7 +20,7 @@ namespace Unity.FPS.AvatarBoss
         public float DriftDistanceMax = 5.5f;
         [Tooltip("Radius inside which the spikes deal damage")]
         public float DamageRadius = 2.5f;
-        [Range(1, 4)] public int TargetCellCount = 2;
+        [Range(1, 4)] public int TargetCellCount = 1;
 
         [Header("Spike visuals")]
         public float SpikeRiseTime = 0.25f;

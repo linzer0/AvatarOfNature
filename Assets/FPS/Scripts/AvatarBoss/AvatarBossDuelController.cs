@@ -19,7 +19,7 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossAttackScheduler Scheduler;
 
         [Header("Duel tuning")]
-        [Min(0.01f)] public float ClosedBodyDamageMultiplier = 0.18f;
+        [Min(0.01f)] public float ClosedBodyDamageMultiplier = 0.12f;
         [Min(0.01f)] public float OpenBodyDamageMultiplier = 1f;
         [Min(0f)] public float VulnerabilityDuration = 3.5f;
         [Min(0f)] public float VulnerabilityDelayAfterCollapse = 0.15f;
@@ -69,6 +69,19 @@ namespace Unity.FPS.AvatarBoss
                 Scheduler.AttackExecuted += OnAttackExecuted;
         }
 
+        /// <summary>
+        /// Applies difficulty tuning after all boss components have initialized.
+        /// Difficulty owns this value; keeping it here avoids Start() overwriting the
+        /// profile with the serialized fallback.
+        /// </summary>
+        public void ApplyDifficultyTuning(float closedBodyDamageMultiplier, float vulnerabilityDuration)
+        {
+            ClosedBodyDamageMultiplier = Mathf.Max(0.01f, closedBodyDamageMultiplier);
+            VulnerabilityDuration = Mathf.Max(0f, vulnerabilityDuration);
+            if (m_BodyDamageable != null && !DuelWindowActive)
+                m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
+        }
+
         void OnDestroy()
         {
             if (Scheduler != null)
@@ -116,6 +129,12 @@ namespace Unity.FPS.AvatarBoss
             m_HasLastResolvedIntent = true;
             ResolvedSectorCount += brokenSectors;
             OnIntentResolved?.Invoke(intent);
+            EventManager.Broadcast(new CameraImpulseEvent
+            {
+                Strength = 0.28f + 0.04f * Mathf.Min(2, brokenSectors - 1),
+                Duration = 0.2f,
+                Direction = Vector3.down
+            });
 
             if (m_VulnerabilityRoutine != null)
                 StopCoroutine(m_VulnerabilityRoutine);
@@ -133,6 +152,12 @@ namespace Unity.FPS.AvatarBoss
                 yield break;
 
             DuelWindowActive = true;
+            EventManager.Broadcast(new CameraImpulseEvent
+            {
+                Strength = 0.18f,
+                Duration = 0.24f,
+                Direction = Vector3.up
+            });
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = OpenBodyDamageMultiplier;
             Boss.TriggerDuelWindow(VulnerabilityDuration);

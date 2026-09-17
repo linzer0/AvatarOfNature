@@ -120,6 +120,18 @@ namespace Unity.FPS.AvatarBoss
             }
 
             OnBossHit?.Invoke(pos, damage, weakPoint);
+            EventManager.Broadcast(new BossHitFeedbackEvent
+            {
+                Position = pos,
+                Damage = damage,
+                IsWeakPoint = weakPoint
+            });
+            EventManager.Broadcast(new CameraImpulseEvent
+            {
+                Strength = weakPoint ? 0.22f : 0.055f,
+                Duration = weakPoint ? 0.16f : 0.08f,
+                Direction = weakPoint ? Vector3.forward : Vector3.zero
+            });
         }
 
         void OnDestroy()
@@ -219,6 +231,12 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_IsDead)
                 return;
+            EventManager.Broadcast(new CameraImpulseEvent
+            {
+                Strength = 0.42f,
+                Duration = 0.26f,
+                Direction = Vector3.back
+            });
             Debug.Log("[AvatarOfNature] STAGGER BROKEN — weak points exposed!", this);
             PlayCue(AvatarBossCue.StaggerBreak);
 

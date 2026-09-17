@@ -58,6 +58,22 @@ namespace Unity.FPS.Game
         public float DamageValue;
     }
 
+    /// <summary>Confirmed damage feedback for presentation systems such as the HUD.</summary>
+    public class BossHitFeedbackEvent : GameEvent
+    {
+        public Vector3 Position;
+        public float Damage;
+        public bool IsWeakPoint;
+    }
+
+    /// <summary>Short camera impulse emitted by combat moments that deserve weight.</summary>
+    public class CameraImpulseEvent : GameEvent
+    {
+        public float Strength;
+        public float Duration;
+        public Vector3 Direction;
+    }
+
     public class DisplayMessageEvent : GameEvent
     {
         public string Message;

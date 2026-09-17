@@ -62,6 +62,12 @@ namespace Unity.FPS.Gameplay
         [Header("Stance")] [Tooltip("Ratio (0-1) of the character height where the camera will be at")]
         public float CameraHeightRatio = 0.9f;
 
+        [Header("Combat camera feel")]
+        [Min(0f)] public float CombatCameraPositionAmplitude = 0.045f;
+        [Min(0f)] public float CombatCameraRotationAmplitude = 1.15f;
+        [Min(0.1f)] public float CombatCameraFrequency = 24f;
+        [Min(0.1f)] public float CombatCameraDecay = 7f;
+
         [Tooltip("Height of character when standing")]
         public float CapsuleHeightStanding = 1.8f;
 
@@ -146,6 +152,10 @@ namespace Unity.FPS.Gameplay
         float m_TargetCharacterHeight;
         Vector3 m_ExternalImpulse;
         Vector3 m_AppliedExternalImpulse;
+        Vector3 m_CameraBaseLocalPosition;
+        float m_CameraTrauma;
+        float m_CameraTime;
+        Vector3 m_CameraDirection;
 
         const float k_JumpGroundingPreventionTime = 0.2f;
         const float k_GroundCheckDistanceInAir = 0.07f;
@@ -181,10 +191,21 @@ namespace Unity.FPS.Gameplay
             m_Controller.enableOverlapRecovery = true;
 
             m_Health.OnDie += OnDie;
+            EventManager.AddListener<CameraImpulseEvent>(OnCameraImpulse);
 
             // force the crouch state to false when starting
             SetCrouchingState(false, true);
             UpdateCharacterHeight(true);
+            m_CameraBaseLocalPosition = PlayerCamera != null
+                ? PlayerCamera.transform.localPosition
+                : Vector3.zero;
+        }
+
+        void OnDestroy()
+        {
+            EventManager.RemoveListener<CameraImpulseEvent>(OnCameraImpulse);
+            if (m_Health != null)
+                m_Health.OnDie -= OnDie;
         }
 
         void Update()
@@ -306,7 +327,7 @@ namespace Unity.FPS.Gameplay
                 m_CameraVerticalAngle = Mathf.Clamp(m_CameraVerticalAngle, -89f, 89f);
 
                 // apply the vertical angle as a local rotation to the camera transform along its right axis (makes it pivot up and down)
-                PlayerCamera.transform.localEulerAngles = new Vector3(m_CameraVerticalAngle, 0, 0);
+                ApplyCombatCamera();
             }
 
             // character movement handling
@@ -449,7 +470,7 @@ namespace Unity.FPS.Gameplay
             {
                 m_Controller.height = m_TargetCharacterHeight;
                 m_Controller.center = Vector3.up * m_Controller.height * 0.5f;
-                PlayerCamera.transform.localPosition = Vector3.up * m_TargetCharacterHeight * CameraHeightRatio;
+                PlayerCamera.transform.localPosition = CameraBasePosition();
                 m_Actor.AimPoint.transform.localPosition = m_Controller.center;
             }
             // Update smooth height
@@ -460,9 +481,61 @@ namespace Unity.FPS.Gameplay
                     CrouchingSharpness * Time.deltaTime);
                 m_Controller.center = Vector3.up * m_Controller.height * 0.5f;
                 PlayerCamera.transform.localPosition = Vector3.Lerp(PlayerCamera.transform.localPosition,
-                    Vector3.up * m_TargetCharacterHeight * CameraHeightRatio, CrouchingSharpness * Time.deltaTime);
+                    CameraBasePosition(), CrouchingSharpness * Time.deltaTime);
                 m_Actor.AimPoint.transform.localPosition = m_Controller.center;
             }
+        }
+
+        Vector3 CameraBasePosition()
+        {
+            return new Vector3(m_CameraBaseLocalPosition.x,
+                m_TargetCharacterHeight * CameraHeightRatio,
+                m_CameraBaseLocalPosition.z);
+        }
+
+        void OnCameraImpulse(CameraImpulseEvent evt)
+        {
+            if (evt == null || PlayerCamera == null)
+                return;
+            float durationBoost = Mathf.Clamp01(evt.Duration / 0.2f);
+            m_CameraTrauma = Mathf.Clamp01(Mathf.Max(m_CameraTrauma,
+                evt.Strength * (0.75f + 0.25f * durationBoost)));
+            m_CameraDirection = evt.Direction;
+        }
+
+        void ApplyCombatCamera()
+        {
+            if (PlayerCamera == null)
+                return;
+
+            float strength = m_CameraTrauma * m_CameraTrauma;
+            Vector3 cameraOffset = Vector3.zero;
+            float pitchKick = 0f;
+            float rollKick = 0f;
+            if (m_CameraTrauma > 0.001f)
+            {
+                m_CameraTime += Time.unscaledDeltaTime * CombatCameraFrequency;
+                float side = Mathf.Sin(m_CameraTime * 1.31f);
+                float vertical = Mathf.Sin(m_CameraTime * 1.73f + 1.2f);
+                float twist = Mathf.Sin(m_CameraTime * 1.11f + 2.1f);
+                Vector3 noise = new Vector3(side, vertical, twist * 0.35f);
+                Vector3 directional = m_CameraDirection.sqrMagnitude > 0.001f
+                    ? m_CameraDirection.normalized * 0.35f
+                    : Vector3.zero;
+                cameraOffset = (noise + directional) * (CombatCameraPositionAmplitude * strength);
+                pitchKick = vertical * CombatCameraRotationAmplitude * strength;
+                rollKick = twist * CombatCameraRotationAmplitude * 0.7f * strength;
+                m_CameraTrauma = Mathf.MoveTowards(m_CameraTrauma, 0f,
+                    CombatCameraDecay * Time.unscaledDeltaTime);
+                m_CameraDirection = Vector3.Lerp(m_CameraDirection, Vector3.zero,
+                    10f * Time.unscaledDeltaTime);
+            }
+
+            PlayerCamera.transform.localPosition = CameraBasePosition() + cameraOffset;
+            // Preserve the player's authored pitch and add only a temporary combat
+            // offset. Mouse look remains the source of truth for vertical aiming.
+            PlayerCamera.transform.localEulerAngles = new Vector3(
+                m_CameraVerticalAngle + pitchKick, 0f, rollKick);
         }
 
         // returns false if there was an obstruction

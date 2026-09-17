@@ -20,7 +20,7 @@ namespace Unity.FPS.AvatarBoss
         public float DriftDistanceMax = 7f;
         [Tooltip("Seconds between impacts (staggered bomb layout)")]
         public float ImpactInterval = 0.35f;
-        [Range(1, 5)] public int TargetCellCount = 3;
+        [Range(1, 5)] public int TargetCellCount = 1;
 
         [Header("Rock visuals")]
         public float FallHeight = 10f;
