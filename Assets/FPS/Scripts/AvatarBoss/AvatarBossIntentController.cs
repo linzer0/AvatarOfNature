@@ -132,26 +132,31 @@ namespace Unity.FPS.AvatarBoss
             int playerSector = m_HasPlayerPosition ? SectorFromPosition(m_LastPlayerPosition) : -1;
             if (playerSector >= 0 && !m_DestroyedSectors.Contains(playerSector))
             {
-                // The boss pressures the player often, but never with perfect aim.
-                // Nearby and opportunistic sectors make the intent readable without
-                // turning every cast into a guaranteed hit on the player's feet.
+                // Keep every telegraph in the player's local duel space. A distant
+                // random sector reads as noise, not as a deliberate boss decision.
                 double roll = m_Random.NextDouble();
-                if (roll < 0.55 || m_Arena == null)
+                if (roll < 0.70 || m_Arena == null)
                     return playerSector;
 
                 var nearby = new List<int>();
+                int playerRing = playerSector / m_SectorCount;
+                int playerAngular = playerSector % m_SectorCount;
                 for (int i = 0; i < candidates.Count; i++)
                 {
                     int candidate = candidates[i];
-                    if (candidate == playerSector)
+                    int candidateRing = candidate / m_SectorCount;
+                    int candidateAngular = candidate % m_SectorCount;
+                    int angularDistance = Mathf.Abs(candidateAngular - playerAngular);
+                    angularDistance = Mathf.Min(angularDistance, m_SectorCount - angularDistance);
+                    if (candidate == playerSector || candidateRing != playerRing || angularDistance > 1)
                         continue;
-                    var sector = m_Arena.GetSector(candidate);
-                    if (sector != null && (sector.transform.position - m_LastPlayerPosition).sqrMagnitude < 64f)
-                        nearby.Add(candidate);
+                    nearby.Add(candidate);
                 }
 
-                if (nearby.Count > 0 && roll < 0.85)
+                if (nearby.Count > 0)
                     return nearby[m_Random.Next(nearby.Count)];
+
+                return playerSector;
             }
 
             return candidates[m_Random.Next(candidates.Count)];

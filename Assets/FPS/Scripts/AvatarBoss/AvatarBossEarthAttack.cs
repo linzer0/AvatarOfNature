@@ -70,13 +70,18 @@ namespace Unity.FPS.AvatarBoss
 
             for (int i = 0; i < SpikeCount; i++)
             {
-                // telegraphs spawn AROUND the player on a safe radius, never inside the player/camera
-                Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
-                if (rnd.magnitude < 2f)
-                    rnd = rnd.normalized * 2f;
-                Vector3 center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
-                if (m_Arena != null && m_TargetSector >= 0)
-                    center = m_Arena.GetSectorTargetPoint(m_TargetSector, center);
+                Vector3 center;
+                if (m_Arena != null && m_TargetSector >= 0 && i > 0)
+                    center = m_Arena.GetRandomPointInSector(m_TargetSector);
+                else if (i == 0)
+                    center = clusterCenter;
+                else
+                {
+                    Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
+                    if (rnd.magnitude < 2f)
+                        rnd = rnd.normalized * 2f;
+                    center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
+                }
 
                 center = SnapToGround(center + Vector3.up * 20f);
 

@@ -155,6 +155,35 @@ namespace Unity.FPS.AvatarBoss
                 Mathf.Cos(angle) * radius, surfaceY, Mathf.Sin(angle) * radius));
         }
 
+        /// <summary>Returns a uniformly distributed gameplay point inside a sector's usable area.</summary>
+        public Vector3 GetRandomPointInSector(int index, float edgeInset = 0.75f)
+        {
+            EnsureInitialized();
+            if (index < 0 || index >= m_Sectors.Count)
+                return transform.position;
+
+            int count = Mathf.Clamp(SectorCount, 8, 12);
+            int rings = Mathf.Clamp(RingCount, 2, 5);
+            int ring = index / count;
+            int angular = index % count;
+            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
+            float innerRadius = ringStart + safeGap * 0.5f + edgeInset;
+            float outerRadius = ringEnd - safeGap * 0.5f - edgeInset;
+            if (outerRadius < innerRadius)
+                innerRadius = outerRadius = (ringStart + ringEnd) * 0.5f;
+
+            float sectorStep = Mathf.PI * 2f / count;
+            float centerAngle = (angular + 0.5f) * sectorStep;
+            float halfAngle = sectorStep * SectorArcFill * 0.5f;
+            float radius = Mathf.Sqrt(UnityEngine.Random.Range(innerRadius * innerRadius, outerRadius * outerRadius));
+            float angle = centerAngle + UnityEngine.Random.Range(-halfAngle, halfAngle);
+            float surfaceY = SectorVisualLift + SectorHeight * 0.5f;
+            return transform.TransformPoint(new Vector3(
+                Mathf.Cos(angle) * radius, surfaceY, Mathf.Sin(angle) * radius));
+        }
+
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>
         public bool DamageSector(int index)
         {
