@@ -22,6 +22,8 @@ namespace Unity.FPS.AvatarBoss
         Text m_Title;
         Image m_HpFill;
         Image m_StaggerFill;
+        Text m_HpLabel;
+        Text m_StaggerLabel;
         Text m_StatusLine;
         Text m_EventMessage;
         CanvasGroup m_EventGroup;
@@ -189,8 +191,18 @@ namespace Unity.FPS.AvatarBoss
                     if (img.name == "StaggerBarFill") m_StaggerFill = img;
                 foreach (var txt in existing.GetComponentsInChildren<Text>(true))
                 {
+                    if (txt.name == "HpLabel") m_HpLabel = txt;
+                    if (txt.name == "StaggerLabel") m_StaggerLabel = txt;
                     if (txt.name == "StatusLine") m_StatusLine = txt;
                     if (txt.name == "EventMessage") { m_EventMessage = txt; m_EventGroup = txt.GetComponent<CanvasGroup>(); }
+                }
+                var existingPanel = existing.transform.Find("BossHudPanel");
+                if (existingPanel != null)
+                {
+                    if (m_HpLabel == null)
+                        m_HpLabel = AddBarLabel(existingPanel, "HpLabel", "BOSS HEALTH", new Vector2(0f, -42f), 1050f);
+                    if (m_StaggerLabel == null)
+                        m_StaggerLabel = AddBarLabel(existingPanel, "StaggerLabel", "STAGGER", new Vector2(0f, -94f), 1050f);
                 }
                 return;
             }
@@ -219,6 +231,8 @@ namespace Unity.FPS.AvatarBoss
                 new Vector2(width, 40f), new Color(0.88f, 0.22f, 0.18f, 1f));
             m_StaggerFill = AddBar(panel, "StaggerBar", new Vector2(0.5f, 1f), new Vector2(0f, -112f),
                 new Vector2(width, 22f), new Color(0.98f, 0.78f, 0.25f, 1f));
+            m_HpLabel = AddBarLabel(panel, "HpLabel", "BOSS HEALTH", new Vector2(0f, -42f), width);
+            m_StaggerLabel = AddBarLabel(panel, "StaggerLabel", "STAGGER", new Vector2(0f, -94f), width);
 
             m_StatusLine = AddText(panel, "StatusLine", 30, Color.white, TextAnchor.MiddleCenter);
             var stRt = m_StatusLine.GetComponent<RectTransform>();
@@ -244,6 +258,18 @@ namespace Unity.FPS.AvatarBoss
             m_EventGroup.alpha = 0f;
         }
 
+        Text AddBarLabel(Transform parent, string name, string label, Vector2 position, float width)
+        {
+            var text = AddText(parent, name, 16, new Color(0.9f, 0.94f, 1f, 0.92f), TextAnchor.MiddleLeft);
+            var rect = text.GetComponent<RectTransform>();
+            rect.anchorMin = new Vector2(0.5f, 1f);
+            rect.anchorMax = new Vector2(0.5f, 1f);
+            rect.sizeDelta = new Vector2(width - 22f, 22f);
+            rect.anchoredPosition = position + new Vector2(11f, 0f);
+            text.text = label;
+            return text;
+        }
+
         void Update()
         {
             if (m_Boss == null)
@@ -263,12 +289,17 @@ namespace Unity.FPS.AvatarBoss
 
             float hp = Mathf.Clamp01(m_Boss.BossHealth.GetRatio());
             m_HpFill.fillAmount = hp;
+            if (m_HpLabel != null)
+                m_HpLabel.text = $"BOSS HEALTH  {hp * 100f:F0}%";
             m_HpFill.color = hp < 0.3f
                 ? Color.Lerp(new Color(0.88f, 0.22f, 0.18f, 1f), new Color(1f, 0.5f, 0.12f, 1f),
                     (Mathf.Sin(Time.unscaledTime * 8f) + 1f) * 0.5f)
                 : new Color(0.88f, 0.22f, 0.18f, 1f);
 
-            m_StaggerFill.fillAmount = m_Boss.Stagger != null ? Mathf.Clamp01(m_Boss.Stagger.Ratio) : 0f;
+            float stagger = m_Boss.Stagger != null ? Mathf.Clamp01(m_Boss.Stagger.Ratio) : 0f;
+            m_StaggerFill.fillAmount = stagger;
+            if (m_StaggerLabel != null)
+                m_StaggerLabel.text = $"STAGGER  {stagger * 100f:F0}%";
 
             if (m_Boss.SummonsActive)
                 m_StatusLine.text = "PHASE 2 · DEFEAT THE SUMMONS · " + ActiveSummons() + " LEFT";
