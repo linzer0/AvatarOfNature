@@ -90,6 +90,7 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossSummonController m_Summons;
         AvatarBossStagger m_Stagger;
         PlayerCharacterController m_Player;
+        bool m_InitialComboEnabled;
 
         void Awake()
         {
@@ -103,6 +104,7 @@ namespace Unity.FPS.AvatarBoss
             m_Summons = GetComponent<AvatarBossSummonController>();
             m_Stagger = GetComponent<AvatarBossStagger>();
             m_Player = FindFirstObjectByType<PlayerCharacterController>();
+            m_InitialComboEnabled = m_Scheduler != null && m_Scheduler.EnableCombo;
             ApplyDifficulty(DefaultDifficulty);
         }
 
@@ -115,6 +117,8 @@ namespace Unity.FPS.AvatarBoss
             if (m_Scheduler != null)
             {
                 m_Scheduler.ComboFrequency = ActiveProfile.ComboFrequency;
+                m_Scheduler.UseMixedCombos = difficulty == AvatarBossDifficulty.Hard;
+                m_Scheduler.EnableCombo = difficulty == AvatarBossDifficulty.Hard || m_InitialComboEnabled;
                 m_Scheduler.AttackCooldown = 3f * ActiveProfile.AttackCooldownMultiplier;
                 m_Scheduler.InitialGraceTime = 4f * ActiveProfile.AttackCooldownMultiplier;
                 m_Scheduler.RecoverTime = 1.5f * ActiveProfile.AttackCooldownMultiplier;

@@ -130,7 +130,9 @@ namespace Unity.FPS.AvatarBoss
             {
                 Strength = weakPoint ? 0.22f : 0.055f,
                 Duration = weakPoint ? 0.16f : 0.08f,
-                Direction = weakPoint ? Vector3.forward : Vector3.zero
+                // Never push the camera toward the target on a confirmed weak-point
+                // hit: that reads as an unwanted zoom-in in first person.
+                Direction = Vector3.zero
             });
         }
 

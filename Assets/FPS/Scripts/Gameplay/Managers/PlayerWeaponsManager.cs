@@ -235,7 +235,7 @@ namespace Unity.FPS.Gameplay
         {
             // Keep ordinary body-hit feedback positional only. FOV is reserved for
             // meaningful combat beats so machine-gun fire cannot zoom the player in.
-            if (evt == null || evt.Strength < 0.12f)
+            if (evt == null || evt.Strength < 0.12f || evt.Direction.sqrMagnitude < 0.001f)
                 return;
             float durationBoost = Mathf.Clamp01(evt.Duration / 0.2f);
             float punch = evt.Strength * CombatFovPunch * (0.75f + 0.25f * durationBoost);

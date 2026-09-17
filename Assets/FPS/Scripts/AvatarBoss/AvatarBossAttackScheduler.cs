@@ -35,6 +35,8 @@ namespace Unity.FPS.AvatarBoss
 
         [Header("Phase 2 Combo (fixed: Shockwave -> ComboDelay -> Earth)")]
         public bool EnableCombo = false;
+        [Tooltip("When enabled, combo follow-ups select a fresh intent instead of forcing Earth.")]
+        public bool UseMixedCombos = false;
         [Range(0f, 1f)] public float ComboFrequency = 1f;
         [Tooltip("Seconds between Shockwave finishing and the chained Earth attack")]
         public float ComboDelay = 1.5f;
@@ -96,6 +98,7 @@ namespace Unity.FPS.AvatarBoss
         float m_InitRecover;
         float m_InitCooldown;
         bool m_InitCombo;
+        bool m_InitMixedCombos;
         bool m_OriginalsCached;
         AvatarBossController m_Boss;
         AvatarBossShowcaseDifficultySelect m_DifficultySelect;
@@ -122,6 +125,7 @@ namespace Unity.FPS.AvatarBoss
             m_InitRecover = RecoverTime;
             m_InitCooldown = AttackCooldown;
             m_InitCombo = EnableCombo;
+            m_InitMixedCombos = UseMixedCombos;
             m_OriginalsCached = true;
         }
 
@@ -178,7 +182,10 @@ namespace Unity.FPS.AvatarBoss
                 if (m_ComboPending)
                 {
                     m_ComboPending = false;
-                    StartFixedCycle(AvatarBossElement.Earth);
+                    if (UseMixedCombos)
+                        StartNewCycle();
+                    else
+                        StartFixedCycle(AvatarBossElement.Earth);
                 }
                 else
                 {
@@ -301,6 +308,7 @@ namespace Unity.FPS.AvatarBoss
             RecoverTime = m_InitRecover;
             AttackCooldown = m_InitCooldown;
             EnableCombo = m_InitCombo;
+            UseMixedCombos = m_InitMixedCombos;
 
             Interrupt();
             enabled = true;
@@ -379,7 +387,7 @@ namespace Unity.FPS.AvatarBoss
                 m_NextAttackAllowedTime = Time.time + ComboPostRecoverTime;
             }
             else if (EnableCombo
-                && attack.Element == AvatarBossElement.Shockwave
+                && (UseMixedCombos || attack.Element == AvatarBossElement.Shockwave)
                 && Time.time >= m_NextComboAllowedTime
                 && Random.value <= ComboFrequency)
             {

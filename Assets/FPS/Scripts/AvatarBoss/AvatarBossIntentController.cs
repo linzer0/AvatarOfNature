@@ -129,72 +129,17 @@ namespace Unity.FPS.AvatarBoss
             if (candidates.Count == 0)
                 return -1;
 
-            // A damaged cell is the boss's unfinished commitment. Finish it on
-            // the next cycle so the player can read the two-step break instead of
-            // seeing a random new telegraph before the previous crack matters.
-            if (m_Arena != null && m_LastTargetSector >= 0)
-            {
-                var previous = m_Arena.GetSector(m_LastTargetSector);
-                if (previous != null && previous.State == AvatarBossArenaSectorState.Damaged)
-                    return m_LastTargetSector;
-            }
-
-            // Once there is more than one usable option, do not keep painting the
-            // same cell. The player can still be pressured locally, but the arena
-            // should visibly evolve around them.
-            if (candidates.Count > 1 && m_LastTargetSector >= 0)
-                candidates.Remove(m_LastTargetSector);
-
             int playerSector = m_HasPlayerPosition ? SectorFromPosition(m_LastPlayerPosition) : -1;
             if (playerSector >= 0 && candidates.Contains(playerSector))
             {
-                // Keep every telegraph in the player's local duel space. A distant
-                // random sector reads as noise, not as a deliberate boss decision.
-                double roll = m_Random.NextDouble();
-                if (roll < 0.35 || m_Arena == null)
+                // In the live arena the primary threat is always the cell occupied
+                // by the player. Extra cells are added by the attack itself.
+                if (m_Arena != null)
                     return playerSector;
-
-                var nearby = new List<int>();
-                int angularCount = AngularSectorCount();
-                int playerRing = playerSector / angularCount;
-                int playerAngular = playerSector % angularCount;
-                for (int i = 0; i < candidates.Count; i++)
-                {
-                    int candidate = candidates[i];
-                    int candidateRing = candidate / angularCount;
-                    int candidateAngular = candidate % angularCount;
-                    int angularDistance = Mathf.Abs(candidateAngular - playerAngular);
-                    angularDistance = Mathf.Min(angularDistance, angularCount - angularDistance);
-                    if (candidate == playerSector || candidateRing != playerRing || angularDistance > 1)
-                        continue;
-                    nearby.Add(candidate);
-                }
-
-                if (nearby.Count > 0 && roll < 0.65)
-                    return nearby[m_Random.Next(nearby.Count)];
-
-                var distant = new List<int>();
-                for (int i = 0; i < candidates.Count; i++)
-                {
-                    int candidate = candidates[i];
-                    int candidateRing = candidate / angularCount;
-                    int candidateAngular = candidate % angularCount;
-                    int angularDistance = Mathf.Abs(candidateAngular - playerAngular);
-                    angularDistance = Mathf.Min(angularDistance, angularCount - angularDistance);
-                    if (candidate != playerSector
-                        && (candidateRing != playerRing || angularDistance > 1))
-                        distant.Add(candidate);
-                }
-
-                if (distant.Count > 0)
-                    return distant[m_Random.Next(distant.Count)];
-
-                if (nearby.Count > 0)
-                    return nearby[m_Random.Next(nearby.Count)];
-
-                return playerSector;
             }
 
+            if (candidates.Count > 1 && m_LastTargetSector >= 0)
+                candidates.Remove(m_LastTargetSector);
             return candidates[m_Random.Next(candidates.Count)];
         }
 
