@@ -12,6 +12,7 @@ namespace Unity.FPS.AvatarBoss
 
         readonly int m_Seed;
         readonly int m_SectorCount;
+        readonly AvatarBossArenaController m_Arena;
         readonly Vector3 m_ArenaCenter;
         readonly int m_RecentDestroyedMemory;
         System.Random m_Random;
@@ -42,6 +43,16 @@ namespace Unity.FPS.AvatarBoss
             m_ArenaCenter = arenaCenter;
             m_RecentDestroyedMemory = recentDestroyedMemory;
             m_Random = new System.Random(seed);
+        }
+
+        public AvatarBossIntentController(
+            int seed,
+            AvatarBossArenaController arena,
+            int recentDestroyedMemory = 3)
+            : this(seed, arena != null ? arena.Sectors.Count : DefaultSectorCount,
+                arena != null ? arena.transform.position : default, recentDestroyedMemory)
+        {
+            m_Arena = arena;
         }
 
         public void SetLastPlayerPosition(Vector3 position)
@@ -172,6 +183,9 @@ namespace Unity.FPS.AvatarBoss
 
         int SectorFromPosition(Vector3 position)
         {
+            if (m_Arena != null)
+                return m_Arena.GetNearestSectorIndex(position);
+
             Vector3 offset = position - m_ArenaCenter;
             if (offset.sqrMagnitude < 0.0001f)
                 return 0;
@@ -183,6 +197,13 @@ namespace Unity.FPS.AvatarBoss
 
         Vector3 SectorDirection(int sector)
         {
+            if (m_Arena != null)
+            {
+                var target = m_Arena.GetSector(sector);
+                if (target != null)
+                    return (target.transform.position - m_Arena.transform.position).normalized;
+            }
+
             float angle = (sector + 0.5f) * Mathf.PI * 2f / m_SectorCount;
             return new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle));
         }

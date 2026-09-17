@@ -133,7 +133,9 @@ namespace Unity.FPS.AvatarBoss
                     ? m_Arena.Sectors.Count
                     : AvatarBossIntentController.DefaultSectorCount;
                 Vector3 center = m_Arena != null ? m_Arena.transform.position : transform.position;
-                m_IntentController = new AvatarBossIntentController(IntentSeed, sectorCount, center);
+                m_IntentController = m_Arena != null
+                    ? new AvatarBossIntentController(IntentSeed, m_Arena)
+                    : new AvatarBossIntentController(IntentSeed, sectorCount, center);
             }
             m_NextAttackAllowedTime = Time.time + InitialGraceTime;
             m_Attacks = GetComponentsInChildren<AvatarBossAttack>();

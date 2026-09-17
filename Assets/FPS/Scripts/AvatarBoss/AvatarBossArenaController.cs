@@ -8,12 +8,16 @@ namespace Unity.FPS.AvatarBoss
     public sealed class AvatarBossArenaController : MonoBehaviour
     {
         [Header("Arena")]
-        [Min(0.1f)] public float ArenaRadius = 10f;
-        [Min(0.1f)] public float ArenaInnerRadius = 2.5f;
+        [Min(0.1f)] public float ArenaRadius = 18f;
+        [Min(0.1f)] public float ArenaInnerRadius = 4f;
         [Min(0.05f)] public float SectorHeight = 0.25f;
         [Range(8, 12)] public int SectorCount = 8;
+        [Range(2, 5)] public int RingCount = 3;
+        [Min(0f)] public float RingGap = 0.75f;
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
+        public bool CreateCenterPlatform = true;
+        [Min(0.1f)] public float CenterPlatformRadius = 3.7f;
         [Min(0f)] public float SectorVisualLift = 0.22f;
         [Range(0.35f, 0.9f)] public float SectorArcFill = 0.48f;
 
@@ -83,6 +87,13 @@ namespace Unity.FPS.AvatarBoss
             return nearest;
         }
 
+        /// <summary>Returns the flat list index of the sector nearest to a world position.</summary>
+        public int GetNearestSectorIndex(Vector3 worldPosition)
+        {
+            var sector = GetNearestSector(worldPosition);
+            return sector == null ? -1 : sector.Index;
+        }
+
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>
         public bool DamageSector(int index)
         {
@@ -135,33 +146,55 @@ namespace Unity.FPS.AvatarBoss
         void CreateSectors()
         {
             var count = Mathf.Clamp(SectorCount, 8, 12);
-            for (var i = 0; i < count; i++)
+            var rings = Mathf.Clamp(RingCount, 2, 5);
+            if (CreateCenterPlatform)
+                CreateCenterPlatformVisual();
+
+            for (var ring = 0; ring < rings; ring++)
             {
-                var sectorObject = new GameObject($"ArenaSector_{i:00}");
-                sectorObject.transform.SetParent(transform, false);
-                var angle = (i + 0.5f) * Mathf.PI * 2f / count;
-                float midRadius = (ArenaInnerRadius + ArenaRadius) * 0.5f;
-                sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
-                sectorObject.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
-                var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
-                sector.SetIndex(i);
-                if (CreateRuntimeVisuals)
-                    CreateSectorVisuals(sectorObject, count);
-                m_Sectors.Add(sector);
+                float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
+                float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+                float midRadius = (ringStart + ringEnd) * 0.5f;
+                for (var angular = 0; angular < count; angular++)
+                {
+                    var index = ring * count + angular;
+                    var sectorObject = new GameObject($"ArenaSector_R{ring}_S{angular:00}");
+                    sectorObject.transform.SetParent(transform, false);
+                    var angle = (angular + 0.5f) * Mathf.PI * 2f / count;
+                    sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
+                    sectorObject.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
+                    var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
+                    sector.SetIndex(index);
+                    if (CreateRuntimeVisuals)
+                        CreateSectorVisuals(sectorObject, count, ring, ringStart, ringEnd);
+                    m_Sectors.Add(sector);
+                }
             }
         }
 
-        void CreateSectorVisuals(GameObject sectorObject, int count)
+        void CreateCenterPlatformVisual()
         {
-            float ringDepth = Mathf.Max(0.5f, ArenaRadius - ArenaInnerRadius);
-            float arcWidth = Mathf.Max(0.2f, 2f * Mathf.PI * ArenaRadius / count * SectorArcFill);
+            var platform = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
+            platform.name = "BossCenterPlatform";
+            platform.transform.SetParent(transform, false);
+            platform.transform.localPosition = new Vector3(0f, -0.05f, 0f);
+            platform.transform.localScale = new Vector3(CenterPlatformRadius * 2f, 0.2f, CenterPlatformRadius * 2f);
+            SetRuntimeMaterial(platform.GetComponent<Renderer>(), new Color(0.035f, 0.06f, 0.08f, 1f));
+        }
+
+        void CreateSectorVisuals(GameObject sectorObject, int count, int ring, float ringStart, float ringEnd)
+        {
+            float ringDepth = Mathf.Max(0.5f, ringEnd - ringStart - RingGap);
+            float arcWidth = Mathf.Max(0.2f, 2f * Mathf.PI * ringEnd / count * SectorArcFill);
 
             var intact = GameObject.CreatePrimitive(PrimitiveType.Cube);
             intact.name = "SectorIntactVisual";
             intact.transform.SetParent(sectorObject.transform, false);
             intact.transform.localScale = new Vector3(arcWidth, SectorHeight, ringDepth);
             intact.transform.localPosition = new Vector3(0f, -SectorHeight * 0.5f, 0f);
-            SetRuntimeMaterial(intact.GetComponent<Renderer>(), new Color(0.12f, 0.28f, 0.22f, 1f));
+            SetRuntimeMaterial(intact.GetComponent<Renderer>(), ring % 2 == 0
+                ? new Color(0.10f, 0.26f, 0.20f, 1f)
+                : new Color(0.14f, 0.34f, 0.27f, 1f));
 
             var damaged = GameObject.CreatePrimitive(PrimitiveType.Cube);
             damaged.name = "SectorDamagedVisual";
