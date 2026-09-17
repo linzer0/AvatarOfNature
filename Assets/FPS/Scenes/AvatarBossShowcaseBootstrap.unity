@@ -249,7 +249,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96cb57dfa2423c04a98a7382bd87c9fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossShowcaseBootstrap
-  ShowcaseSceneName: AvatarBossShowcase
+  ShowcaseSceneName: AvatarBossDuelArena
 --- !u!4 &777512844
 Transform:
   m_ObjectHideFlags: 0

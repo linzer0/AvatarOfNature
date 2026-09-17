@@ -14,6 +14,8 @@ namespace Unity.FPS.AvatarBoss
         [Range(8, 12)] public int SectorCount = 8;
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
+        [Min(0f)] public float SectorVisualLift = 0.22f;
+        [Range(0.45f, 0.9f)] public float SectorArcFill = 0.68f;
 
         [SerializeField] List<AvatarBossArenaSector> m_Sectors = new List<AvatarBossArenaSector>();
 
@@ -139,7 +141,7 @@ namespace Unity.FPS.AvatarBoss
                 sectorObject.transform.SetParent(transform, false);
                 var angle = (i + 0.5f) * Mathf.PI * 2f / count;
                 float midRadius = (ArenaInnerRadius + ArenaRadius) * 0.5f;
-                sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * midRadius;
+                sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
                 sectorObject.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
                 var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
                 sector.SetIndex(i);
@@ -152,7 +154,7 @@ namespace Unity.FPS.AvatarBoss
         void CreateSectorVisuals(GameObject sectorObject, int count)
         {
             float ringDepth = Mathf.Max(0.5f, ArenaRadius - ArenaInnerRadius);
-            float arcWidth = Mathf.Max(0.2f, 2f * Mathf.PI * ArenaRadius / count * 0.82f);
+            float arcWidth = Mathf.Max(0.2f, 2f * Mathf.PI * ArenaRadius / count * SectorArcFill);
 
             var intact = GameObject.CreatePrimitive(PrimitiveType.Cube);
             intact.name = "SectorIntactVisual";
@@ -179,6 +181,7 @@ namespace Unity.FPS.AvatarBoss
             sector.IntactVisual = intact;
             sector.DamagedVisual = damaged;
             sector.DestroyedVisual = destroyed;
+            sector.ForceState(AvatarBossArenaSectorState.Intact);
         }
 
         void SetRuntimeMaterial(Renderer renderer, Color color)
