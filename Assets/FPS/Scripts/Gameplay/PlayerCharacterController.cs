@@ -104,6 +104,12 @@ namespace Unity.FPS.Gameplay
         public bool IsDead { get; private set; }
         public bool IsCrouching { get; private set; }
 
+        /// <summary>Applies an external gameplay impulse, such as a boss shockwave.</summary>
+        public void ApplyExternalImpulse(Vector3 impulse)
+        {
+            CharacterVelocity += impulse;
+        }
+
         public float RotationMultiplier
         {
             get

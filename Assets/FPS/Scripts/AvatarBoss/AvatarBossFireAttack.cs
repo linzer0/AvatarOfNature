@@ -15,6 +15,9 @@ namespace Unity.FPS.AvatarBoss
         public int ImpactCount = 6;
         [Tooltip("Max distance of impact positions around the player")]
         public float ImpactSpread = 7f;
+        [Range(0f, 1f)] public float DirectTargetChance = 0.55f;
+        public float DriftDistanceMin = 3f;
+        public float DriftDistanceMax = 7f;
         [Tooltip("Seconds between impacts (staggered bomb layout)")]
         public float ImpactInterval = 0.35f;
 
@@ -53,13 +56,21 @@ namespace Unity.FPS.AvatarBoss
             }
 
             int count = Mathf.Clamp(ImpactCount, 6, 8);
+            Vector3 clusterCenter = m_Player.position;
+            if (Random.value > DirectTargetChance)
+            {
+                Vector2 drift = Random.insideUnitCircle.normalized
+                    * Random.Range(DriftDistanceMin, DriftDistanceMax);
+                clusterCenter += new Vector3(drift.x, 0f, drift.y);
+            }
+
             for (int i = 0; i < count; i++)
             {
                 // impacts AROUND the player on a safe radius, never inside the player/camera
                 Vector2 rnd = Random.insideUnitCircle * ImpactSpread;
                 if (rnd.magnitude < 2.5f)
                     rnd = rnd.normalized * 2.5f;
-                Vector3 center = m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
+                Vector3 center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
 
                 center = SnapToGround(center + Vector3.up * 20f);
 

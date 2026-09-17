@@ -15,6 +15,9 @@ namespace Unity.FPS.AvatarBoss
         public int SpikeCount = 5;
         [Tooltip("Max distance of spike positions around the player")]
         public float SpikeSpread = 6f;
+        [Range(0f, 1f)] public float DirectTargetChance = 0.55f;
+        public float DriftDistanceMin = 2.5f;
+        public float DriftDistanceMax = 5.5f;
         [Tooltip("Radius inside which the spikes deal damage")]
         public float DamageRadius = 2.5f;
 
@@ -52,13 +55,21 @@ namespace Unity.FPS.AvatarBoss
                 return;
             }
 
+            Vector3 clusterCenter = m_Player.position;
+            if (Random.value > DirectTargetChance)
+            {
+                Vector2 drift = Random.insideUnitCircle.normalized
+                    * Random.Range(DriftDistanceMin, DriftDistanceMax);
+                clusterCenter += new Vector3(drift.x, 0f, drift.y);
+            }
+
             for (int i = 0; i < SpikeCount; i++)
             {
                 // telegraphs spawn AROUND the player on a safe radius, never inside the player/camera
                 Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
                 if (rnd.magnitude < 2f)
                     rnd = rnd.normalized * 2f;
-                Vector3 center = m_Player.position + new Vector3(rnd.x, 0f, rnd.y);
+                Vector3 center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
 
                 center = SnapToGround(center + Vector3.up * 20f);
 

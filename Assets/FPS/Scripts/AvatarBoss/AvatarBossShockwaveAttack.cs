@@ -5,8 +5,8 @@ using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
 {
-    /// Shockwave: an expanding ring travels across the arena from the boss.
-    /// Players avoid damage by leaving the ground (jump) when the wave passes.
+    /// Shockwave: an expanding ring pushes the player away from the boss.
+    /// It is a positioning threat, not a direct-damage or arena-damage attack.
     public class AvatarBossShockwaveAttack : AvatarBossAttack
     {
         [Header("Shockwave")]
@@ -16,8 +16,12 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Radius at which the wave dissipates")]
         public float MaxRadius = 28f;
 
-        [Tooltip("Half-width of the band in which a grounded player takes damage")]
-        public float DamageBandWidth = 1.2f;
+        [Tooltip("Half-width of the band in which the player is pushed")]
+        public float PushBandWidth = 1.2f;
+        [Tooltip("Horizontal impulse applied away from the boss")]
+        public float PushForce = 22f;
+        [Tooltip("Small lift that makes the push readable without becoming a jump attack")]
+        public float PushLift = 1.5f;
 
         [Header("Visuals")]
         [Tooltip("Ring alpha pulse frequency (visual readability only)")]
@@ -96,7 +100,7 @@ namespace Unity.FPS.AvatarBoss
 
             Vector3 center = m_Ring.transform.position;
             float radius = 0.5f;
-            bool damageDone = false;
+            bool pushDone = false;
 
             while (m_Ring != null && radius < MaxRadius)
             {
@@ -113,25 +117,25 @@ namespace Unity.FPS.AvatarBoss
                     s_RingMaterial.color = Color.Lerp(baseColor, Color.white, Mathf.Pow(rhythm, 3f) * 0.6f);
                 }
 
-                if (!damageDone)
+                if (!pushDone)
                 {
                     var controller = m_Player.GetComponent<PlayerCharacterController>();
-                    if (controller != null && controller.IsGrounded)
+                    if (controller != null)
                     {
                         Vector2 center2D = new Vector2(center.x, center.z);
                         Vector2 player2D = new Vector2(m_Player.position.x, m_Player.position.z);
                         float dist = Vector2.Distance(center2D, player2D);
 
-                        if (dist <= radius && dist > radius - DamageBandWidth)
+                        if (dist <= radius && dist > radius - PushBandWidth)
                         {
-                            Damageable damageable = m_Player.GetComponentInChildren<Damageable>();
-                            if (damageable != null)
-                            {
-                                damageable.InflictDamage(Damage, false,
-                                    m_Boss != null ? m_Boss.gameObject : gameObject);
-                                damageDone = true;
-                            }
-                            // shockwave language: ground impact burst where the wave lands
+                            Vector3 pushDirection = m_Player.position - center;
+                            pushDirection.y = 0f;
+                            if (pushDirection.sqrMagnitude < 0.001f)
+                                pushDirection = m_Player.forward;
+                            controller.ApplyExternalImpulse(pushDirection.normalized * PushForce
+                                + Vector3.up * PushLift);
+                            pushDone = true;
+                            // Shockwave language: force burst where the wave lands.
                             SpawnImpactEffect(m_Player.position);
                         }
                     }
