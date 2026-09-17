@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace Unity.FPS.AvatarBoss
 {
     /// <summary>
-    /// Scene-aware Game Over flow for AvatarBossShowcase only.
+    /// Scene-aware Game Over flow for the boss arena scenes.
     /// Intercepts the moment before the player health hits zero, freezes the
     /// gameplay state (no PlayerDeathEvent, so the Microgame GameFlowManager
     /// never loads LoseScene), shows a custom overlay with a restart loop.
@@ -27,8 +27,10 @@ namespace Unity.FPS.AvatarBoss
 
         void Awake()
         {
-            // only meaningful inside the boss showcase
-            if (SceneManager.GetActiveScene().name != "AvatarBossShowcase")
+            // Only meaningful inside the boss arena scenes. The dedicated duel
+            // arena replaced the old showcase scene, but keeps this shared flow.
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName != "AvatarBossShowcase" && sceneName != "AvatarBossDuelArena")
             {
                 enabled = false;
                 return;
@@ -39,6 +41,8 @@ namespace Unity.FPS.AvatarBoss
         {
             var player = GameObject.Find("Player");
             m_Boss = GetComponentInParent<AvatarBossController>();
+            if (m_Boss == null)
+                m_Boss = FindFirstObjectByType<AvatarBossController>();
             if (player == null || m_Boss == null)
             {
                 enabled = false;

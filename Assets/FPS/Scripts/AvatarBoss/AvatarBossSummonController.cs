@@ -26,7 +26,7 @@ namespace Unity.FPS.AvatarBoss
         public bool EnableSummons = true;
 
         [Tooltip("Delay before the first summon after Phase 2 starts")]
-        public float FirstSummonDelay = 30f;
+        public float FirstSummonDelay = 8f;
 
         [Tooltip("Delay after all summons are dead before the boss resumes attacking")]
         public float ResumeDelay = 2f;

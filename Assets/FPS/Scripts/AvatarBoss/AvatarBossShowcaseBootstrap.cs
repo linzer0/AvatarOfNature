@@ -20,7 +20,7 @@ namespace Unity.FPS.AvatarBoss
     /// Loads the boss showcase only after the player has chosen a difficulty.
     public sealed class AvatarBossShowcaseBootstrap : MonoBehaviour
     {
-        [SerializeField] string ShowcaseSceneName = "AvatarBossShowcase";
+        [SerializeField] string ShowcaseSceneName = "AvatarBossDuelArena";
 
         Button m_StartButton;
         Text m_SelectedLabel;

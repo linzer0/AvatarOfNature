@@ -391,10 +391,12 @@ namespace Unity.FPS.AvatarBoss
                 outerRadius, midRadius, halfSectorAngle, SectorHeight);
             SetRuntimeMaterial(damaged.GetComponent<Renderer>(), new Color(0.72f, 0.38f, 0.08f, 1f));
 
-            var destroyed = CreateSectorMeshVisual(sectorObject, "SectorDestroyedVisual", innerRadius,
-                outerRadius, midRadius, halfSectorAngle, 0.04f);
-            destroyed.transform.localPosition = new Vector3(0f, -0.9f, 0f);
-            SetRuntimeMaterial(destroyed.GetComponent<Renderer>(), new Color(0.18f, 0.03f, 0.02f, 1f));
+            // A destroyed sector is a real hole. Do not spawn a second full-size
+            // wedge underneath it: that reads as a regenerated tile and still
+            // gives the player something to stand on after the collapse.
+            var destroyed = new GameObject("SectorDestroyedVisual");
+            destroyed.transform.SetParent(sectorObject.transform, false);
+            destroyed.SetActive(false);
 
             var sector = sectorObject.GetComponent<AvatarBossArenaSector>();
             sector.IntactVisual = intact;

@@ -16,6 +16,12 @@ namespace Unity.FPS.Gameplay
         [Header("General")] [Tooltip("Force applied downward when in the air")]
         public float GravityDownForce = 20f;
 
+        [Tooltip("How quickly boss impulses decay after being applied")]
+        [Min(0f)] public float ExternalImpulseDamping = 24f;
+
+        [Tooltip("Maximum vertical component allowed for external gameplay impulses")]
+        [Min(0f)] public float MaxExternalVerticalImpulse = 1.25f;
+
         [Tooltip("Physic layers checked to consider the player grounded")]
         public LayerMask GroundCheckLayers = -1;
 
@@ -107,7 +113,10 @@ namespace Unity.FPS.Gameplay
         /// <summary>Applies an external gameplay impulse, such as a boss shockwave.</summary>
         public void ApplyExternalImpulse(Vector3 impulse)
         {
-            CharacterVelocity += impulse;
+            impulse.y = Mathf.Clamp(impulse.y, -MaxExternalVerticalImpulse, MaxExternalVerticalImpulse);
+            m_ExternalImpulse += impulse;
+            m_ExternalImpulse.y = Mathf.Clamp(m_ExternalImpulse.y,
+                -MaxExternalVerticalImpulse, MaxExternalVerticalImpulse);
         }
 
         public float RotationMultiplier
@@ -135,6 +144,8 @@ namespace Unity.FPS.Gameplay
         float m_CameraVerticalAngle = 0f;
         float m_FootstepDistanceCounter;
         float m_TargetCharacterHeight;
+        Vector3 m_ExternalImpulse;
+        Vector3 m_AppliedExternalImpulse;
 
         const float k_JumpGroundingPreventionTime = 0.2f;
         const float k_GroundCheckDistanceInAir = 0.07f;
@@ -272,6 +283,12 @@ namespace Unity.FPS.Gameplay
 
         void HandleCharacterMovement()
         {
+            // Remove the impulse that was injected into CharacterVelocity on the
+            // previous frame before calculating normal movement. Without this,
+            // knockback compounds into an unintended rocket launch.
+            CharacterVelocity -= m_AppliedExternalImpulse;
+            m_AppliedExternalImpulse = Vector3.zero;
+
             // horizontal character rotation
             {
                 // rotate the transform with the input speed around its local Y axis
@@ -373,6 +390,14 @@ namespace Unity.FPS.Gameplay
                     CharacterVelocity += Vector3.down * GravityDownForce * Time.deltaTime;
                 }
             }
+
+            // Apply boss knockback after movement acceleration and air-speed
+            // clamping. Otherwise the grounded branch immediately overwrites
+            // CharacterVelocity and the shockwave feels like a visual-only hit.
+            CharacterVelocity += m_ExternalImpulse;
+            m_AppliedExternalImpulse = m_ExternalImpulse;
+            m_ExternalImpulse = Vector3.MoveTowards(m_ExternalImpulse, Vector3.zero,
+                ExternalImpulseDamping * Time.deltaTime);
 
             // apply the final calculated velocity value as a character movement
             Vector3 capsuleBottomBeforeMove = GetCapsuleBottomHemisphere();

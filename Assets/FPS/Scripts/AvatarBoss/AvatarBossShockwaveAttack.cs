@@ -19,12 +19,12 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Half-width of the moving front in metres")]
         public float PushBandWidth = 1.2f;
         [Tooltip("Impulse in the chosen sector; adjacent sectors receive the configured fraction")]
-        public float PushForce = 42f;
-        [Range(0f, 1f)] public float AdjacentSectorForceMultiplier = 0.5f;
+        public float PushForce = 58f;
+        [Range(0f, 1f)] public float AdjacentSectorForceMultiplier = 0.65f;
         [Tooltip("Angular padding around each sector lane")]
         [Range(0f, 0.4f)] public float LaneAngularPadding = 0.08f;
         [Tooltip("Small lift that makes the push readable without becoming a jump attack")]
-        public float PushLift = 2.4f;
+        public float PushLift = 1.1f;
 
         [Header("Visuals")]
         [Tooltip("Ring alpha pulse frequency (visual readability only)")]
@@ -165,7 +165,14 @@ namespace Unity.FPS.AvatarBoss
                                 continue;
                             }
 
-                            controller.ApplyExternalImpulse(m_TargetDirection * (PushForce * forceMultiplier)
+                            Vector3 pushDirection = m_Player.position - m_Boss.transform.position;
+                            pushDirection.y = 0f;
+                            if (pushDirection.sqrMagnitude < 0.001f)
+                                pushDirection = m_TargetDirection;
+                            else
+                                pushDirection.Normalize();
+
+                            controller.ApplyExternalImpulse(pushDirection * (PushForce * forceMultiplier)
                                 + Vector3.up * PushLift);
                             pushDone = true;
                             // Shockwave language: force burst where the wave lands.

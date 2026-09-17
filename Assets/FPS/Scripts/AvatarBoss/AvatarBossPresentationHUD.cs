@@ -293,6 +293,9 @@ namespace Unity.FPS.AvatarBoss
             string difficultyText = difficulty != null
                 ? difficulty.CurrentDifficulty.ToString().ToUpperInvariant() + " · "
                 : "";
+            var duel = m_Boss.GetComponent<AvatarBossDuelController>();
+            if (duel != null && duel.DuelWindowActive)
+                return difficultyText + "DUEL WINDOW · ATTACK THE BOSS";
             var healing = m_Boss.HealingOrbs;
             if (healing != null && healing.RecoveryActive)
             {
@@ -325,7 +328,7 @@ namespace Unity.FPS.AvatarBoss
             string orbSuffix = healing != null && healing.SpawnedOrbCount > 0
                 ? " · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount
                 : "";
-            return difficultyText + phase + " · " + state + orbSuffix;
+            return difficultyText + phase + " · " + state + " · BREAK MARKED CELLS" + orbSuffix;
         }
 
         string ElementName(AvatarBossAttackScheduler sched)

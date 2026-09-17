@@ -19,7 +19,7 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossAttackScheduler Scheduler;
 
         [Header("Duel tuning")]
-        [Min(0.01f)] public float ClosedBodyDamageMultiplier = 0.08f;
+        [Min(0.01f)] public float ClosedBodyDamageMultiplier = 0.18f;
         [Min(0.01f)] public float OpenBodyDamageMultiplier = 1f;
         [Min(0f)] public float VulnerabilityDuration = 3.5f;
         [Min(0f)] public float VulnerabilityDelayAfterCollapse = 0.15f;
