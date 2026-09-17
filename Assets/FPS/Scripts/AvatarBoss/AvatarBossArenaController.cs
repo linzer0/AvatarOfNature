@@ -91,8 +91,32 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Returns the flat list index of the sector nearest to a world position.</summary>
         public int GetNearestSectorIndex(Vector3 worldPosition)
         {
+            int contained = GetSectorIndexAtWorldPosition(worldPosition);
+            if (contained >= 0)
+                return contained;
+
             var sector = GetNearestSector(worldPosition);
             return sector == null ? -1 : sector.Index;
+        }
+
+        /// <summary>Returns the sector containing a world position using the arena's radial and angular layout.</summary>
+        public int GetSectorIndexAtWorldPosition(Vector3 worldPosition)
+        {
+            EnsureInitialized();
+            Vector3 local = transform.InverseTransformPoint(worldPosition);
+            float radius = new Vector2(local.x, local.z).magnitude;
+            if (radius < ArenaInnerRadius || radius > ArenaRadius || m_Sectors.Count == 0)
+                return -1;
+
+            int count = Mathf.Clamp(SectorCount, 8, 12);
+            int rings = Mathf.Clamp(RingCount, 2, 5);
+            float ringSize = (ArenaRadius - ArenaInnerRadius) / rings;
+            int ring = Mathf.Clamp(Mathf.FloorToInt((radius - ArenaInnerRadius) / ringSize), 0, rings - 1);
+            float angle = Mathf.Atan2(local.z, local.x);
+            float sectorStep = Mathf.PI * 2f / count;
+            // Sector zero occupies [0, sectorStep); its visual center is at half a step.
+            int angular = Mathf.FloorToInt((angle + Mathf.PI * 2f) / sectorStep) % count;
+            return ring * count + angular;
         }
 
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>

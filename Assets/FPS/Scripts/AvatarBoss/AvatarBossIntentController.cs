@@ -207,7 +207,9 @@ namespace Unity.FPS.AvatarBoss
         int SectorFromPosition(Vector3 position)
         {
             if (m_Arena != null)
-                return m_Arena.GetNearestSectorIndex(position);
+                return m_Arena.GetSectorIndexAtWorldPosition(position) >= 0
+                    ? m_Arena.GetSectorIndexAtWorldPosition(position)
+                    : m_Arena.GetNearestSectorIndex(position);
 
             Vector3 offset = position - m_ArenaCenter;
             if (offset.sqrMagnitude < 0.0001f)

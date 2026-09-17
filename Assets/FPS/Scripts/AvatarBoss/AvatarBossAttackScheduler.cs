@@ -218,6 +218,8 @@ namespace Unity.FPS.AvatarBoss
                 {
                     AttackCount++;
                     m_PendingAttack = attack;
+                    if (HasCurrentIntent)
+                        attack.SetIntent(CurrentIntent);
                     m_LastElement = element;
                     m_HasLastElement = true;
                     SetState(AvatarBossSchedulerState.Telegraph);
@@ -322,6 +324,8 @@ namespace Unity.FPS.AvatarBoss
             m_PendingAttack = PickIntentAttack();
             m_LastElement = m_PendingAttack.Element; // recorded at cycle start so interrupted attacks still count
             m_HasLastElement = true;
+            if (HasCurrentIntent)
+                m_PendingAttack.SetIntent(CurrentIntent);
             SetState(AvatarBossSchedulerState.Telegraph);
             m_PendingAttack.Prepare();
             m_CycleRoutine = StartCoroutine(RunCycle(m_PendingAttack));

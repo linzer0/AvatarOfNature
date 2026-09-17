@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
 {
-    /// Shockwave: an expanding ring pushes the player away from the boss.
+    /// Shockwave: a directed lane pushes the player away from the boss.
     /// It is a positioning threat, not a direct-damage or arena-damage attack.
     public class AvatarBossShockwaveAttack : AvatarBossAttack
     {
@@ -16,10 +16,13 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Radius at which the wave dissipates")]
         public float MaxRadius = 28f;
 
-        [Tooltip("Half-width of the band in which the player is pushed")]
+        [Tooltip("Half-width of the moving front in metres")]
         public float PushBandWidth = 1.2f;
-        [Tooltip("Horizontal impulse applied away from the boss")]
-        public float PushForce = 22f;
+        [Tooltip("Impulse in the chosen sector; adjacent sectors receive the configured fraction")]
+        public float PushForce = 34f;
+        [Range(0f, 1f)] public float AdjacentSectorForceMultiplier = 0.5f;
+        [Tooltip("Angular padding around each sector lane")]
+        [Range(0f, 0.4f)] public float LaneAngularPadding = 0.08f;
         [Tooltip("Small lift that makes the push readable without becoming a jump attack")]
         public float PushLift = 1.5f;
 
@@ -30,6 +33,9 @@ namespace Unity.FPS.AvatarBoss
         Transform m_Player;
         AvatarBossController m_Boss;
         GameObject m_Ring;
+        Vector3 m_WaveOrigin;
+        Vector3 m_TargetDirection = Vector3.forward;
+        int m_SectorCount = 8;
 
         static Material s_RingMaterial;
 
@@ -38,6 +44,19 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
+        }
+
+        public override void SetIntent(AvatarBossIntent intent)
+        {
+            m_TargetDirection = intent.TargetDirection;
+            m_TargetDirection.y = 0f;
+            if (m_TargetDirection.sqrMagnitude < 0.001f)
+                m_TargetDirection = Vector3.forward;
+            m_TargetDirection.Normalize();
+
+            var arena = FindFirstObjectByType<AvatarBossArenaController>();
+            if (arena != null)
+                m_SectorCount = Mathf.Clamp(arena.SectorCount, 8, 12);
         }
         public override void Prepare()
         {
@@ -54,13 +73,14 @@ namespace Unity.FPS.AvatarBoss
             }
 
             Vector3 center = SnapToGround(m_Boss.transform.position + Vector3.up * 20f);
+            m_WaveOrigin = center + Vector3.up * 0.1f;
 
-            m_Ring = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            m_Ring = GameObject.CreatePrimitive(PrimitiveType.Cube);
             Object.Destroy(m_Ring.GetComponent<Collider>());
             m_Ring.name = "ShockwaveTelegraph";
-            m_Ring.transform.SetPositionAndRotation(center + Vector3.up * 0.1f,
-                Quaternion.Euler(-90f, 0f, 0f));
-            m_Ring.transform.localScale = Vector3.one * 0f;
+            m_Ring.transform.SetPositionAndRotation(m_WaveOrigin,
+                Quaternion.LookRotation(m_TargetDirection, Vector3.up));
+            m_Ring.transform.localScale = new Vector3(2f, 0.05f, 0f);
 
             MeshRenderer ringRenderer = m_Ring.GetComponent<MeshRenderer>();
             Shader textureShader = Shader.Find("Sprites/Default");
@@ -84,7 +104,8 @@ namespace Unity.FPS.AvatarBoss
             {
                 t += Time.deltaTime;
                 float k = Mathf.Clamp01(t / TelegraphTime);
-                m_Ring.transform.localScale = new Vector3(4f + 4f * k, 4f + 4f * k, 1f); // small preview ring
+                float length = 2f + 8f * k;
+                PositionWave(length);
                 yield return null;
             }
         }
@@ -105,7 +126,7 @@ namespace Unity.FPS.AvatarBoss
             while (m_Ring != null && radius < MaxRadius)
             {
                 radius += WaveSpeed * Time.deltaTime;
-                m_Ring.transform.localScale = new Vector3(radius * 2f, radius * 2f, 1f);
+                PositionWave(radius);
 
                 // pulse alpha for readability; white flash pumping on the wave front
                 if (m_Ring != null && s_RingMaterial != null)
@@ -122,17 +143,27 @@ namespace Unity.FPS.AvatarBoss
                     var controller = m_Player.GetComponent<PlayerCharacterController>();
                     if (controller != null)
                     {
-                        Vector2 center2D = new Vector2(center.x, center.z);
-                        Vector2 player2D = new Vector2(m_Player.position.x, m_Player.position.z);
-                        float dist = Vector2.Distance(center2D, player2D);
+                        Vector3 toPlayer = m_Player.position - center;
+                        toPlayer.y = 0f;
+                        float dist = toPlayer.magnitude;
+                        Vector3 playerDirection = dist > 0.001f ? toPlayer / dist : m_TargetDirection;
+                        float angularOffset = Vector3.SignedAngle(m_TargetDirection, playerDirection, Vector3.up);
+                        float sectorAngle = 360f / Mathf.Max(1, m_SectorCount);
+                        int laneOffset = Mathf.RoundToInt(angularOffset / sectorAngle);
 
-                        if (dist <= radius && dist > radius - PushBandWidth)
+                        if (dist <= radius && dist > radius - PushBandWidth
+                            && Mathf.Abs(angularOffset) <= sectorAngle + LaneAngularPadding * Mathf.Rad2Deg)
                         {
-                            Vector3 pushDirection = m_Player.position - center;
-                            pushDirection.y = 0f;
-                            if (pushDirection.sqrMagnitude < 0.001f)
-                                pushDirection = m_Player.forward;
-                            controller.ApplyExternalImpulse(pushDirection.normalized * PushForce
+                            float forceMultiplier = Mathf.Abs(laneOffset) == 0
+                                ? 1f
+                                : Mathf.Abs(laneOffset) == 1 ? AdjacentSectorForceMultiplier : 0f;
+                            if (forceMultiplier <= 0f)
+                            {
+                                yield return null;
+                                continue;
+                            }
+
+                            controller.ApplyExternalImpulse(m_TargetDirection * (PushForce * forceMultiplier)
                                 + Vector3.up * PushLift);
                             pushDone = true;
                             // Shockwave language: force burst where the wave lands.
@@ -175,6 +206,17 @@ namespace Unity.FPS.AvatarBoss
             if (bestDist < float.MaxValue)
                 return best.point;
             return from - Vector3.up * 20f;
+        }
+
+        void PositionWave(float length)
+        {
+            if (m_Ring == null)
+                return;
+            float width = Mathf.Max(1f, length * (2f * Mathf.Tan(Mathf.Deg2Rad * (180f / m_SectorCount * 0.5f + LaneAngularPadding))));
+            m_Ring.transform.SetPositionAndRotation(
+                m_WaveOrigin + m_TargetDirection * (length * 0.5f),
+                Quaternion.LookRotation(m_TargetDirection, Vector3.up));
+            m_Ring.transform.localScale = new Vector3(width, 0.05f, length);
         }
     }
 }

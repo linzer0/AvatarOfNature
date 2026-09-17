@@ -61,5 +61,17 @@ namespace Unity.FPS.AvatarBoss.EditorTests
             Assert.IsNotNull(m_Controller.GetNearestSector(new Vector3(1000f, 1000f, 1000f)),
                 "The nearest registered sector is returned even outside the arena bounds");
         }
+
+        [Test]
+        public void GetSectorIndexAtWorldPosition_MapsEverySectorCenterToItsOwnSector()
+        {
+            for (var i = 0; i < m_Controller.Sectors.Count; i++)
+            {
+                var sector = m_Controller.GetSector(i);
+                Assert.AreEqual(i,
+                    m_Controller.GetSectorIndexAtWorldPosition(sector.transform.position),
+                    $"Sector center {i} must resolve back to sector {i}");
+            }
+        }
     }
 }

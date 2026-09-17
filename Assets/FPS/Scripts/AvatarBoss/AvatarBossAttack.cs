@@ -56,6 +56,11 @@ namespace Unity.FPS.AvatarBoss
             timed.LifeTime = 2.5f;
         }
 
+        /// <summary>Provides the chosen boss intent to attacks that need directional telegraphing.</summary>
+        public virtual void SetIntent(AvatarBossIntent intent)
+        {
+        }
+
         /// <summary>Spawn all telegraph visuals. Called when the cycle enters the Telegraph state.</summary>
         public abstract void Prepare();
 
