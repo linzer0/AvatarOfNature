@@ -17,8 +17,23 @@ namespace Unity.FPS.AvatarBoss
         MeshRenderer m_BodyRenderer;
         GameObject m_VisualRoot;
         GameObject m_Aura;
+        GameObject m_CastHalo;
+        MeshRenderer m_CastHaloRenderer;
         Light m_RimLight;
         readonly List<GameObject> m_Cores = new List<GameObject>();
+        Transform m_Torso;
+        Transform m_Head;
+        Transform m_Crown;
+        Transform m_ShoulderL;
+        Transform m_ShoulderR;
+        Transform m_ArmL;
+        Transform m_ArmR;
+        Vector3 m_VisualRootBasePosition;
+        Quaternion m_VisualRootBaseRotation;
+        Vector3 m_TorsoBaseScale;
+        AvatarBossSchedulerState m_LastCastState = (AvatarBossSchedulerState)(-1);
+        AvatarBossElement m_LastCastElement = (AvatarBossElement)(-1);
+        float m_CastBurst;
 
         struct WeakPointMarker
         {
@@ -225,6 +240,7 @@ namespace Unity.FPS.AvatarBoss
             if (existing != null)
             {
                 m_VisualRoot = existing.gameObject;
+                CacheRigParts();
                 BuildWeakPointMarkers();
                 m_Built = true;
                 return; // a VisualRoot already exists in the scene
@@ -233,23 +249,25 @@ namespace Unity.FPS.AvatarBoss
             m_VisualRoot = new GameObject("VisualRoot");
             m_VisualRoot.transform.SetParent(transform, false);
 
-            // main husk: broad elemental torso, clearly taller and wider than the player
-            AddVisual("Torso", PrimitiveType.Cube, new Vector3(0f, 3.1f, 0f),
-                new Vector3(3.6f, 4.6f, 3.6f), m_TorsoColor);
-            // head / mask with golden crown
-            AddVisual("Head", PrimitiveType.Cube, new Vector3(0f, 6.4f, 0f),
-                new Vector3(2.4f, 2.2f, 2.4f), m_HeadColor);
-            AddVisual("Crown", PrimitiveType.Cube, new Vector3(0f, 7.8f, 0f),
-                new Vector3(2.9f, 0.4f, 2.9f), m_CrownColor, emissive: true);
-            // shoulders and arms
-            AddVisual("ShoulderL", PrimitiveType.Cube, new Vector3(-2.6f, 5.0f, 0f),
-                new Vector3(1.8f, 1.6f, 2.4f), m_ShoulderColor);
-            AddVisual("ShoulderR", PrimitiveType.Cube, new Vector3(2.6f, 5.0f, 0f),
-                new Vector3(1.8f, 1.6f, 2.4f), m_ShoulderColor);
-            AddVisual("ArmL", PrimitiveType.Cube, new Vector3(-3.4f, 3.4f, 0f),
-                new Vector3(1.0f, 3.0f, 1.0f), m_ArmColor);
-            AddVisual("ArmR", PrimitiveType.Cube, new Vector3(3.4f, 3.4f, 0f),
-                new Vector3(1.0f, 3.0f, 1.0f), m_ArmColor);
+            // A readable golem silhouette: rounded stone mass, separated shoulders,
+            // ceremonial mask and a crown that can visibly rotate during a cast.
+            AddVisual("Torso", PrimitiveType.Capsule, new Vector3(0f, 3.35f, 0f),
+                new Vector3(2.9f, 3.25f, 2.9f), m_TorsoColor);
+            AddVisual("Head", PrimitiveType.Sphere, new Vector3(0f, 6.6f, 0f),
+                new Vector3(2.35f, 2.1f, 2.35f), m_HeadColor);
+            AddVisual("Crown", PrimitiveType.Cylinder, new Vector3(0f, 7.85f, 0f),
+                new Vector3(1.85f, 0.28f, 1.85f), m_CrownColor, emissive: true);
+            AddVisual("CrownTip", PrimitiveType.Cylinder, new Vector3(0f, 8.5f, 0f),
+                new Vector3(0.72f, 0.9f, 0.72f), m_CrownColor, emissive: true);
+            // shoulders and arms: the raised pose becomes the attack telegraph.
+            AddVisual("ShoulderL", PrimitiveType.Sphere, new Vector3(-2.35f, 5.15f, 0f),
+                new Vector3(1.6f, 1.35f, 1.9f), m_ShoulderColor);
+            AddVisual("ShoulderR", PrimitiveType.Sphere, new Vector3(2.35f, 5.15f, 0f),
+                new Vector3(1.6f, 1.35f, 1.9f), m_ShoulderColor);
+            AddVisual("ArmL", PrimitiveType.Capsule, new Vector3(-3.05f, 3.45f, 0f),
+                new Vector3(0.78f, 2.1f, 0.78f), m_ArmColor);
+            AddVisual("ArmR", PrimitiveType.Capsule, new Vector3(3.05f, 3.45f, 0f),
+                new Vector3(0.78f, 2.1f, 0.78f), m_ArmColor);
 
             // elemental cores on the front face, near the weak points
             AddCore("CoreL", new Vector3(-1.15f, 3.3f, -1.8f));
@@ -275,6 +293,21 @@ namespace Unity.FPS.AvatarBoss
                 Destroy(auraCollider);
             m_Aura.SetActive(false); // Phase 1: aura hidden
 
+            m_CastHalo = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+            m_CastHalo.name = "CastHalo_Visual";
+            m_CastHalo.transform.SetParent(m_VisualRoot.transform, false);
+            m_CastHalo.transform.localPosition = new Vector3(0f, 3.5f, 0f);
+            m_CastHalo.transform.localScale = new Vector3(4.4f, 0.16f, 4.4f);
+            m_CastHaloRenderer = m_CastHalo.GetComponent<MeshRenderer>();
+            var castMat = new Material(Shader.Find("Sprites/Default"));
+            castMat.color = new Color(0.35f, 0.85f, 1f, 0.2f);
+            m_CastHaloRenderer.material = castMat;
+            m_CastHaloRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            var castCollider = m_CastHalo.GetComponent<Collider>();
+            if (castCollider != null)
+                Destroy(castCollider);
+            m_CastHalo.SetActive(false);
+
             // warm rim light standing over the boss (presentation only)
             var lightGo = new GameObject("BossRimLight");
             lightGo.transform.SetParent(m_VisualRoot.transform, false);
@@ -292,8 +325,26 @@ namespace Unity.FPS.AvatarBoss
             if (m_BodyRenderer != null)
                 m_BodyRenderer.enabled = false;
 
+            CacheRigParts();
             BuildWeakPointMarkers();
             m_Built = true;
+        }
+
+        void CacheRigParts()
+        {
+            if (m_VisualRoot == null)
+                return;
+            m_Torso = m_VisualRoot.transform.Find("Torso_Visual");
+            m_Head = m_VisualRoot.transform.Find("Head_Visual");
+            m_Crown = m_VisualRoot.transform.Find("Crown_Visual");
+            m_ShoulderL = m_VisualRoot.transform.Find("ShoulderL_Visual");
+            m_ShoulderR = m_VisualRoot.transform.Find("ShoulderR_Visual");
+            m_ArmL = m_VisualRoot.transform.Find("ArmL_Visual");
+            m_ArmR = m_VisualRoot.transform.Find("ArmR_Visual");
+            m_VisualRootBasePosition = m_VisualRoot.transform.localPosition;
+            m_VisualRootBaseRotation = m_VisualRoot.transform.localRotation;
+            if (m_Torso != null)
+                m_TorsoBaseScale = m_Torso.localScale;
         }
 
         void BuildWeakPointMarkers()
@@ -359,6 +410,8 @@ namespace Unity.FPS.AvatarBoss
             if (m_Dead)
                 return;
 
+            UpdateBossMotion();
+
             // hit flash: brief white pulse on body hits, green pulse on weak points
             if (m_HitFlash > 0f)
             {
@@ -404,6 +457,79 @@ namespace Unity.FPS.AvatarBoss
             UpdateWeakPointMarkers();
             UpdateWeakPointPresentation();
             UpdateFloatingMarkers();
+        }
+
+        void UpdateBossMotion()
+        {
+            if (!m_Built || m_VisualRoot == null)
+                return;
+
+            var scheduler = m_Boss.Scheduler;
+            var state = scheduler != null ? scheduler.State : AvatarBossSchedulerState.Idle;
+            var element = scheduler != null && scheduler.CurrentAttack != null
+                ? scheduler.CurrentAttack.Element : AvatarBossElement.Earth;
+            if (state != m_LastCastState || element != m_LastCastElement)
+            {
+                if (state == AvatarBossSchedulerState.Execute)
+                    m_CastBurst = 0.22f;
+                m_LastCastState = state;
+                m_LastCastElement = element;
+            }
+
+            float pulse = state == AvatarBossSchedulerState.Telegraph
+                ? 0.5f + Mathf.Sin(Time.time * 4.5f) * 0.5f
+                : state == AvatarBossSchedulerState.Windup ? 1f : 0f;
+            float burst = Mathf.Clamp01(m_CastBurst / 0.22f);
+            m_CastBurst = Mathf.Max(0f, m_CastBurst - Time.deltaTime);
+
+            float bob = Mathf.Sin(Time.time * 1.8f) * 0.06f + burst * 0.14f;
+            m_VisualRoot.transform.localPosition = m_VisualRootBasePosition + Vector3.up * bob;
+            float lean = state == AvatarBossSchedulerState.Windup ? 7f + pulse * 5f : burst * 12f;
+            // Keep the silhouette aligned with the gameplay weak-point colliders.
+            // Rotation is carried by the crown/halo below, while the body only leans
+            // during a cast so the visual never lies about where it can be hit.
+            m_VisualRoot.transform.localRotation = m_VisualRootBaseRotation * Quaternion.Euler(lean, 0f, 0f);
+
+            if (m_Torso != null)
+                m_Torso.localScale = m_TorsoBaseScale * (1f + pulse * 0.035f + burst * 0.08f);
+            if (m_Head != null)
+                m_Head.localRotation = Quaternion.Euler(-pulse * 8f, 0f, 0f);
+            if (m_Crown != null)
+                m_Crown.localRotation = Quaternion.Euler(0f, Time.time * (m_Boss.PhaseTwo ? 130f : 85f), pulse * 12f);
+            if (m_ShoulderL != null)
+                m_ShoulderL.localRotation = Quaternion.Euler(0f, Time.time * 38f, pulse * 7f);
+            if (m_ShoulderR != null)
+                m_ShoulderR.localRotation = Quaternion.Euler(0f, -Time.time * 38f, -pulse * 7f);
+            if (m_ArmL != null)
+                m_ArmL.localRotation = Quaternion.Euler(0f, 0f, 18f + pulse * 42f + burst * 16f);
+            if (m_ArmR != null)
+                m_ArmR.localRotation = Quaternion.Euler(0f, 0f, -18f - pulse * 42f - burst * 16f);
+
+            bool casting = state == AvatarBossSchedulerState.Telegraph
+                || state == AvatarBossSchedulerState.Windup;
+            if (m_CastHalo != null)
+            {
+                m_CastHalo.SetActive(casting || burst > 0f);
+                if (m_CastHaloRenderer != null)
+                {
+                    Color color = CastColor(element);
+                    m_CastHaloRenderer.material.color = new Color(color.r, color.g, color.b,
+                        casting ? 0.12f + pulse * 0.18f : burst * 0.28f);
+                    m_CastHalo.transform.localScale = new Vector3(4.4f + pulse * 0.9f + burst,
+                        0.16f + burst * 0.12f, 4.4f + pulse * 0.9f + burst);
+                }
+            }
+        }
+
+        Color CastColor(AvatarBossElement element)
+        {
+            switch (element)
+            {
+                case AvatarBossElement.Fire: return new Color(1f, 0.28f, 0.08f);
+                case AvatarBossElement.Earth: return new Color(0.85f, 0.55f, 0.18f);
+                case AvatarBossElement.Shockwave: return new Color(0.78f, 0.35f, 1f);
+                default: return new Color(0.25f, 0.85f, 1f);
+            }
         }
 
         void UpdateWeakPointPresentation()

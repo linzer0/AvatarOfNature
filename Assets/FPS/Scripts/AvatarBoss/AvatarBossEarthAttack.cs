@@ -161,7 +161,12 @@ namespace Unity.FPS.AvatarBoss
 
         void DealDamage()
         {
-            foreach (var spike in m_Spikes)
+            // Damage callbacks can interrupt/cleanup an attack (for example when
+            // the player dies or a stagger interrupts the scheduler). Iterate over
+            // a stable snapshot so the visual impact pass cannot throw while the
+            // live pool list is being released.
+            var activeSpikes = m_Spikes.ToArray();
+            foreach (var spike in activeSpikes)
             {
                 if (spike == null)
                     continue;
