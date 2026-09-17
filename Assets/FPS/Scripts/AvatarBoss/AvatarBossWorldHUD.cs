@@ -317,7 +317,12 @@ namespace Unity.FPS.AvatarBoss
 
             bool vuln = AnyWeakPointExposed();
             if (vuln || stateWord == "STAGGER")
-                stateWord = "VULNERABLE - " + stateWord;
+                stateWord = "VULNERABLE - SHOOT THE GREEN CORE";
+
+            if (m_Boss.GetComponent<AvatarBossDuelController>()?.DuelWindowActive == true)
+                stateWord = "DUEL WINDOW - SHOOT THE GREEN CORE";
+            else if (!m_Boss.PhaseTwo && !vuln && stateWord == "IDLE")
+                stateWord = "BUILD STAGGER OR BREAK MARKED CELLS";
 
             return phaseText + " - " + stateWord;
         }

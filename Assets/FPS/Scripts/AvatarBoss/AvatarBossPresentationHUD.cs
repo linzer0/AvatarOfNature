@@ -331,7 +331,7 @@ namespace Unity.FPS.AvatarBoss
                 : "";
             var duel = m_Boss.GetComponent<AvatarBossDuelController>();
             if (duel != null && duel.DuelWindowActive)
-                return difficultyText + "DUEL WINDOW · ATTACK THE BOSS";
+                return difficultyText + "DUEL WINDOW · SHOOT THE GREEN CORE";
             var healing = m_Boss.HealingOrbs;
             if (healing != null && healing.RecoveryActive)
             {
@@ -344,7 +344,7 @@ namespace Unity.FPS.AvatarBoss
             string state = "IDLE";
             var sched = m_Boss.Scheduler;
             if (m_Boss.Stagger != null && m_Boss.Stagger.IsFull)
-                state = "STAGGERED";
+                return difficultyText + phase + " · STAGGER BREAK · SHOOT THE GREEN CORE";
             else if (m_Boss.Scheduler != null)
             {
                 switch (sched.State)
@@ -364,7 +364,10 @@ namespace Unity.FPS.AvatarBoss
             string orbSuffix = healing != null && healing.SpawnedOrbCount > 0
                 ? " · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount
                 : "";
-            return difficultyText + phase + " · " + state + " · BREAK MARKED CELLS" + orbSuffix;
+            string objective = m_Boss.PhaseTwo
+                ? "SHOOT THE GREEN CORE WHEN IT OPENS"
+                : "BUILD STAGGER OR BREAK MARKED CELLS";
+            return difficultyText + phase + " · " + state + " · " + objective + orbSuffix;
         }
 
         string ElementName(AvatarBossAttackScheduler sched)
