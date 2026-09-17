@@ -15,6 +15,7 @@ namespace Unity.FPS.AvatarBoss
     {
         const float k_MessageFadeIn = 0.15f;
         const float k_MessageFadeOut = 0.45f;
+        const float k_StatusRefreshInterval = 0.1f;
 
         AvatarBossController m_Boss;
         Canvas m_Canvas;
@@ -37,6 +38,7 @@ namespace Unity.FPS.AvatarBoss
         bool m_LastSummonsActive;
         bool m_LastDead;
         bool m_Initialized;
+        float m_NextStatusRefresh;
 
         void Start()
         {
@@ -289,8 +291,6 @@ namespace Unity.FPS.AvatarBoss
 
             float hp = Mathf.Clamp01(m_Boss.BossHealth.GetRatio());
             m_HpFill.fillAmount = hp;
-            if (m_HpLabel != null)
-                m_HpLabel.text = $"BOSS HEALTH  {hp * 100f:F0}%";
             m_HpFill.color = hp < 0.3f
                 ? Color.Lerp(new Color(0.88f, 0.22f, 0.18f, 1f), new Color(1f, 0.5f, 0.12f, 1f),
                     (Mathf.Sin(Time.unscaledTime * 8f) + 1f) * 0.5f)
@@ -298,15 +298,20 @@ namespace Unity.FPS.AvatarBoss
 
             float stagger = m_Boss.Stagger != null ? Mathf.Clamp01(m_Boss.Stagger.Ratio) : 0f;
             m_StaggerFill.fillAmount = stagger;
-            if (m_StaggerLabel != null)
-                m_StaggerLabel.text = $"STAGGER  {stagger * 100f:F0}%";
 
-            if (m_Boss.SummonsActive)
-                m_StatusLine.text = "PHASE 2 · DEFEAT THE SUMMONS · " + ActiveSummons() + " LEFT";
-            else
-                m_StatusLine.text = DescribeStatus();
-
-            PollEvents();
+            if (Time.unscaledTime >= m_NextStatusRefresh)
+            {
+                m_NextStatusRefresh = Time.unscaledTime + k_StatusRefreshInterval;
+                if (m_HpLabel != null)
+                    m_HpLabel.text = $"BOSS HEALTH  {hp * 100f:F0}%";
+                if (m_StaggerLabel != null)
+                    m_StaggerLabel.text = $"STAGGER  {stagger * 100f:F0}%";
+                if (m_Boss.SummonsActive)
+                    m_StatusLine.text = "PHASE 2 · DEFEAT THE SUMMONS · " + ActiveSummons() + " LEFT";
+                else
+                    m_StatusLine.text = DescribeStatus();
+                PollEvents();
+            }
             UpdateMessageFade();
         }
 

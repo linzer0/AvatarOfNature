@@ -20,6 +20,9 @@ namespace Unity.FPS.AvatarBoss
         Text m_NotificationText;
         Transform m_Camera;
         string m_NotificationTextName = "AVATAR OF NATURE";
+        AvatarBossSummonController m_Summons;
+        const float k_TextRefreshInterval = 0.1f;
+        float m_NextTextRefresh;
         void Start()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
@@ -30,6 +33,7 @@ namespace Unity.FPS.AvatarBoss
             }
             BuildUI();
             m_Camera = UnityEngine.Camera.main.transform;
+            m_Summons = m_Boss.GetComponentInChildren<AvatarBossSummonController>();
         }
         void BuildUI()
         {
@@ -150,10 +154,15 @@ namespace Unity.FPS.AvatarBoss
                 else
                     m_StaggerFill.color = m_StaggerBaseColor;
             }
-            if (m_StatusText != null)
-                m_StatusText.text = DescribeStatus();
-            if (m_WeakPointText != null)
-                m_WeakPointText.text = DescribeWeakPoints();
+            bool refreshText = Time.unscaledTime >= m_NextTextRefresh;
+            if (refreshText)
+            {
+                m_NextTextRefresh = Time.unscaledTime + k_TextRefreshInterval;
+                if (m_StatusText != null)
+                    m_StatusText.text = DescribeStatus();
+                if (m_WeakPointText != null)
+                    m_WeakPointText.text = DescribeWeakPoints();
+            }
             // notifications: no spam, visible for NotificationSeconds only
             if (m_NotificationText != null)
             {
@@ -163,7 +172,7 @@ namespace Unity.FPS.AvatarBoss
                     m_NotificationText.color = m_NotificationTintColor;
                     m_NotificationText.fontSize = Mathf.CeilToInt(Mathf.Lerp(18, 34, Mathf.Clamp01(m_NotificationTimer / NotificationSeconds)));
                 }
-                else if (m_Boss.SummonsActive)
+                else if (refreshText && m_Boss.SummonsActive)
                 {
                     // persistent summon objective line with a live counter
                     int left = ActiveSummonCount();
@@ -172,16 +181,16 @@ namespace Unity.FPS.AvatarBoss
                     m_NotificationText.color = m_NotificationTintColor;
                     m_NotificationText.fontSize = 24;
                 }
-                else
+                else if (refreshText)
                     m_NotificationText.text = "";
             }
-            PollEventNotifications();
+            if (refreshText)
+                PollEventNotifications();
         }
 
         int ActiveSummonCount()
         {
-            var summons = m_Boss.GetComponentInChildren<AvatarBossSummonController>();
-            return summons != null ? summons.ActiveSummonCount : 0;
+            return m_Summons != null ? m_Summons.ActiveSummonCount : 0;
         }
         [Header("Notifications")]
         public float NotificationSeconds = 2.5f;

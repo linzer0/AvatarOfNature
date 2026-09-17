@@ -32,11 +32,14 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossArenaController m_Arena;
         int m_TargetSector = -1;
         readonly List<GameObject> m_Telegraphs = new List<GameObject>();
+        readonly List<GameObject> m_TelegraphPool = new List<GameObject>();
         readonly List<GameObject> m_Rocks = new List<GameObject>();
+        readonly List<GameObject> m_RockPool = new List<GameObject>();
         readonly List<Vector3> m_ImpactPoints = new List<Vector3>();
 
         static Material s_DecalMaterial;
         static Material s_RockMaterial;
+        static Shader s_SpriteShader;
 
         void Awake()
         {
@@ -99,18 +102,16 @@ namespace Unity.FPS.AvatarBoss
                 Vector3 center = SnapToGround(m_Player.position + new Vector3(rnd.x, 20f, rnd.y));
                 m_ImpactPoints.Add(center);
 
-                GameObject decal = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                Object.Destroy(decal.GetComponent<Collider>());
+                GameObject decal = AcquirePrimitive(m_TelegraphPool, PrimitiveType.Cylinder, "MeteorTelegraph");
                 decal.name = "MeteorTelegraph";
                 decal.transform.SetPositionAndRotation(center + Vector3.up * 0.06f, Quaternion.identity);
                 decal.transform.localScale = new Vector3(2.4f, 0.02f, 2.4f);
                 MeshRenderer decalRenderer = decal.GetComponent<MeshRenderer>();
-                Shader textureShader = Shader.Find("Sprites/Default");
-                if (s_DecalMaterial == null && textureShader != null)
-                    s_DecalMaterial = new Material(textureShader)
+                if (s_DecalMaterial == null && SpriteShader != null)
+                    s_DecalMaterial = new Material(SpriteShader)
                         { color = new Color(1f, 0.35f, 0.05f, 0.7f) };
                 if (s_DecalMaterial != null)
-                    decalRenderer.material = s_DecalMaterial;
+                    decalRenderer.sharedMaterial = s_DecalMaterial;
                 m_Telegraphs.Add(decal);
             }
         }
@@ -133,21 +134,20 @@ namespace Unity.FPS.AvatarBoss
 
         IEnumerator FallRock(Vector3 target)
         {
-            GameObject rock = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            GameObject rock = AcquirePrimitive(m_RockPool, PrimitiveType.Cube, "MeteorRock");
             rock.name = "MeteorRock";
             rock.transform.position = target + Vector3.up * FallHeight;
             rock.transform.rotation = Random.rotation;
             rock.transform.localScale = Vector3.one * RockSize;
 
             MeshRenderer rockRenderer = rock.GetComponent<MeshRenderer>();
-            Shader textureShader = Shader.Find("Sprites/Default");
-                if (s_RockMaterial == null && textureShader != null)
+                if (s_RockMaterial == null && SpriteShader != null)
                 {
-                    s_RockMaterial = new Material(textureShader);
+                    s_RockMaterial = new Material(SpriteShader);
                     s_RockMaterial.color = new Color(1f, 0.28f, 0.08f, 1f);
                 }
             if (s_RockMaterial != null)
-                rockRenderer.material = s_RockMaterial;
+                rockRenderer.sharedMaterial = s_RockMaterial;
 
             m_Rocks.Add(rock);
 
@@ -162,7 +162,7 @@ namespace Unity.FPS.AvatarBoss
                 yield return null;
             }
 
-            if (rock == null)
+            if (rock == null || !rock.activeSelf)
                 yield break;
 
             rock.transform.position = target;
@@ -191,14 +191,14 @@ namespace Unity.FPS.AvatarBoss
             SpawnImpactEffect(target);
 
             m_Rocks.Remove(rock);
-            Destroy(rock);
+            ReleasePrimitive(m_RockPool, rock);
         }
 
         void DestroyTelegraphs()
         {
             foreach (var decal in m_Telegraphs)
                 if (decal != null)
-                    Destroy(decal);
+                    ReleasePrimitive(m_TelegraphPool, decal);
             m_Telegraphs.Clear();
             m_ImpactPoints.Clear();
         }
@@ -209,8 +209,42 @@ namespace Unity.FPS.AvatarBoss
 
             foreach (var rock in m_Rocks)
                 if (rock != null)
-                    Destroy(rock);
+                    ReleasePrimitive(m_RockPool, rock);
             m_Rocks.Clear();
+        }
+
+        static Shader SpriteShader => s_SpriteShader != null
+            ? s_SpriteShader
+            : s_SpriteShader = Shader.Find("Sprites/Default");
+
+        GameObject AcquirePrimitive(List<GameObject> pool, PrimitiveType type, string objectName)
+        {
+            for (int i = 0; i < pool.Count; i++)
+            {
+                var pooled = pool[i];
+                if (pooled != null && !pooled.activeSelf)
+                {
+                    pooled.SetActive(true);
+                    return pooled;
+                }
+            }
+
+            var created = GameObject.CreatePrimitive(type);
+            created.name = objectName;
+            var collider = created.GetComponent<Collider>();
+            if (collider != null)
+                Destroy(collider);
+            pool.Add(created);
+            return created;
+        }
+
+        void ReleasePrimitive(List<GameObject> pool, GameObject item)
+        {
+            if (item == null)
+                return;
+            item.SetActive(false);
+            if (!pool.Contains(item))
+                pool.Add(item);
         }
 
         Vector3 SnapToGround(Vector3 from)

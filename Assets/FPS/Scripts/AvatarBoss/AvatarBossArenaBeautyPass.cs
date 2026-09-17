@@ -21,8 +21,11 @@ namespace Unity.FPS.AvatarBoss
         Transform m_DressingRoot;
         Material m_RuneMaterial;
         AvatarBossController m_Boss;
+        AvatarBossDuelController m_Duel;
+        AvatarBossAttackScheduler m_Scheduler;
         readonly List<Transform> m_BeaconOrbs = new List<Transform>();
         readonly List<Light> m_BeaconLights = new List<Light>();
+        float m_NextVisualRefresh;
 
         void Start()
         {
@@ -31,6 +34,8 @@ namespace Unity.FPS.AvatarBoss
                 return;
 
             m_Boss = FindFirstObjectByType<AvatarBossController>();
+            m_Duel = m_Boss != null ? m_Boss.GetComponent<AvatarBossDuelController>() : null;
+            m_Scheduler = m_Boss != null ? m_Boss.Scheduler : null;
             m_Arena.SectorStateChanged += OnSectorStateChanged;
 
             BuildAtmosphere();
@@ -93,26 +98,25 @@ namespace Unity.FPS.AvatarBoss
 
         void Update()
         {
-            if (m_RuneMaterial == null)
+            if (m_RuneMaterial == null || Time.unscaledTime < m_NextVisualRefresh)
                 return;
+            m_NextVisualRefresh = Time.unscaledTime + (1f / 30f);
 
             Color target = RuneColor;
             float intensity = 1f;
             if (m_Boss != null)
             {
-                var duel = m_Boss.GetComponent<AvatarBossDuelController>();
-                var scheduler = m_Boss.Scheduler;
-                if (duel != null && duel.DuelWindowActive)
+                if (m_Duel != null && m_Duel.DuelWindowActive)
                 {
                     target = new Color(0.35f, 1f, 0.58f, 1f);
                     intensity = 1.35f;
                 }
-                else if (scheduler != null
-                    && (scheduler.State == AvatarBossSchedulerState.Telegraph
-                        || scheduler.State == AvatarBossSchedulerState.Windup)
-                    && scheduler.CurrentAttack != null)
+                else if (m_Scheduler != null
+                    && (m_Scheduler.State == AvatarBossSchedulerState.Telegraph
+                        || m_Scheduler.State == AvatarBossSchedulerState.Windup)
+                    && m_Scheduler.CurrentAttack != null)
                 {
-                    target = ElementColor(scheduler.CurrentAttack.Element);
+                    target = ElementColor(m_Scheduler.CurrentAttack.Element);
                     intensity = 1.1f;
                 }
             }
