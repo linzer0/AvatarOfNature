@@ -19,12 +19,12 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Half-width of the moving front in metres")]
         public float PushBandWidth = 1.2f;
         [Tooltip("Impulse in the chosen sector; adjacent sectors receive the configured fraction")]
-        public float PushForce = 34f;
+        public float PushForce = 42f;
         [Range(0f, 1f)] public float AdjacentSectorForceMultiplier = 0.5f;
         [Tooltip("Angular padding around each sector lane")]
         [Range(0f, 0.4f)] public float LaneAngularPadding = 0.08f;
         [Tooltip("Small lift that makes the push readable without becoming a jump attack")]
-        public float PushLift = 1.5f;
+        public float PushLift = 2.4f;
 
         [Header("Visuals")]
         [Tooltip("Ring alpha pulse frequency (visual readability only)")]
@@ -48,6 +48,7 @@ namespace Unity.FPS.AvatarBoss
 
         public override void SetIntent(AvatarBossIntent intent)
         {
+            base.SetIntent(intent);
             m_TargetDirection = intent.TargetDirection;
             m_TargetDirection.y = 0f;
             if (m_TargetDirection.sqrMagnitude < 0.001f)

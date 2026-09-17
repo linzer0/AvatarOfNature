@@ -33,6 +33,9 @@ namespace Unity.FPS.AvatarBoss
 
         protected virtual AvatarBossElement ExpectedElement => Element;
 
+        protected AvatarBossIntent CurrentIntent { get; private set; }
+        protected bool HasIntent { get; private set; }
+
         /// <summary>Validation guard: designer data must match the component's expected element.
         /// Logs a clear error but never repairs data silently.</summary>
         protected virtual void Start()
@@ -59,6 +62,8 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Provides the chosen boss intent to attacks that need directional telegraphing.</summary>
         public virtual void SetIntent(AvatarBossIntent intent)
         {
+            CurrentIntent = intent;
+            HasIntent = true;
         }
 
         /// <summary>Spawn all telegraph visuals. Called when the cycle enters the Telegraph state.</summary>

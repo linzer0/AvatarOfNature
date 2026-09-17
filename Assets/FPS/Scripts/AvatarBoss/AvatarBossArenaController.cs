@@ -119,6 +119,42 @@ namespace Unity.FPS.AvatarBoss
             return ring * count + angular;
         }
 
+        /// <summary>Returns a point clamped inside a sector, preserving a preferred point when possible.</summary>
+        public Vector3 GetSectorTargetPoint(int index, Vector3 preferredWorldPosition, float edgeInset = 0.75f)
+        {
+            EnsureInitialized();
+            if (index < 0 || index >= m_Sectors.Count)
+                return preferredWorldPosition;
+
+            int count = Mathf.Clamp(SectorCount, 8, 12);
+            int rings = Mathf.Clamp(RingCount, 2, 5);
+            int ring = index / count;
+            int angular = index % count;
+            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
+            float innerRadius = ringStart + safeGap * 0.5f + edgeInset;
+            float outerRadius = ringEnd - safeGap * 0.5f - edgeInset;
+            float sectorStep = Mathf.PI * 2f / count;
+            float halfAngle = sectorStep * SectorArcFill * 0.5f;
+            float centerAngle = (angular + 0.5f) * sectorStep;
+
+            if (outerRadius < innerRadius)
+                innerRadius = outerRadius = (ringStart + ringEnd) * 0.5f;
+
+            Vector3 local = transform.InverseTransformPoint(preferredWorldPosition);
+            float preferredRadius = new Vector2(local.x, local.z).magnitude;
+            float preferredAngle = Mathf.Atan2(local.z, local.x);
+            float delta = Mathf.DeltaAngle(centerAngle * Mathf.Rad2Deg, preferredAngle * Mathf.Rad2Deg)
+                * Mathf.Deg2Rad;
+            delta = Mathf.Clamp(delta, -halfAngle, halfAngle);
+            float radius = Mathf.Clamp(preferredRadius, innerRadius, outerRadius);
+            float angle = centerAngle + delta;
+            float surfaceY = SectorVisualLift + SectorHeight * 0.5f;
+            return transform.TransformPoint(new Vector3(
+                Mathf.Cos(angle) * radius, surfaceY, Mathf.Sin(angle) * radius));
+        }
+
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>
         public bool DamageSector(int index)
         {

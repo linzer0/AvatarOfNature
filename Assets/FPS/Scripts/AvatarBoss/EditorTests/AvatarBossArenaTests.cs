@@ -73,5 +73,16 @@ namespace Unity.FPS.AvatarBoss.EditorTests
                     $"Sector center {i} must resolve back to sector {i}");
             }
         }
+
+        [Test]
+        public void GetSectorTargetPoint_StaysInsideRequestedSector()
+        {
+            for (var i = 0; i < m_Controller.Sectors.Count; i++)
+            {
+                var point = m_Controller.GetSectorTargetPoint(i, Vector3.zero);
+                Assert.AreEqual(i, m_Controller.GetSectorIndexAtWorldPosition(point),
+                    $"Target point for sector {i} must resolve to that same sector");
+            }
+        }
     }
 }

@@ -28,6 +28,8 @@ namespace Unity.FPS.AvatarBoss
 
         Transform m_Player;
         AvatarBossController m_Boss;
+        AvatarBossArenaController m_Arena;
+        int m_TargetSector = -1;
         readonly List<GameObject> m_Telegraphs = new List<GameObject>();
         readonly List<GameObject> m_Spikes = new List<GameObject>();
 
@@ -39,6 +41,13 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
+            m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
+        }
+
+        public override void SetIntent(AvatarBossIntent intent)
+        {
+            base.SetIntent(intent);
+            m_TargetSector = intent.TargetSector;
         }
 
         public override void Prepare()
@@ -55,13 +64,9 @@ namespace Unity.FPS.AvatarBoss
                 return;
             }
 
-            Vector3 clusterCenter = m_Player.position;
-            if (Random.value > DirectTargetChance)
-            {
-                Vector2 drift = Random.insideUnitCircle.normalized
-                    * Random.Range(DriftDistanceMin, DriftDistanceMax);
-                clusterCenter += new Vector3(drift.x, 0f, drift.y);
-            }
+            Vector3 clusterCenter = m_Arena != null && m_TargetSector >= 0
+                ? m_Arena.GetSectorTargetPoint(m_TargetSector, m_Player.position)
+                : m_Player.position;
 
             for (int i = 0; i < SpikeCount; i++)
             {
@@ -70,6 +75,8 @@ namespace Unity.FPS.AvatarBoss
                 if (rnd.magnitude < 2f)
                     rnd = rnd.normalized * 2f;
                 Vector3 center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
+                if (m_Arena != null && m_TargetSector >= 0)
+                    center = m_Arena.GetSectorTargetPoint(m_TargetSector, center);
 
                 center = SnapToGround(center + Vector3.up * 20f);
 
@@ -156,7 +163,8 @@ namespace Unity.FPS.AvatarBoss
                 var damaged = new HashSet<Health>();
                 foreach (var hit in hits)
                 {
-                    Damageable damageable = hit.GetComponent<Damageable>();
+                    Damageable damageable = hit.GetComponent<Damageable>()
+                        ?? hit.GetComponentInParent<Damageable>();
                     if (damageable == null || damageable.Health == null || damaged.Contains(damageable.Health))
                         continue;
 
