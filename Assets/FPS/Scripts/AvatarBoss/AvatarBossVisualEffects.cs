@@ -31,6 +31,7 @@ namespace Unity.FPS.AvatarBoss
         readonly List<FloatingMarker> m_FloatingMarkers = new List<FloatingMarker>();
         readonly Dictionary<string, Color> m_BaseColors = new Dictionary<string, Color>();
         bool m_PhaseTwoApplied;
+        bool m_WeakPointPresentationActive;
         bool m_Dead;
         bool m_Built;
         float m_LastMarkerSpawn;
@@ -115,6 +116,7 @@ namespace Unity.FPS.AvatarBoss
         {
             m_Dead = false;
             m_PhaseTwoApplied = false;
+            m_WeakPointPresentationActive = false;
             m_HitFlash = 0f;
             m_StaggerFlash = 0f;
 
@@ -400,7 +402,84 @@ namespace Unity.FPS.AvatarBoss
             }
 
             UpdateWeakPointMarkers();
+            UpdateWeakPointPresentation();
             UpdateFloatingMarkers();
+        }
+
+        void UpdateWeakPointPresentation()
+        {
+            if (m_Boss.WeakPoints == null)
+                return;
+
+            bool exposed = false;
+            foreach (var weakPoint in m_Boss.WeakPoints)
+            {
+                if (weakPoint != null && weakPoint.IsExposed)
+                {
+                    exposed = true;
+                    break;
+                }
+            }
+
+            if (exposed != m_WeakPointPresentationActive)
+                ApplyWeakPointPresentation(exposed);
+
+            if (!exposed)
+                return;
+
+            float pulse = 0.92f + Mathf.Sin(Time.time * 8f) * 0.12f;
+            foreach (var core in m_Cores)
+                if (core != null)
+                    core.transform.localScale = Vector3.one * (0.55f * pulse);
+        }
+
+        void ApplyWeakPointPresentation(bool exposed)
+        {
+            m_WeakPointPresentationActive = exposed;
+            Color exposedCore = new Color(0.25f, 1f, 0.52f, 1f);
+
+            foreach (var core in m_Cores)
+            {
+                if (core == null)
+                    continue;
+                var renderer = core.GetComponent<MeshRenderer>();
+                if (renderer == null)
+                    continue;
+                var mat = new Material(renderer.material);
+                Color color = exposed ? exposedCore : (m_PhaseTwoApplied ? m_PhaseTwoTint : m_CrownColor);
+                mat.color = color;
+                mat.EnableKeyword("_EMISSION");
+                mat.SetColor("_EmissionColor", color * (exposed ? 2.4f : 1.6f));
+                renderer.material = mat;
+            }
+
+            if (m_RimLight != null)
+            {
+                m_RimLight.color = exposed
+                    ? new Color(0.25f, 1f, 0.55f)
+                    : (m_PhaseTwoApplied ? new Color(1f, 0.45f, 0.2f) : new Color(1f, 0.85f, 0.55f));
+                m_RimLight.intensity = exposed ? 8f : 5f;
+            }
+
+            if (m_VisualRoot == null)
+                return;
+            foreach (Transform child in m_VisualRoot.transform)
+            {
+                if (child == null || !child.name.EndsWith("_Visual")
+                    || (m_Aura != null && child == m_Aura.transform))
+                    continue;
+                var renderer = child.GetComponent<MeshRenderer>();
+                if (renderer == null)
+                    continue;
+                Color baseColor;
+                if (!m_BaseColors.TryGetValue(child.name, out baseColor))
+                    continue;
+                var mat = new Material(renderer.material);
+                mat.color = exposed
+                    ? Color.Lerp(baseColor, new Color(0.12f, 0.46f, 0.3f, 1f), 0.28f)
+                    : baseColor;
+                renderer.material = mat;
+            }
         }
 
         /// <summary>Floating damage numbers: rise + fade once per damage event.</summary>

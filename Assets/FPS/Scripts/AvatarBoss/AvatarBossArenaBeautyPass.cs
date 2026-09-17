@@ -185,6 +185,11 @@ namespace Unity.FPS.AvatarBoss
                 {
                     if (renderer == null || renderer.gameObject.name.Contains("Telegraph"))
                         continue;
+                    if (renderer.gameObject.name.Contains("SectorDamagedVisual"))
+                    {
+                        renderer.material.color = new Color(0.78f, 0.3f, 0.06f, 1f);
+                        continue;
+                    }
                     var material = renderer.material;
                     material.color = color;
                     if (material.HasProperty("_Smoothness"))

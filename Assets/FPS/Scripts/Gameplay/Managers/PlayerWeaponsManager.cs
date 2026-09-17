@@ -66,6 +66,10 @@ namespace Unity.FPS.Gameplay
         [Tooltip("Portion of the regular FOV to apply to the weapon camera")]
         public float WeaponFovMultiplier = 1f;
 
+        [Header("Combat camera feel")]
+        [Min(0f)] public float CombatFovPunch = 7f;
+        [Min(0.1f)] public float CombatFovDecay = 10f;
+
         [Tooltip("Delay before switching weapon a second time, to avoid recieving multiple inputs from mouse wheel")]
         public float WeaponSwitchDelay = 1f;
 
@@ -92,6 +96,8 @@ namespace Unity.FPS.Gameplay
         float m_TimeStartedWeaponSwitch;
         WeaponSwitchState m_WeaponSwitchState;
         int m_WeaponSwitchNewWeaponIndex;
+        float m_CombatFovPunch;
+        float m_AppliedFovOffset;
 
         void Start()
         {
@@ -106,6 +112,7 @@ namespace Unity.FPS.Gameplay
             DebugUtility.HandleErrorIfNullGetComponent<PlayerCharacterController, PlayerWeaponsManager>(
                 m_PlayerCharacterController, this, gameObject);
 
+            EventManager.AddListener<CameraImpulseEvent>(OnCameraImpulse);
             SetFov(DefaultFov);
 
             OnSwitchedToWeapon += OnWeaponSwitched;
@@ -117,6 +124,12 @@ namespace Unity.FPS.Gameplay
             }
 
             SwitchWeapon(true);
+        }
+
+        void OnDestroy()
+        {
+            EventManager.RemoveListener<CameraImpulseEvent>(OnCameraImpulse);
+            OnSwitchedToWeapon -= OnWeaponSwitched;
         }
 
         void Update()
@@ -198,6 +211,11 @@ namespace Unity.FPS.Gameplay
             UpdateWeaponRecoil();
             UpdateWeaponSwitching();
 
+            m_CombatFovPunch = Mathf.MoveTowards(m_CombatFovPunch, 0f,
+                CombatFovDecay * Time.unscaledDeltaTime);
+            if (m_PlayerCharacterController != null && m_PlayerCharacterController.PlayerCamera != null)
+                SetFov(m_PlayerCharacterController.PlayerCamera.fieldOfView - m_AppliedFovOffset);
+
             // Set final weapon socket position based on all the combined animation influences
             WeaponParentSocket.localPosition =
                 m_WeaponMainLocalPosition + m_WeaponBobLocalPosition + m_WeaponRecoilLocalPosition;
@@ -206,8 +224,20 @@ namespace Unity.FPS.Gameplay
         // Sets the FOV of the main camera and the weapon camera simultaneously
         public void SetFov(float fov)
         {
-            m_PlayerCharacterController.PlayerCamera.fieldOfView = fov;
-            WeaponCamera.fieldOfView = fov * WeaponFovMultiplier;
+            float baseFov = fov - m_AppliedFovOffset;
+            m_AppliedFovOffset = m_CombatFovPunch;
+            float displayedFov = baseFov + m_AppliedFovOffset;
+            m_PlayerCharacterController.PlayerCamera.fieldOfView = displayedFov;
+            WeaponCamera.fieldOfView = displayedFov * WeaponFovMultiplier;
+        }
+
+        void OnCameraImpulse(CameraImpulseEvent evt)
+        {
+            if (evt == null)
+                return;
+            float durationBoost = Mathf.Clamp01(evt.Duration / 0.2f);
+            float punch = evt.Strength * CombatFovPunch * (0.75f + 0.25f * durationBoost);
+            m_CombatFovPunch = Mathf.Clamp(m_CombatFovPunch + punch, 0f, CombatFovPunch);
         }
 
         // Iterate on all weapon slots to find the next valid weapon to switch to

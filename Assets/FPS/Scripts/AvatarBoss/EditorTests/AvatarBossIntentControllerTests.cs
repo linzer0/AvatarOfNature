@@ -52,6 +52,22 @@ namespace Unity.FPS.AvatarBoss.EditorTests
         }
 
         [Test]
+        public void TargetSelection_DoesNotRepeatPreviousUsableSector()
+        {
+            var controller = new AvatarBossIntentController(17, 8, Vector3.zero);
+            controller.SetLastPlayerPosition(new Vector3(4f, 0f, 0f));
+
+            Assert.IsTrue(controller.TryGetNextIntent(out var previous));
+            for (int i = 0; i < 6; i++)
+            {
+                Assert.IsTrue(controller.TryGetNextIntent(out var next));
+                Assert.AreNotEqual(previous.TargetSector, next.TargetSector,
+                    "A usable arena should visibly move the boss telegraph to another sector.");
+                previous = next;
+            }
+        }
+
+        [Test]
         public void Reset_RestoresInitialSequence()
         {
             var controller = new AvatarBossIntentController(99);
