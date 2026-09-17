@@ -15,7 +15,7 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
         [Min(0f)] public float SectorVisualLift = 0.22f;
-        [Range(0.45f, 0.9f)] public float SectorArcFill = 0.68f;
+        [Range(0.35f, 0.9f)] public float SectorArcFill = 0.48f;
 
         [SerializeField] List<AvatarBossArenaSector> m_Sectors = new List<AvatarBossArenaSector>();
 
