@@ -62,6 +62,12 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossIntent CurrentIntent { get; private set; }
         public bool HasCurrentIntent { get; private set; }
 
+        /// <summary>Removes a broken arena sector from future intent selection.</summary>
+        public void MarkSectorDestroyed(int sector)
+        {
+            m_IntentController?.MarkSectorDestroyed(sector);
+        }
+
         /// Fired when an attack enters Execute, including the selected intent.
         public event System.Action<AvatarBossAttack, AvatarBossIntent> AttackExecuted;
 

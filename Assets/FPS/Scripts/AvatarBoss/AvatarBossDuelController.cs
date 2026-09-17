@@ -81,10 +81,24 @@ namespace Unity.FPS.AvatarBoss
         {
             if (Boss == null || Boss.IsDead || Arena == null)
                 return;
+            // Shockwave is a positioning test. It moves the player but does not spend
+            // any arena durability or open the boss's damage window.
+            if (attack == null || attack.Element == AvatarBossElement.Shockwave)
+                return;
             if (intent.TargetSector < 0 || intent.TargetSector >= Arena.Sectors.Count)
                 return;
-            if (!Arena.CollapseSector(intent.TargetSector))
+
+            var target = Arena.GetSector(intent.TargetSector);
+            if (target == null || !Arena.DamageSector(intent.TargetSector))
                 return;
+
+            // A normal impact only stains/cracks the tile. The duel window belongs
+            // exclusively to the impact that actually breaks it.
+            if (target.State != AvatarBossArenaSectorState.Collapsing
+                && target.State != AvatarBossArenaSectorState.Destroyed)
+                return;
+
+            Scheduler?.MarkSectorDestroyed(intent.TargetSector);
 
             m_LastResolvedIntent = intent;
             m_HasLastResolvedIntent = true;

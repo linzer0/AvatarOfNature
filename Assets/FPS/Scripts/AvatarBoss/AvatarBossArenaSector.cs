@@ -21,6 +21,8 @@ namespace Unity.FPS.AvatarBoss
     public sealed class AvatarBossArenaSector : MonoBehaviour
     {
         [SerializeField] int m_Index;
+        [SerializeField] int m_MaxHitPoints = 3;
+        [SerializeField] int m_HitPoints = 3;
         [SerializeField] AvatarBossArenaSectorState m_State = AvatarBossArenaSectorState.Intact;
         [SerializeField] GameObject m_IntactVisual;
         [SerializeField] GameObject m_DamagedVisual;
@@ -35,6 +37,12 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Current state of this sector.</summary>
         public AvatarBossArenaSectorState State => m_State;
 
+        /// <summary>Maximum number of boss impacts this sector can absorb.</summary>
+        public int MaxHitPoints => m_MaxHitPoints;
+
+        /// <summary>Remaining impacts before the sector collapses.</summary>
+        public int HitPoints => m_HitPoints;
+
         /// <summary>Visual used while the sector is intact.</summary>
         public GameObject IntactVisual { get => m_IntactVisual; set => m_IntactVisual = value; }
 
@@ -48,6 +56,24 @@ namespace Unity.FPS.AvatarBoss
         public void SetIndex(int index)
         {
             m_Index = index;
+        }
+
+        /// <summary>Sets the sector's current and maximum impact budget.</summary>
+        public void ResetHitPoints(int maxHitPoints)
+        {
+            m_MaxHitPoints = Mathf.Max(1, maxHitPoints);
+            m_HitPoints = m_MaxHitPoints;
+        }
+
+        /// <summary>Consumes boss impact damage while the sector is still usable.</summary>
+        public bool ApplyDamage(int amount)
+        {
+            if (amount <= 0 || m_State == AvatarBossArenaSectorState.Collapsing
+                || m_State == AvatarBossArenaSectorState.Destroyed)
+                return false;
+
+            m_HitPoints = Mathf.Max(0, m_HitPoints - amount);
+            return true;
         }
 
         /// <summary>Applies a state and updates the configured visuals.</summary>

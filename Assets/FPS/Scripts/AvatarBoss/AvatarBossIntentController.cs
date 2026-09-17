@@ -40,6 +40,7 @@ namespace Unity.FPS.AvatarBoss
 
             m_Seed = seed;
             m_SectorCount = sectorCount;
+            m_Arena = null;
             m_ArenaCenter = arenaCenter;
             m_RecentDestroyedMemory = recentDestroyedMemory;
             m_Random = new System.Random(seed);
@@ -130,7 +131,29 @@ namespace Unity.FPS.AvatarBoss
 
             int playerSector = m_HasPlayerPosition ? SectorFromPosition(m_LastPlayerPosition) : -1;
             if (playerSector >= 0 && !m_DestroyedSectors.Contains(playerSector))
-                return playerSector;
+            {
+                // The boss pressures the player often, but never with perfect aim.
+                // Nearby and opportunistic sectors make the intent readable without
+                // turning every cast into a guaranteed hit on the player's feet.
+                double roll = m_Random.NextDouble();
+                if (roll < 0.55 || m_Arena == null)
+                    return playerSector;
+
+                var nearby = new List<int>();
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    int candidate = candidates[i];
+                    if (candidate == playerSector)
+                        continue;
+                    var sector = m_Arena.GetSector(candidate);
+                    if (sector != null && (sector.transform.position - m_LastPlayerPosition).sqrMagnitude < 64f)
+                        nearby.Add(candidate);
+                }
+
+                if (nearby.Count > 0 && roll < 0.85)
+                    return nearby[m_Random.Next(nearby.Count)];
+            }
+
             return candidates[m_Random.Next(candidates.Count)];
         }
 

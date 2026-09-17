@@ -14,6 +14,7 @@ namespace Unity.FPS.AvatarBoss
         [Range(8, 12)] public int SectorCount = 8;
         [Range(2, 5)] public int RingCount = 3;
         [Min(0f)] public float RingGap = 0.18f;
+        [Min(1)] public int SectorMaxHitPoints = 3;
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
         public bool CreateCenterPlatform = true;
@@ -97,7 +98,23 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>
         public bool DamageSector(int index)
         {
-            return SetSectorState(index, AvatarBossArenaSectorState.Damaged);
+            return DamageSector(index, 1);
+        }
+
+        /// <summary>Applies boss impact damage and collapses the sector when its budget is depleted.</summary>
+        public bool DamageSector(int index, int amount)
+        {
+            var sector = GetSector(index);
+            if (sector == null || !sector.ApplyDamage(amount))
+                return false;
+
+            if (sector.State == AvatarBossArenaSectorState.Intact)
+                ChangeState(sector, AvatarBossArenaSectorState.Damaged);
+
+            if (sector.HitPoints <= 0)
+                return CollapseSector(index);
+
+            return true;
         }
 
         /// <summary>Starts a sector collapse and raises events for Collapsing and Destroyed.</summary>
@@ -134,6 +151,7 @@ namespace Unity.FPS.AvatarBoss
                 if (sector == null)
                     continue;
                 sector.StopCollapse();
+                sector.ResetHitPoints(SectorMaxHitPoints);
                 ChangeState(sector, AvatarBossArenaSectorState.Intact);
             }
         }
@@ -163,8 +181,9 @@ namespace Unity.FPS.AvatarBoss
                     var angle = (angular + 0.5f) * Mathf.PI * 2f / count;
                     sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
                     sectorObject.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
-                    var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
-                    sector.SetIndex(index);
+                var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
+                sector.SetIndex(index);
+                sector.ResetHitPoints(SectorMaxHitPoints);
                     if (CreateRuntimeVisuals)
                         CreateSectorVisuals(sectorObject, count, ring, ringStart, ringEnd);
                     m_Sectors.Add(sector);
