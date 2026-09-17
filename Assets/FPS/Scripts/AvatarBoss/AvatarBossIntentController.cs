@@ -153,6 +153,25 @@ namespace Unity.FPS.AvatarBoss
                     nearby.Add(candidate);
                 }
 
+                if (nearby.Count > 0 && roll < 0.85)
+                    return nearby[m_Random.Next(nearby.Count)];
+
+                var distant = new List<int>();
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    int candidate = candidates[i];
+                    int candidateRing = candidate / m_SectorCount;
+                    int candidateAngular = candidate % m_SectorCount;
+                    int angularDistance = Mathf.Abs(candidateAngular - playerAngular);
+                    angularDistance = Mathf.Min(angularDistance, m_SectorCount - angularDistance);
+                    if (candidate != playerSector
+                        && (candidateRing != playerRing || angularDistance > 1))
+                        distant.Add(candidate);
+                }
+
+                if (distant.Count > 0)
+                    return distant[m_Random.Next(distant.Count)];
+
                 if (nearby.Count > 0)
                     return nearby[m_Random.Next(nearby.Count)];
 

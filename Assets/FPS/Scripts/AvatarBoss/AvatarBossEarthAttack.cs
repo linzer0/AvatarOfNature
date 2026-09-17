@@ -52,6 +52,8 @@ namespace Unity.FPS.AvatarBoss
 
         public override void Prepare()
         {
+            if (m_Arena == null)
+                m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
             if (m_Player == null)
             {
                 var player = FindFirstObjectByType<PlayerCharacterController>();
@@ -83,7 +85,8 @@ namespace Unity.FPS.AvatarBoss
                     center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
                 }
 
-                center = SnapToGround(center + Vector3.up * 20f);
+                if (m_Arena == null || m_TargetSector < 0)
+                    center = SnapToGround(center + Vector3.up * 20f);
 
                 GameObject decal = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 Object.Destroy(decal.GetComponent<Collider>());
