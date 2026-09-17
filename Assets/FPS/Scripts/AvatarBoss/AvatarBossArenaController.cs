@@ -180,7 +180,11 @@ namespace Unity.FPS.AvatarBoss
                     sectorObject.transform.SetParent(transform, false);
                     var angle = (angular + 0.5f) * Mathf.PI * 2f / count;
                     sectorObject.transform.localPosition = new Vector3(Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
-                    sectorObject.transform.localRotation = Quaternion.Euler(0f, -angle * Mathf.Rad2Deg, 0f);
+                    // Local X is tangential and local Z is radial. Rotate Z onto
+                    // the outward radial direction so neighboring sectors keep
+                    // their angular separation.
+                    sectorObject.transform.localRotation = Quaternion.Euler(0f,
+                        90f - angle * Mathf.Rad2Deg, 0f);
                 var sector = sectorObject.AddComponent<AvatarBossArenaSector>();
                 sector.SetIndex(index);
                 sector.ResetHitPoints(SectorMaxHitPoints);
@@ -203,29 +207,24 @@ namespace Unity.FPS.AvatarBoss
 
         void CreateSectorVisuals(GameObject sectorObject, int count, int ring, float ringStart, float ringEnd)
         {
-            float ringDepth = Mathf.Max(0.5f, ringEnd - ringStart - RingGap);
-            float arcWidth = Mathf.Max(0.2f, 2f * Mathf.PI * ringEnd / count * SectorArcFill);
+            float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
+            float innerRadius = ringStart + safeGap * 0.5f;
+            float outerRadius = ringEnd - safeGap * 0.5f;
+            float halfSectorAngle = Mathf.PI / count * SectorArcFill * 0.5f;
+            float midRadius = (ringStart + ringEnd) * 0.5f;
 
-            var intact = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            intact.name = "SectorIntactVisual";
-            intact.transform.SetParent(sectorObject.transform, false);
-            intact.transform.localScale = new Vector3(arcWidth, SectorHeight, ringDepth);
-            intact.transform.localPosition = new Vector3(0f, -SectorHeight * 0.5f, 0f);
+            var intact = CreateSectorMeshVisual(sectorObject, "SectorIntactVisual", innerRadius,
+                outerRadius, midRadius, halfSectorAngle, SectorHeight);
             SetRuntimeMaterial(intact.GetComponent<Renderer>(), ring % 2 == 0
                 ? new Color(0.10f, 0.26f, 0.20f, 1f)
                 : new Color(0.14f, 0.34f, 0.27f, 1f));
 
-            var damaged = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            damaged.name = "SectorDamagedVisual";
-            damaged.transform.SetParent(sectorObject.transform, false);
-            damaged.transform.localScale = new Vector3(arcWidth, SectorHeight, ringDepth);
-            damaged.transform.localPosition = new Vector3(0f, -SectorHeight * 0.5f, 0f);
+            var damaged = CreateSectorMeshVisual(sectorObject, "SectorDamagedVisual", innerRadius,
+                outerRadius, midRadius, halfSectorAngle, SectorHeight);
             SetRuntimeMaterial(damaged.GetComponent<Renderer>(), new Color(0.72f, 0.38f, 0.08f, 1f));
 
-            var destroyed = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            destroyed.name = "SectorDestroyedVisual";
-            destroyed.transform.SetParent(sectorObject.transform, false);
-            destroyed.transform.localScale = new Vector3(arcWidth, 0.04f, ringDepth);
+            var destroyed = CreateSectorMeshVisual(sectorObject, "SectorDestroyedVisual", innerRadius,
+                outerRadius, midRadius, halfSectorAngle, 0.04f);
             destroyed.transform.localPosition = new Vector3(0f, -0.9f, 0f);
             SetRuntimeMaterial(destroyed.GetComponent<Renderer>(), new Color(0.18f, 0.03f, 0.02f, 1f));
 
@@ -234,6 +233,51 @@ namespace Unity.FPS.AvatarBoss
             sector.DamagedVisual = damaged;
             sector.DestroyedVisual = destroyed;
             sector.ForceState(AvatarBossArenaSectorState.Intact);
+        }
+
+        GameObject CreateSectorMeshVisual(GameObject sectorObject, string name, float innerRadius,
+            float outerRadius, float midRadius, float halfSectorAngle, float height)
+        {
+            var visual = new GameObject(name);
+            visual.transform.SetParent(sectorObject.transform, false);
+            visual.transform.localPosition = new Vector3(0f, -height * 0.5f, 0f);
+
+            float innerHalfWidth = innerRadius * Mathf.Tan(halfSectorAngle);
+            float outerHalfWidth = outerRadius * Mathf.Tan(halfSectorAngle);
+            float innerZ = innerRadius - midRadius;
+            float outerZ = outerRadius - midRadius;
+            float bottom = 0f;
+            float top = height;
+            var vertices = new[]
+            {
+                new Vector3(-innerHalfWidth, bottom, innerZ),
+                new Vector3(innerHalfWidth, bottom, innerZ),
+                new Vector3(-outerHalfWidth, bottom, outerZ),
+                new Vector3(outerHalfWidth, bottom, outerZ),
+                new Vector3(-innerHalfWidth, top, innerZ),
+                new Vector3(innerHalfWidth, top, innerZ),
+                new Vector3(-outerHalfWidth, top, outerZ),
+                new Vector3(outerHalfWidth, top, outerZ)
+            };
+            var triangles = new[]
+            {
+                0, 2, 3, 0, 3, 1,
+                4, 5, 7, 4, 7, 6,
+                0, 1, 5, 0, 5, 4,
+                2, 6, 7, 2, 7, 3,
+                0, 4, 6, 0, 6, 2,
+                1, 3, 7, 1, 7, 5
+            };
+            var mesh = new Mesh { name = name + "Mesh" };
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
+            visual.AddComponent<MeshFilter>().sharedMesh = mesh;
+            visual.AddComponent<MeshRenderer>();
+            visual.AddComponent<MeshCollider>().sharedMesh = mesh;
+            return visual;
         }
 
         void SetRuntimeMaterial(Renderer renderer, Color color)
