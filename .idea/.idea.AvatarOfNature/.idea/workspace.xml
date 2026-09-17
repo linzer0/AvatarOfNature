@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="4b4f0612-359a-46d5-bad5-2465dfe32980" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/Assets/Editor/HubForceResolve.cs" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Alerted.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Alerted.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Hurt.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Hurt.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Idle.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Idle.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@IdleClosed.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@IdleClosed.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@RunFoward.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@RunFoward.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@RunFowardClosed.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@RunFowardClosed.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Shoot.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/HoverBot/HoverBot@Shoot.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Rigs/HoverBot.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Rigs/HoverBot.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Rigs/Turret.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Rigs/Turret.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@ActivatedHurt.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@ActivatedHurt.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackIn.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackIn.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackLoop.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackLoop.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackOut.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@AttackOut.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@Idle.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@Idle.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@PassiveHurt.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Animation/Turret/Turret@PassiveHurt.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_ExplosionDisk.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_ExplosionDisk.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Health_Pickup.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Health_Pickup.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Jetpack.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Jetpack.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Projectile.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Projectile.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_ReachPoint_Objective.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_ReachPoint_Objective.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Sun.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Sun.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Weapon_Primary.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Weapon_Primary.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Weapon_Secondary.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_Weapon_Secondary.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_WireframeRangeCage.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Models/Mesh_WireframeRangeCage.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/UnityTutorial_Skybox05_4k.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/UnityTutorial_Skybox05_4k.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/Unity_skyboxBG01.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/Unity_skyboxBG01.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/Unity_skyboxBG02.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Backgrounds/Unity_skyboxBG02.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Body_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Glass_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Glass_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Light__Emission.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/HoverBot_Light__Emission.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Body_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Glass_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Glass_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Light_Emission.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Characters/Turret_Light_Emission.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Emissive.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Emissive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/HealthPickup_Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack__MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack__MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack__Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Pickups/Jetpack__Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Emissive.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Emissive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/StatueBig_Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Emissive.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Emissive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Props/WallStatue_Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/CloseBtn_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/CloseBtn_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/ControlScheme_PopUp.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/ControlScheme_PopUp.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Blaster_Center.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Blaster_Center.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Blaster_Side.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Blaster_Side.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Drop.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Drop.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Hexa.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Hexa.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Shotgun_Circle.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Crosshair_Shotgun_Circle.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Gradiants.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Gradiants.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Jetpack_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Jetpack_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_KeyScroll_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_KeyScroll_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Key_Bg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Key_Bg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_LifeBar_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_LifeBar_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon01.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon01.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon02.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon02.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon03.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/HUD_Weapon03.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Notification_Enemy_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Notification_Enemy_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Notification_MainObj_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Notification_MainObj_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Radar_Enemy_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Radar_Enemy_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Radar_Enemy_IconBg.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Radar_Enemy_IconBg.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Crouch_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Crouch_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Sprint_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Sprint_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Stand_Icon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Stance_Stand_Icon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/TEX_Black_16x16.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/TEX_Black_16x16.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/TEX_White_16x16.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/TEX_White_16x16.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Transparent_Center.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/UI/Transparent_Center.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Dot.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Dot.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ExplosionRange.bmp" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ExplosionRange.bmp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ExplosionRing.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ExplosionRing.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Falloff.psd" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Falloff.psd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Flare.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Flare.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/HealthPickUp.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/HealthPickUp.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/JetPackPulse.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/JetPackPulse.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/OverheatSmoke.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/OverheatSmoke.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Projectile.bmp" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Projectile.bmp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ProjectileRamp.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ProjectileRamp.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Projectile_Trail.bmp" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Projectile_Trail.bmp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Shadow.psd" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Shadow.psd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ShrapnelTriangle.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ShrapnelTriangle.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Anger01.tga" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Anger01.tga" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_ExclamationMark.tga" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_ExclamationMark.tga" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Speedlines.tga" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Speedlines.tga" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Speedlines_Atlas.tga" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/Symbol_Speedlines_Atlas.tga" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ThickSmoke.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ThickSmoke.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ThickSmoke_N.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/ThickSmoke_N.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/WireframeCage.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/VFX/WireframeCage.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Emissive.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Emissive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Blaster_Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_AO.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_AO.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Albedo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Albedo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Emissive.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Emissive.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_MetallicSmooth.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_MetallicSmooth.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Normal.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Art/Textures/Weapons/Launcher_Normal.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/Music/Wind Ambience.mp3" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/Music/Wind Ambience.mp3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Alert.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Alert.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Attack.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Attack.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Death.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Death.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Movement.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Hoverbot_Movement.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Alert.mp3" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Alert.mp3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Attack.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Attack.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Death.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Enemies/Turret_Death.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Health.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Health.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Jetpack.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Jetpack.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Weapon_Medium.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Weapon_Medium.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Weapon_Small.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Pickups/Pickup_Weapon_Small.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Damage_Tick.mp3" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Damage_Tick.mp3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Damage_Tick2.mp3" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Damage_Tick2.mp3" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Footstep.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Footstep.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Jetpack_Use.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Jetpack_Use.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Jump.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Jump.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Land.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Land.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Land_Damage.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Player/Land_Damage.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_Chime.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_Chime.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_End.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_End.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_Snap.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/UI/Notification_Snap.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Blaster_Shot.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Blaster_Shot.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Charge_BuildUp.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Charge_BuildUp.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Charge_Loop.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Charge_Loop.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Explosion.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Explosion.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Release.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Launcher_Release.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Shotgun_Shot.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Shotgun_Shot.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Weapon_Cooling.wav" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Audio/SFX/Weapons/Weapon_Cooling.wav" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Diamond_Sign.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Diamond_Sign.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Pyramid_Sign.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Pyramid_Sign.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Triangle_Sign.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/PBObjects/Signs/Triangle_Sign.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJAltar.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJAltar.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJBasic_Floor.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJBasic_Floor.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJDun_BigDoor.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJDun_BigDoor.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJFloor_HalfIndented.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJFloor_HalfIndented.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJFloor_Indented.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJFloor_Indented.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_3m.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_3m.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_4m.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_4m.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_8m.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJRamp_8m.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_1m.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_1m.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_4m.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_4m.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_Door.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_Door.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_DoorLarge.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_DoorLarge.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_Window.obj" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/RootObjects/OBJWall_Window.obj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Prefabs/UI/GameHUD.prefab" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Prefabs/UI/GameHUD.prefab" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scenes/AvatarBossShowcase.unity" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scenes/AvatarBossShowcase.unity" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scenes/MainScene/ReflectionProbe-2.exr" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scenes/MainScene/ReflectionProbe-2.exr" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scenes/SecondaryScene/ReflectionProbe-0.exr" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scenes/SecondaryScene/ReflectionProbe-0.exr" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossAttackScheduler.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossAttackScheduler.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossDebugHUD.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossDebugHUD.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossGameplayTestAgent.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossGameplayTestAgent.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossPhaseController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossPhaseController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossShowcaseGameOver.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossShowcaseGameOver.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossStagger.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossStagger.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossSummonController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossSummonController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossVisualEffects.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossVisualEffects.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossWeakPoint.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossWeakPoint.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/Game/Shared/Damageable.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/Game/Shared/Damageable.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/Game/Shared/Health.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/Game/Shared/Health.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Scripts/UI/CompassElement.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Scripts/UI/CompassElement.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Hiearchy.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Hiearchy.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Inspector.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Inspector.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Play.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Play.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Select-Gameobject.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Select-Gameobject.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Select-Property.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/1_GetStarted/WT-Select-Property.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Bake.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Bake.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Hierarchy-and-Scene.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Hierarchy-and-Scene.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Move-Object.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Move-Object.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Orbit-Hand-Tool.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Orbit-Hand-Tool.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Pan-Hand-Tool.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Pan-Hand-Tool.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Project-Window.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Project-Window.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-Hand-Tool.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-Hand-Tool.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-Move.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-Move.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-and-Frame.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Select-and-Frame.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Zoom-Scene.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/2_AddARoom/WT-Zoom-Scene.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/3_ChangeColors/WT-Change-Color.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/3_ChangeColors/WT-Change-Color.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/3_ChangeColors/WT-Select-Material.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/3_ChangeColors/WT-Select-Material.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Drag-Prefab.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Drag-Prefab.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Move-Object.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Move-Object.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Scale-Object.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Scale-Object.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Move.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Move.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Prefab.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Prefab.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Scale.mov" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/4_AddEnemyBot/WT-Select-Scale.mov" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Build your project.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Build your project.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/PlayLogo.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/PlayLogo.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Publish to Unity Play window.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Publish to Unity Play window.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Switch to the Web platform.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/Switch to the Web platform.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/header-completed.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/6_BuildAndPublish/header-completed.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/7_WhatsNext/WT-Essentials.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/7_WhatsNext/WT-Essentials.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/7_WhatsNext/WT-JuniorPgmr.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/7_WhatsNext/WT-JuniorPgmr.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/BotIcon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/BotIcon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/DialogHeader_FPS.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/DialogHeader_FPS.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/FPSIcon.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/FPSIcon.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/Pop.aiff" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/Pop.aiff" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/SuperchargeYourGame.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/SuperchargeYourGame.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/TutorialHeader.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/TutorialHeader.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/FPS/Tutorials/import-asset@2x.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/FPS/Tutorials/import-asset@2x.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Archway.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Archway.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/MoaiHead.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/MoaiHead.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Obelisk.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Obelisk.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Pillar.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Pillar.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Pyramid.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/AncientProps/Pyramid.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/BillboardMeshes/billboard_3D_basic.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/BillboardMeshes/billboard_3D_basic.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/BillboardMeshes/billboard_3D_tall.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/BillboardMeshes/billboard_3D_tall.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Cookie.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Cookie.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Donut.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Donut.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/GummyBear.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/GummyBear.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Licorice.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Licorice.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Lollipop.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/FoodProps/Lollipop.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/GlassesMesh.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/GlassesMesh.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/PartyHatMesh.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/PartyHatMesh.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/WizardHatMesh.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/HatMeshes/WizardHatMesh.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/Cactus.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/Cactus.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FallenTree.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FallenTree.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FirTree.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FirTree.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FlowerBush.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/FlowerBush.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/Mushroom.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/Mushroom.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/PalmTree.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/NatureProps/PalmTree.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Asteroid.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Asteroid.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Crystal.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Crystal.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Rocket.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/Rocket.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/SatelliteDish.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/SpaceProps/SatelliteDish.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/Totems/Mesh_Statue_Big.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/Totems/Mesh_Statue_Big.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/Totems/Mesh_Statue_Wall.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/Totems/Mesh_Statue_Wall.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/Weapons/Mesh_Weapon_1.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/Weapons/Mesh_Weapon_1.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Models/Weapons/Mesh_Weapon_2.fbx" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Models/Weapons/Mesh_Weapon_2.fbx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_basic.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_basic.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_basic_mask.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_basic_mask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_tall.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_tall.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_tall_mask.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_tall_mask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_wide.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_wide.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_wide_mask.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/billboard_2D_wide_mask.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/ModAssets/Textures/rainbowtexture.png" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/ModAssets/Textures/rainbowtexture.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/TextMesh Pro/Fonts/LiberationSans.ttf" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/TextMesh Pro/Fonts/LiberationSans.ttf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/Assets/UniversalRenderPipelineGlobalSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Packages/packages-lock.json" beforeDir="false" afterPath="$PROJECT_DIR$/Packages/packages-lock.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorBuildSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/EditorSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/EditorSettings.asset" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" beforeDir="false" afterPath="$PROJECT_DIR$/ProjectSettings/ProjectSettings.asset" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/Assets/FPS/Scripts/AvatarBoss/AvatarBossPresentationHUD.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/Assets/FPS/Scripts/UI/CompassElement.cs" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 5,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3JMmf31IV16xR7ZyfU8SqYZ4C9g" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;
+  }
+}</component>
+  <component name="RunManager" selected="Attach to Unity Editor.Attach to Unity Editor">
+    <configuration name="Start Unity" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Unity\6000.3.11f1\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-projectPath C:\Users\Linar\Projects\Github\AvatarOfNature -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Linar\Projects\Github\AvatarOfNature" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unit Tests (batch mode)" type="RunUnityExe" factoryName="Unity Executable">
+      <option name="EXE_PATH" value="C:\Unity\6000.3.11f1\Editor\Unity.exe" />
+      <option name="PROGRAM_PARAMETERS" value="-runTests -batchmode -projectPath C:\Users\Linar\Projects\Github\AvatarOfNature -testResults Logs/results.xml -logFile Logs/Editor.log -testPlatform EditMode -debugCodeOptimization" />
+      <option name="WORKING_DIRECTORY" value="C:\Users\Linar\Projects\Github\AvatarOfNature" />
+      <option name="PASS_PARENT_ENVS" value="1" />
+      <option name="ENV_FILE_PATHS" value="" />
+      <option name="REDIRECT_INPUT_PATH" value="" />
+      <option name="MIXED_MODE_DEBUG" value="0" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to Unity Editor" type="UNITY_DEBUG_RUN_CONFIGURATION" factoryName="Unity Debug" show_console_on_std_err="false" show_console_on_std_out="false" port="50000" address="localhost" useMixedMode="false">
+      <option name="allowRunningInParallel" value="false" />
+      <option name="listenPortForConnections" value="false" />
+      <option name="pid" />
+      <option name="projectPathOnTarget" />
+      <option name="runtimes">
+        <list />
+      </option>
+      <option name="selectedOptions">
+        <list />
+      </option>
+      <method v="2" />
+    </configuration>
+    <configuration name="Attach to" type="UnityDevicePlayer" factoryName="UnityAttachToDevicePlayer">
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4b4f0612-359a-46d5-bad5-2465dfe32980" name="Changes" comment="" />
+      <created>1789479413957</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1789479413957</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="UnityProjectConfiguration" hasMinimizedUI="true" />
+  <component name="UnityProjectDiscoverer">
+    <option name="hasUnityReference" value="true" />
+    <option name="unityProject" value="true" />
+    <option name="unityProjectFolder" value="true" />
+  </component>
+  <component name="UnityUnitTestConfiguration" currentTestLauncher="Both" />
+  <component name="VcsManagerConfiguration">
+    <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.OperationCanceledException" breakIfHandledByOtherCode="false" displayValue="System.OperationCanceledException" />
+          <option name="timeStamp" value="1" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.Tasks.TaskCanceledException" breakIfHandledByOtherCode="false" displayValue="System.Threading.Tasks.TaskCanceledException" />
+          <option name="timeStamp" value="2" />
+        </breakpoint>
+        <breakpoint enabled="true" type="DotNet_Exception_Breakpoints">
+          <properties exception="System.Threading.ThreadAbortException" breakIfHandledByOtherCode="false" displayValue="System.Threading.ThreadAbortException" />
+          <option name="timeStamp" value="3" />
+        </breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>
