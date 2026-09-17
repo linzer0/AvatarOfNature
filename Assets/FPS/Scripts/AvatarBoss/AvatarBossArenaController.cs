@@ -13,13 +13,13 @@ namespace Unity.FPS.AvatarBoss
         [Min(0.05f)] public float SectorHeight = 0.25f;
         [Range(8, 12)] public int SectorCount = 8;
         [Range(2, 5)] public int RingCount = 3;
-        [Min(0f)] public float RingGap = 0.75f;
+        [Min(0f)] public float RingGap = 0.18f;
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
         public bool CreateCenterPlatform = true;
         [Min(0.1f)] public float CenterPlatformRadius = 3.7f;
         [Min(0f)] public float SectorVisualLift = 0.22f;
-        [Range(0.35f, 0.9f)] public float SectorArcFill = 0.48f;
+        [Range(0.35f, 0.95f)] public float SectorArcFill = 0.86f;
 
         [SerializeField] List<AvatarBossArenaSector> m_Sectors = new List<AvatarBossArenaSector>();
 
