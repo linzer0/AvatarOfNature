@@ -20,6 +20,7 @@ namespace Unity.FPS.AvatarBoss
         public float DriftDistanceMax = 7f;
         [Tooltip("Seconds between impacts (staggered bomb layout)")]
         public float ImpactInterval = 0.35f;
+        [Range(1, 5)] public int TargetCellCount = 3;
 
         [Header("Rock visuals")]
         public float FallHeight = 10f;
@@ -32,6 +33,7 @@ namespace Unity.FPS.AvatarBoss
         int m_TargetSector = -1;
         readonly List<GameObject> m_Telegraphs = new List<GameObject>();
         readonly List<GameObject> m_Rocks = new List<GameObject>();
+        readonly List<Vector3> m_ImpactPoints = new List<Vector3>();
 
         static Material s_DecalMaterial;
         static Material s_RockMaterial;
@@ -67,60 +69,60 @@ namespace Unity.FPS.AvatarBoss
             }
 
             int count = Mathf.Clamp(ImpactCount, 6, 8);
-            Vector3 clusterCenter = m_Arena != null && m_TargetSector >= 0
-                ? m_Arena.GetSectorTargetPoint(m_TargetSector, m_Player.position)
-                : m_Player.position;
-
-            for (int i = 0; i < count; i++)
+            m_ImpactPoints.Clear();
+            if (m_Arena != null && m_TargetSector >= 0)
             {
-                Vector3 center;
-                if (m_Arena != null && m_TargetSector >= 0 && i > 0)
-                    center = m_Arena.GetRandomPointInSector(m_TargetSector);
-                else if (i == 0)
-                    center = clusterCenter;
-                else
+                var targetSectors = m_Arena.GetAttackTargetSectors(m_TargetSector, TargetCellCount);
+                SetArenaTargetSectors(targetSectors);
+                for (int i = 0; i < targetSectors.Count; i++)
                 {
-                    Vector2 rnd = Random.insideUnitCircle * ImpactSpread;
-                    if (rnd.magnitude < 2.5f)
-                        rnd = rnd.normalized * 2.5f;
-                    center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
+                    var overlay = m_Arena.CreateSectorTelegraph(targetSectors[i],
+                        new Color(1f, 0.24f, 0.03f, 0.58f), "FireCellTelegraph");
+                    if (overlay != null)
+                        m_Telegraphs.Add(overlay);
                 }
 
-                if (m_Arena == null || m_TargetSector < 0)
-                    center = SnapToGround(center + Vector3.up * 20f);
+                for (int i = 0; i < count && targetSectors.Count > 0; i++)
+                {
+                    int sector = targetSectors[i % targetSectors.Count];
+                    m_ImpactPoints.Add(i == 0
+                        ? m_Arena.GetSectorTargetPoint(sector, m_Player.position)
+                        : m_Arena.GetRandomPointInSector(sector));
+                }
+                return;
+            }
+
+            SetArenaTargetSectors(null);
+            for (int i = 0; i < count; i++)
+            {
+                Vector2 rnd = Random.insideUnitCircle * ImpactSpread;
+                Vector3 center = SnapToGround(m_Player.position + new Vector3(rnd.x, 20f, rnd.y));
+                m_ImpactPoints.Add(center);
 
                 GameObject decal = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
                 Object.Destroy(decal.GetComponent<Collider>());
                 decal.name = "MeteorTelegraph";
                 decal.transform.SetPositionAndRotation(center + Vector3.up * 0.06f, Quaternion.identity);
                 decal.transform.localScale = new Vector3(2.4f, 0.02f, 2.4f);
-
                 MeshRenderer decalRenderer = decal.GetComponent<MeshRenderer>();
                 Shader textureShader = Shader.Find("Sprites/Default");
                 if (s_DecalMaterial == null && textureShader != null)
-                {
-                    s_DecalMaterial = new Material(textureShader);
-                    // Fire: red-orange glow language
-                    s_DecalMaterial.color = new Color(1f, 0.35f, 0.05f, 0.7f);
-                }
+                    s_DecalMaterial = new Material(textureShader)
+                        { color = new Color(1f, 0.35f, 0.05f, 0.7f) };
                 if (s_DecalMaterial != null)
                     decalRenderer.material = s_DecalMaterial;
-
                 m_Telegraphs.Add(decal);
             }
         }
 
         public override IEnumerator Execute()
         {
-            if (m_Telegraphs.Count == 0)
+            if (m_ImpactPoints.Count == 0)
                 yield break;
 
-            for (int i = 0; i < m_Telegraphs.Count; i++)
+            for (int i = 0; i < m_ImpactPoints.Count; i++)
             {
-                if (m_Telegraphs[i] == null)
-                    continue;
-
-                StartCoroutine(FallRock(m_Telegraphs[i].transform.position));
+                StartCoroutine(FallRock(m_ImpactPoints[i]));
                 yield return new WaitForSeconds(ImpactInterval);
             }
 
@@ -198,6 +200,7 @@ namespace Unity.FPS.AvatarBoss
                 if (decal != null)
                     Destroy(decal);
             m_Telegraphs.Clear();
+            m_ImpactPoints.Clear();
         }
 
         public override void Cleanup()

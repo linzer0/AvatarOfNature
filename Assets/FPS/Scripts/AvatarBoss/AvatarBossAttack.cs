@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using Unity.FPS.Game;
 using UnityEngine;
 
@@ -35,6 +36,10 @@ namespace Unity.FPS.AvatarBoss
 
         protected AvatarBossIntent CurrentIntent { get; private set; }
         protected bool HasIntent { get; private set; }
+        readonly List<int> m_ArenaTargetSectors = new List<int>();
+
+        /// <summary>Cells visually announced and resolved by this execution.</summary>
+        public IReadOnlyList<int> ArenaTargetSectors => m_ArenaTargetSectors;
 
         /// <summary>Validation guard: designer data must match the component's expected element.
         /// Logs a clear error but never repairs data silently.</summary>
@@ -64,6 +69,16 @@ namespace Unity.FPS.AvatarBoss
         {
             CurrentIntent = intent;
             HasIntent = true;
+        }
+
+        protected void SetArenaTargetSectors(IEnumerable<int> sectors)
+        {
+            m_ArenaTargetSectors.Clear();
+            if (sectors == null)
+                return;
+            foreach (int sector in sectors)
+                if (!m_ArenaTargetSectors.Contains(sector))
+                    m_ArenaTargetSectors.Add(sector);
         }
 
         /// <summary>Spawn all telegraph visuals. Called when the cycle enters the Telegraph state.</summary>

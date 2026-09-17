@@ -37,7 +37,7 @@ namespace Unity.FPS.Game
             // Apply damages with distance falloff
             foreach (Damageable uniqueDamageable in uniqueDamagedHealths.Values)
             {
-                float distance = Vector3.Distance(uniqueDamageable.transform.position, transform.position);
+                float distance = Vector3.Distance(uniqueDamageable.transform.position, center);
                 uniqueDamageable.InflictDamage(
                     damage * DamageRatioOverDistance.Evaluate(distance / AreaOfEffectDistance), true, owner);
             }

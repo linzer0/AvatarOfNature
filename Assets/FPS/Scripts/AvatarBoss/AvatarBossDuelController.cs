@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using Unity.FPS.Game;
 using UnityEngine;
 
@@ -85,24 +86,35 @@ namespace Unity.FPS.AvatarBoss
             // any arena durability or open the boss's damage window.
             if (attack == null || attack.Element == AvatarBossElement.Shockwave)
                 return;
-            if (intent.TargetSector < 0 || intent.TargetSector >= Arena.Sectors.Count)
-                return;
+            var targetSectors = new List<int>();
+            if (attack.ArenaTargetSectors.Count > 0)
+                targetSectors.AddRange(attack.ArenaTargetSectors);
+            else if (intent.TargetSector >= 0 && intent.TargetSector < Arena.Sectors.Count)
+                targetSectors.Add(intent.TargetSector);
 
-            var target = Arena.GetSector(intent.TargetSector);
-            if (target == null || !Arena.DamageSector(intent.TargetSector))
-                return;
+            int brokenSectors = 0;
+            for (int i = 0; i < targetSectors.Count; i++)
+            {
+                int sectorIndex = targetSectors[i];
+                var target = Arena.GetSector(sectorIndex);
+                if (target == null || !Arena.DamageSector(sectorIndex))
+                    continue;
+                if (target.State != AvatarBossArenaSectorState.Collapsing
+                    && target.State != AvatarBossArenaSectorState.Destroyed)
+                    continue;
 
-            // A normal impact only stains/cracks the tile. The duel window belongs
-            // exclusively to the impact that actually breaks it.
-            if (target.State != AvatarBossArenaSectorState.Collapsing
-                && target.State != AvatarBossArenaSectorState.Destroyed)
-                return;
+                Scheduler?.MarkSectorDestroyed(sectorIndex);
+                brokenSectors++;
+            }
 
-            Scheduler?.MarkSectorDestroyed(intent.TargetSector);
+            // A normal impact only stains/cracks cells. The duel window belongs
+            // exclusively to an execution that actually breaks at least one cell.
+            if (brokenSectors == 0)
+                return;
 
             m_LastResolvedIntent = intent;
             m_HasLastResolvedIntent = true;
-            ResolvedSectorCount++;
+            ResolvedSectorCount += brokenSectors;
             OnIntentResolved?.Invoke(intent);
 
             if (m_VulnerabilityRoutine != null)

@@ -20,6 +20,7 @@ namespace Unity.FPS.AvatarBoss
         public float DriftDistanceMax = 5.5f;
         [Tooltip("Radius inside which the spikes deal damage")]
         public float DamageRadius = 2.5f;
+        [Range(1, 4)] public int TargetCellCount = 2;
 
         [Header("Spike visuals")]
         public float SpikeRiseTime = 0.25f;
@@ -32,6 +33,7 @@ namespace Unity.FPS.AvatarBoss
         int m_TargetSector = -1;
         readonly List<GameObject> m_Telegraphs = new List<GameObject>();
         readonly List<GameObject> m_Spikes = new List<GameObject>();
+        readonly List<Vector3> m_ImpactPoints = new List<Vector3>();
 
         static Material s_DecalMaterial;
         static Material s_SpikeMaterial;
@@ -66,62 +68,64 @@ namespace Unity.FPS.AvatarBoss
                 return;
             }
 
-            Vector3 clusterCenter = m_Arena != null && m_TargetSector >= 0
-                ? m_Arena.GetSectorTargetPoint(m_TargetSector, m_Player.position)
-                : m_Player.position;
-
-            for (int i = 0; i < SpikeCount; i++)
+            m_ImpactPoints.Clear();
+            if (m_Arena != null && m_TargetSector >= 0)
             {
-                Vector3 center;
-                if (m_Arena != null && m_TargetSector >= 0 && i > 0)
-                    center = m_Arena.GetRandomPointInSector(m_TargetSector);
-                else if (i == 0)
-                    center = clusterCenter;
-                else
+                var targetSectors = m_Arena.GetAttackTargetSectors(m_TargetSector, TargetCellCount);
+                SetArenaTargetSectors(targetSectors);
+                for (int i = 0; i < targetSectors.Count; i++)
                 {
-                    Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
-                    if (rnd.magnitude < 2f)
-                        rnd = rnd.normalized * 2f;
-                    center = clusterCenter + new Vector3(rnd.x, 0f, rnd.y);
+                    var overlay = m_Arena.CreateSectorTelegraph(targetSectors[i],
+                        new Color(0.85f, 0.58f, 0.12f, 0.55f), "EarthCellTelegraph");
+                    if (overlay != null)
+                        m_Telegraphs.Add(overlay);
                 }
 
-                if (m_Arena == null || m_TargetSector < 0)
-                    center = SnapToGround(center + Vector3.up * 20f);
+                for (int i = 0; i < SpikeCount && targetSectors.Count > 0; i++)
+                {
+                    int sector = targetSectors[i % targetSectors.Count];
+                    m_ImpactPoints.Add(i == 0
+                        ? m_Arena.GetSectorTargetPoint(sector, m_Player.position)
+                        : m_Arena.GetRandomPointInSector(sector));
+                }
+                return;
+            }
+
+            SetArenaTargetSectors(null);
+            for (int i = 0; i < SpikeCount; i++)
+            {
+                Vector2 rnd = Random.insideUnitCircle * SpikeSpread;
+                Vector3 center = SnapToGround(m_Player.position + new Vector3(rnd.x, 20f, rnd.y));
+                m_ImpactPoints.Add(center);
 
                 GameObject decal = GameObject.CreatePrimitive(PrimitiveType.Quad);
                 Object.Destroy(decal.GetComponent<Collider>());
                 decal.name = "EarthTelegraph";
-                decal.transform.SetPositionAndRotation(
-                    center + Vector3.up * 0.08f,
+                decal.transform.SetPositionAndRotation(center + Vector3.up * 0.08f,
                     Quaternion.Euler(-90f, Random.value * 360f, 0f));
                 decal.transform.localScale = Vector3.one * 3.5f;
-
                 MeshRenderer decalRenderer = decal.GetComponent<MeshRenderer>();
                 Shader textureShader = Shader.Find("Sprites/Default");
                 if (s_DecalMaterial == null && textureShader != null)
-                {
-                    s_DecalMaterial = new Material(textureShader);
-                    // Earth: brown-gold dust palette (cracked-soil language)
-                    s_DecalMaterial.color = new Color(0.72f, 0.5f, 0.12f, 0.7f);
-                }
+                    s_DecalMaterial = new Material(textureShader)
+                        { color = new Color(0.72f, 0.5f, 0.12f, 0.7f) };
                 if (s_DecalMaterial != null)
                     decalRenderer.material = s_DecalMaterial;
-
                 m_Telegraphs.Add(decal);
             }
         }
 
         public override IEnumerator Execute()
         {
-            if (m_Telegraphs.Count == 0)
+            if (m_ImpactPoints.Count == 0)
                 yield break;
 
-            foreach (GameObject telegraph in m_Telegraphs)
+            foreach (Vector3 impactPoint in m_ImpactPoints)
             {
                 GameObject spike = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 Object.Destroy(spike.GetComponent<Collider>()); // damage applied via OverlapSphere
                 spike.name = "EarthSpike";
-                spike.transform.position = telegraph.transform.position - Vector3.up * SpikeHeight;
+                spike.transform.position = impactPoint - Vector3.up * SpikeHeight;
                 spike.transform.rotation = Quaternion.identity;
                 spike.transform.localScale = new Vector3(0.8f, SpikeHeight, 0.8f);
 
@@ -204,6 +208,7 @@ namespace Unity.FPS.AvatarBoss
                 if (decal != null)
                     Destroy(decal);
             m_Telegraphs.Clear();
+            m_ImpactPoints.Clear();
 
             DestroySpikes();
         }

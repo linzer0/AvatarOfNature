@@ -49,6 +49,7 @@ namespace Unity.FPS.AvatarBoss
         public override void SetIntent(AvatarBossIntent intent)
         {
             base.SetIntent(intent);
+            SetArenaTargetSectors(new[] { intent.TargetSector });
             m_TargetDirection = intent.TargetDirection;
             m_TargetDirection.y = 0f;
             if (m_TargetDirection.sqrMagnitude < 0.001f)

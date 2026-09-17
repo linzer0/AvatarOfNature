@@ -184,6 +184,85 @@ namespace Unity.FPS.AvatarBoss
                 Mathf.Cos(angle) * radius, surfaceY, Mathf.Sin(angle) * radius));
         }
 
+        /// <summary>Builds a distinct set of usable cells for one attack, preferring distant extras.</summary>
+        public List<int> GetAttackTargetSectors(int primarySector, int targetCount)
+        {
+            EnsureInitialized();
+            var targets = new List<int>();
+            targetCount = Mathf.Clamp(targetCount, 1, m_Sectors.Count);
+            if (IsSectorTargetable(primarySector))
+                targets.Add(primarySector);
+
+            var candidates = new List<int>();
+            for (int i = 0; i < m_Sectors.Count; i++)
+                if (IsSectorTargetable(i) && !targets.Contains(i))
+                    candidates.Add(i);
+
+            int count = Mathf.Clamp(SectorCount, 8, 12);
+            while (targets.Count < targetCount && candidates.Count > 0)
+            {
+                var distant = new List<int>();
+                int reference = targets.Count > 0 ? targets[0] : primarySector;
+                int referenceRing = reference >= 0 ? reference / count : -1;
+                int referenceAngular = reference >= 0 ? reference % count : -1;
+                for (int i = 0; i < candidates.Count; i++)
+                {
+                    int candidate = candidates[i];
+                    int angularDistance = referenceAngular >= 0
+                        ? Mathf.Abs(candidate % count - referenceAngular)
+                        : count;
+                    angularDistance = Mathf.Min(angularDistance, count - angularDistance);
+                    if (referenceRing < 0 || candidate / count != referenceRing || angularDistance > 1)
+                        distant.Add(candidate);
+                }
+
+                var pool = distant.Count > 0 ? distant : candidates;
+                int selected = pool[UnityEngine.Random.Range(0, pool.Count)];
+                targets.Add(selected);
+                candidates.Remove(selected);
+            }
+
+            return targets;
+        }
+
+        /// <summary>Creates a collider-free overlay matching one sector's exact shape.</summary>
+        public GameObject CreateSectorTelegraph(int index, Color color, string telegraphName)
+        {
+            var sector = GetSector(index);
+            if (sector == null)
+                return null;
+
+            int count = Mathf.Clamp(SectorCount, 8, 12);
+            int rings = Mathf.Clamp(RingCount, 2, 5);
+            int ring = index / count;
+            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
+            float innerRadius = ringStart + safeGap * 0.5f;
+            float outerRadius = ringEnd - safeGap * 0.5f;
+            float midRadius = (ringStart + ringEnd) * 0.5f;
+            float halfSectorAngle = Mathf.PI / count * SectorArcFill * 0.5f;
+
+            var overlay = CreateSectorMeshVisual(sector.gameObject, telegraphName, innerRadius,
+                outerRadius, midRadius, halfSectorAngle, 0.025f, false);
+            overlay.transform.localPosition = new Vector3(0f, SectorHeight * 0.5f + 0.012f, 0f);
+            var renderer = overlay.GetComponent<MeshRenderer>();
+            var shader = Shader.Find("Sprites/Default");
+            if (shader != null)
+                renderer.sharedMaterial = new Material(shader) { color = color };
+            renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            renderer.receiveShadows = false;
+            return overlay;
+        }
+
+        bool IsSectorTargetable(int index)
+        {
+            var sector = GetSector(index);
+            return sector != null
+                && sector.State != AvatarBossArenaSectorState.Collapsing
+                && sector.State != AvatarBossArenaSectorState.Destroyed;
+        }
+
         /// <summary>Marks a sector as damaged and raises the state-change event.</summary>
         public bool DamageSector(int index)
         {
@@ -325,7 +404,8 @@ namespace Unity.FPS.AvatarBoss
         }
 
         GameObject CreateSectorMeshVisual(GameObject sectorObject, string name, float innerRadius,
-            float outerRadius, float midRadius, float halfSectorAngle, float height)
+            float outerRadius, float midRadius, float halfSectorAngle, float height,
+            bool addCollider = true)
         {
             var visual = new GameObject(name);
             visual.transform.SetParent(sectorObject.transform, false);
@@ -365,18 +445,21 @@ namespace Unity.FPS.AvatarBoss
 
             visual.AddComponent<MeshFilter>().sharedMesh = mesh;
             visual.AddComponent<MeshRenderer>();
-            var meshCollider = visual.AddComponent<MeshCollider>();
-            meshCollider.sharedMesh = mesh;
-            // CharacterController movement is much more stable against convex
-            // wedges at sector seams than against a non-convex triangle soup.
-            meshCollider.convex = true;
-            var noFriction = new PhysicsMaterial(name + "NoFriction")
+            if (addCollider)
             {
-                dynamicFriction = 0f,
-                staticFriction = 0f,
-                frictionCombine = PhysicsMaterialCombine.Minimum
-            };
-            meshCollider.sharedMaterial = noFriction;
+                var meshCollider = visual.AddComponent<MeshCollider>();
+                meshCollider.sharedMesh = mesh;
+                // CharacterController movement is much more stable against convex
+                // wedges at sector seams than against a non-convex triangle soup.
+                meshCollider.convex = true;
+                var noFriction = new PhysicsMaterial(name + "NoFriction")
+                {
+                    dynamicFriction = 0f,
+                    staticFriction = 0f,
+                    frictionCombine = PhysicsMaterialCombine.Minimum
+                };
+                meshCollider.sharedMaterial = noFriction;
+            }
             return visual;
         }
 

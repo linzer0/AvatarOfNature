@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using NUnit.Framework;
 using UnityEngine;
 
@@ -83,6 +84,33 @@ namespace Unity.FPS.AvatarBoss.EditorTests
                 Assert.AreEqual(i, m_Controller.GetSectorIndexAtWorldPosition(point),
                     $"Target point for sector {i} must resolve to that same sector");
             }
+        }
+
+        [Test]
+        public void GetAttackTargetSectors_ReturnsDistinctUsableCells()
+        {
+            var targets = m_Controller.GetAttackTargetSectors(0, 3);
+
+            Assert.AreEqual(3, targets.Count);
+            Assert.Contains(0, targets);
+            Assert.AreEqual(targets.Count, new HashSet<int>(targets).Count);
+            foreach (var index in targets)
+            {
+                Assert.IsNotNull(m_Controller.GetSector(index));
+                Assert.AreNotEqual(AvatarBossArenaSectorState.Destroyed, m_Controller.GetSector(index).State);
+            }
+        }
+
+        [Test]
+        public void CreateSectorTelegraph_MatchesCellWithoutAddingCollision()
+        {
+            m_Controller.CreateRuntimeVisuals = true;
+            var telegraph = m_Controller.CreateSectorTelegraph(0, Color.red, "TestCellTelegraph");
+
+            Assert.IsNotNull(telegraph);
+            Assert.AreSame(m_Controller.GetSector(0).transform, telegraph.transform.parent);
+            Assert.IsNotNull(telegraph.GetComponent<MeshFilter>());
+            Assert.IsNull(telegraph.GetComponent<Collider>());
         }
     }
 }
