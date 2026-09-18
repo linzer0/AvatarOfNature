@@ -8,7 +8,7 @@ gameplay loop without scanning one large folder.
 - `Attacks/` — concrete Fire, Earth and Shockwave attack implementations.
 - `Presentation/` — HUD, bootstrap flow, weak points, VFX, audio and support presentation systems.
 - `Support/` — runtime support mechanics such as summons and healing orbs.
-- `Testing/` — deterministic runtime agents, assertions, reports and debug-only harnesses.
+- `Testing/` — deterministic runtime agents, assertions, reports and debug-only harnesses. It is compiled as the separate `fps.AvatarBoss.Testing` assembly.
 - `EditorTests/` — Unity Test Framework tests; kept separate from runtime code.
 
 The `fps.AvatarBoss` assembly definition remains at this folder root. Moving a

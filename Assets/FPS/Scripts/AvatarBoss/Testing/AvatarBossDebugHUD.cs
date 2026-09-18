@@ -7,8 +7,6 @@ namespace Unity.FPS.AvatarBoss
     public class AvatarBossDebugHUD : MonoBehaviour
     {
         /// <summary>Static gate for one-shot F10 hit diagnostics (HIT ... weakPoint=...).</summary>
-        public static bool F10DiagnosticsEnabled;
-
         public AvatarBossController Boss;
         public bool ShowOnStart = false;
 
@@ -19,7 +17,7 @@ namespace Unity.FPS.AvatarBoss
             if (Boss == null)
                 Boss = GetComponentInParent<AvatarBossController>();
             m_Shown = ShowOnStart;
-            F10DiagnosticsEnabled = ShowOnStart;
+            AvatarBossDiagnostics.F10DiagnosticsEnabled = ShowOnStart;
         }
 
         void Update()
@@ -28,7 +26,7 @@ namespace Unity.FPS.AvatarBoss
             if (kb != null && kb.f10Key.wasPressedThisFrame)
             {
                 m_Shown = !m_Shown;
-                F10DiagnosticsEnabled = m_Shown;
+                AvatarBossDiagnostics.F10DiagnosticsEnabled = m_Shown;
             }
         }
 

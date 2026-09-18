@@ -902,7 +902,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 28921e7885cd2ae4d9b350d1a984b03b, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDebugHUD
+  m_EditorClassIdentifier: fps.AvatarBoss.Testing::Unity.FPS.AvatarBoss.AvatarBossDebugHUD
   Boss: {fileID: 0}
 --- !u!114 &1099317687
 MonoBehaviour:
@@ -1084,7 +1084,7 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: b5770ba394d80534091495f0e56774ff, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossGameplayTestAgent
+  m_EditorClassIdentifier: fps.AvatarBoss.Testing::Unity.FPS.AvatarBoss.AvatarBossGameplayTestAgent
   AutoRun: 0
   ShotInterval: 0.15
   StepTimeout: 60

@@ -102,7 +102,7 @@ namespace Unity.FPS.AvatarBoss
             float stagger = Stagger != null ? Stagger.CurrentStagger : 0f;
             bool weakPoint = part != null && part.GetComponent<AvatarBossWeakPoint>() != null;
 
-            if (AvatarBossDebugHUD.F10DiagnosticsEnabled)
+            if (AvatarBossDiagnostics.F10DiagnosticsEnabled)
             {
                 float mult = part != null ? part.DamageMultiplier : 1f;
                 float applied = damage;

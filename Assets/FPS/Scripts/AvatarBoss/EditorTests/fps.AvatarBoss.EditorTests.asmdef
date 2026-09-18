@@ -2,6 +2,7 @@
     "name": "fps.AvatarBoss.EditorTests",
     "references": [
         "fps.AvatarBoss",
+        "fps.AvatarBoss.Testing",
         "fps.Game",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
