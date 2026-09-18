@@ -28,7 +28,7 @@ namespace Unity.FPS.AvatarBoss
                 difficulty == AvatarBossDifficulty.Hard ? Hard : Normal;
         }
 
-        static AvatarBossDifficultyProfile CreateEasy()
+        public static AvatarBossDifficultyProfile CreateEasy()
         {
             return new AvatarBossDifficultyProfile
             {
@@ -42,7 +42,7 @@ namespace Unity.FPS.AvatarBoss
             };
         }
 
-        static AvatarBossDifficultyProfile CreateNormal()
+        public static AvatarBossDifficultyProfile CreateNormal()
         {
             return new AvatarBossDifficultyProfile
             {
@@ -56,7 +56,7 @@ namespace Unity.FPS.AvatarBoss
             };
         }
 
-        static AvatarBossDifficultyProfile CreateHard()
+        public static AvatarBossDifficultyProfile CreateHard()
         {
             return new AvatarBossDifficultyProfile
             {

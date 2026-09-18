@@ -50,39 +50,6 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossDifficulty CurrentDifficulty { get; private set; }
         public AvatarBossDifficultyProfile ActiveProfile { get; private set; }
 
-        [Header("Legacy fallback profiles")]
-        [Tooltip("Used only when EncounterConfig is missing from an older scene.")]
-        public AvatarBossDifficultyProfile Easy = new AvatarBossDifficultyProfile
-        {
-            Difficulty = AvatarBossDifficulty.Easy, BodyDamageMultiplier = 0.15f, PlayerDamageMultiplier = 0.75f,
-            AttackCooldownMultiplier = 1.2f, TelegraphMultiplier = 1.25f, WindupMultiplier = 1.15f,
-            DifficultyStaggerMultiplier = 1.15f,
-            StaggerGainMultiplier = 1.15f, VulnerabilityDuration = 4.2f, ShockwaveSpeedMultiplier = 0.85f,
-            MeteorDamage = 15f, OrbCount = 2, OrbHealth = 24f, OrbSpeed = 3.5f, HealPercent = 0.06f,
-            SummonCount = 2, SummonCooldownMultiplier = 1.2f, ComboFrequency = 0.55f, RecoveryFrequency = 1.2f, ComboCooldownMin = 30f, ComboCooldownMax = 38f,
-            MeteorCooldownMin = 30f, MeteorCooldownMax = 38f, MaxConcurrentThreats = 1
-        };
-        public AvatarBossDifficultyProfile Normal = new AvatarBossDifficultyProfile
-        {
-            Difficulty = AvatarBossDifficulty.Normal, BodyDamageMultiplier = 0.12f, PlayerDamageMultiplier = 1f,
-            AttackCooldownMultiplier = 1f, TelegraphMultiplier = 1f, WindupMultiplier = 1f,
-            DifficultyStaggerMultiplier = 1f,
-            StaggerGainMultiplier = 1f, VulnerabilityDuration = 3.5f, ShockwaveSpeedMultiplier = 1f,
-            MeteorDamage = 20f, OrbCount = 3, OrbHealth = 30f, OrbSpeed = 4.5f, HealPercent = 0.08f,
-            SummonCount = 3, SummonCooldownMultiplier = 1f, ComboFrequency = 0.8f, RecoveryFrequency = 1f, ComboCooldownMin = 25f, ComboCooldownMax = 35f,
-            MeteorCooldownMin = 25f, MeteorCooldownMax = 35f, MaxConcurrentThreats = 1
-        };
-        public AvatarBossDifficultyProfile Hard = new AvatarBossDifficultyProfile
-        {
-            Difficulty = AvatarBossDifficulty.Hard, BodyDamageMultiplier = 0.08f, PlayerDamageMultiplier = 1.2f,
-            AttackCooldownMultiplier = 0.85f, TelegraphMultiplier = 0.85f, WindupMultiplier = 0.85f,
-            DifficultyStaggerMultiplier = 0.85f,
-            StaggerGainMultiplier = 0.9f, VulnerabilityDuration = 3f, ShockwaveSpeedMultiplier = 1.1f,
-            MeteorDamage = 24f, OrbCount = 4, OrbHealth = 42f, OrbSpeed = 5.75f, HealPercent = 0.10f,
-            SummonCount = 3, SummonCooldownMultiplier = 0.85f, ComboFrequency = 1f, RecoveryFrequency = 0.85f, ComboCooldownMin = 18f, ComboCooldownMax = 25f,
-            MeteorCooldownMin = 18f, MeteorCooldownMax = 25f, MaxConcurrentThreats = 1
-        };
-
         AvatarBossController m_Boss;
         AvatarBossAttackScheduler m_Scheduler;
         AvatarBossHealingOrbs m_Orbs;
@@ -118,8 +85,11 @@ namespace Unity.FPS.AvatarBoss
         public void ApplyDifficulty(AvatarBossDifficulty difficulty)
         {
             CurrentDifficulty = difficulty;
-            var legacyProfile = difficulty == AvatarBossDifficulty.Easy ? Easy :
-                difficulty == AvatarBossDifficulty.Hard ? Hard : Normal;
+            var legacyProfile = difficulty == AvatarBossDifficulty.Easy
+                ? AvatarBossEncounterConfig.CreateEasy()
+                : difficulty == AvatarBossDifficulty.Hard
+                    ? AvatarBossEncounterConfig.CreateHard()
+                    : AvatarBossEncounterConfig.CreateNormal();
             ActiveProfile = EncounterConfig != null ? EncounterConfig.GetProfile(difficulty) : legacyProfile;
 
             float baseAttackCooldown = EncounterConfig != null ? EncounterConfig.AttackCooldown : 3f;

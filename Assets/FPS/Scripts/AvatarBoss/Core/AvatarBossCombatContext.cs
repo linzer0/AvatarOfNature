@@ -24,6 +24,7 @@ namespace Unity.FPS.AvatarBoss
                 Arena = UnityEngine.Object.FindFirstObjectByType<AvatarBossArenaController>();
             if (Player == null)
                 Player = UnityEngine.Object.FindFirstObjectByType<PlayerCharacterController>();
+
         }
     }
 }
