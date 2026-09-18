@@ -110,7 +110,16 @@ namespace Unity.FPS.AvatarBoss
             {
                 int sectorIndex = targetSectors[i];
                 var target = Arena.GetSector(sectorIndex);
-                if (target == null || !Arena.DamageSector(sectorIndex))
+                if (target == null)
+                    continue;
+
+                // A telegraphed boss impact is the player's actual puzzle
+                // resolution, not a small amount of ambient arena damage. Once
+                // the marked zone is hit, consume its remaining durability so
+                // the arena visibly changes and the weak-point window can open
+                // in the same readable boss cycle. Ordinary damage/tests still
+                // use DamageSector(int) and retain the Intact -> Damaged step.
+                if (!Arena.DamageSector(sectorIndex, Mathf.Max(1, target.HitPoints)))
                     continue;
                 if (target.State != AvatarBossArenaSectorState.Collapsing
                     && target.State != AvatarBossArenaSectorState.Destroyed)

@@ -45,6 +45,7 @@ namespace Unity.FPS.AvatarBoss
         Health m_BossHealth;
         AvatarBossSummonController m_Summons;
         AvatarBossHealingOrbs m_HealingOrbs;
+        AvatarBossDuelController m_Duel;
 
         bool m_Running;
         bool m_Abort;
@@ -129,8 +130,7 @@ namespace Unity.FPS.AvatarBoss
                 m_Report.StepResult("Setup", "boss and player linked, weapon ready", Time.unscaledTime, CaptureSnapshot());
             }
 
-            if (!m_Abort) yield return ShootBodyStep();
-            if (!m_Abort) yield return WaitStaggerBreakStep();
+            if (!m_Abort) yield return WaitForArenaResolutionStep();
             if (!m_Abort) yield return VerifyWeakPointAStep();
             if (!m_Abort) yield return HitWeakPointStep();
             if (!m_Abort) yield return TriggerPhase2Step();
@@ -173,6 +173,7 @@ namespace Unity.FPS.AvatarBoss
             m_PlayerHealth = m_Player.GetComponent<Health>();
             m_Summons = m_Boss.GetComponentInChildren<AvatarBossSummonController>();
             m_HealingOrbs = m_Boss.HealingOrbs;
+            m_Duel = m_Boss.GetComponent<AvatarBossDuelController>();
             if (m_HealingOrbs != null)
             {
                 RecoveryStarted = HealingOrbsDetected = HealingOrbDestroyed = false;
@@ -216,6 +217,24 @@ namespace Unity.FPS.AvatarBoss
             // deterministic stagger tracking
             m_StaggerBreakSeen = false;
             m_Stagger.OnStaggerFull += OnStaggerFullEdge;
+        }
+
+        IEnumerator WaitForArenaResolutionStep()
+        {
+            float t0 = Time.unscaledTime;
+            while (!m_Boss.IsDead && Time.unscaledTime - t0 < StepTimeout)
+            {
+                // Shockwave is intentionally a movement test. Fire/Earth impacts
+                // resolve the marked sector and open the actual duel window.
+                if (m_Duel != null && m_Duel.DuelWindowActive)
+                {
+                    m_Report.StepResult("ResolveMarkedSector", "arena impact opened duel window", t0, CaptureSnapshot());
+                    yield break;
+                }
+                yield return null;
+            }
+
+            m_Report.Fail("ResolveMarkedSector", "no marked sector resolved before timeout", t0, CaptureSnapshot());
         }
 
         void OnDestroy()
@@ -368,23 +387,13 @@ namespace Unity.FPS.AvatarBoss
                 }
             }
 
-            // fill stagger to break; stop immediately on break or if a summon re-enters
-            while (!m_StaggerBreakSeen && !m_Boss.IsDead
-                && m_BossHealth.CurrentHealth > 0f
-                && !m_Boss.SummonsActive
+            // Phase 2 keeps the same readable resolution rule: wait for the
+            // next marked Earth/Fire impact, then expect both weak points.
+            while (!m_Boss.IsDead && !m_Boss.SummonsActive
+                && (m_Duel == null || !m_Duel.DuelWindowActive)
                 && Time.unscaledTime - t0 < StepTimeout)
-            {
-                yield return ShootAndAim(BodyAimPoint());
-                yield return new WaitForSeconds(ShotInterval);
-            }
-            yield return new WaitForSeconds(0.4f);
-
-            if (CountExposed() < 2 && AllowHybridNudge && !m_Boss.IsDead)
-            {
-                m_Stagger.DebugAddStagger(m_Stagger.MaxStagger);
-                Debug.LogWarning($"[{Tag}] VerifyPhase2WeakPoints: test-only stagger hook used after real bullet budget.");
-                yield return new WaitForSeconds(0.4f);
-            }
+                yield return null;
+            yield return new WaitForSeconds(0.2f);
 
             int exposed = CountExposed();
             if (m_Boss.PhaseTwo && exposed >= 2)
