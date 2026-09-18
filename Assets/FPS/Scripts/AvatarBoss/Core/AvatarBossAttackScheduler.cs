@@ -138,7 +138,9 @@ namespace Unity.FPS.AvatarBoss
             m_DifficultySelect = GetComponentInParent<AvatarBossShowcaseDifficultySelect>();
             if (HealingOrbs == null)
                 HealingOrbs = GetComponentInParent<AvatarBossHealingOrbs>();
-            m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            var context = m_Boss != null ? m_Boss.GetCombatContext() : null;
+            context?.ResolveSceneReferences();
+            m_Arena = context != null ? context.Arena : null;
             if (UseIntentController)
             {
                 int sectorCount = m_Arena != null
@@ -345,7 +347,7 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_IntentController != null)
             {
-                var player = FindFirstObjectByType<PlayerCharacterController>();
+                var player = m_Boss != null ? m_Boss.GetCombatContext().Player : null;
                 if (player != null)
                     m_IntentController.SetLastPlayerPosition(player.transform.position);
 

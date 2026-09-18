@@ -42,8 +42,11 @@ namespace Unity.FPS.AvatarBoss
                 Boss = GetComponent<AvatarBossController>();
             if (Scheduler == null && Boss != null)
                 Scheduler = Boss.Scheduler;
-            if (Arena == null)
-                Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            if (Arena == null && Boss != null)
+            {
+                Boss.GetCombatContext().ResolveSceneReferences();
+                Arena = Boss.CombatContext.Arena;
+            }
 
             var body = transform.Find("BossBody");
             if (body != null)
@@ -56,8 +59,11 @@ namespace Unity.FPS.AvatarBoss
                 Boss = GetComponent<AvatarBossController>();
             if (Scheduler == null && Boss != null)
                 Scheduler = Boss.Scheduler;
-            if (Arena == null)
-                Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            if (Arena == null && Boss != null)
+            {
+                Boss.GetCombatContext().ResolveSceneReferences();
+                Arena = Boss.CombatContext.Arena;
+            }
 
             if (m_BodyDamageable != null)
             {

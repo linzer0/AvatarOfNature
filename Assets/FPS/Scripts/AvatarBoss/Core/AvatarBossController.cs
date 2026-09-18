@@ -17,6 +17,7 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossWeakPoint[] WeakPoints { get; private set; }
         public AvatarBossAttackScheduler Scheduler { get; private set; }
         public AvatarBossHealingOrbs HealingOrbs { get; private set; }
+        public AvatarBossCombatContext CombatContext { get; private set; }
 
         public bool PhaseTwo { get; private set; }
 
@@ -32,8 +33,18 @@ namespace Unity.FPS.AvatarBoss
 
         public bool IsDead => m_IsDead;
 
+        public AvatarBossCombatContext GetCombatContext()
+        {
+            if (CombatContext == null)
+                CombatContext = new AvatarBossCombatContext();
+            return CombatContext;
+        }
+
         void Awake()
         {
+            CombatContext = new AvatarBossCombatContext();
+            CombatContext.ResolveSceneReferences();
+
             BossHealth = GetComponentInParent<Health>();
             if (BossHealth == null)
                 BossHealth = GetComponent<Health>();

@@ -3,7 +3,7 @@
 The boss prototype is split by responsibility so a reviewer can follow the
 gameplay loop without scanning one large folder.
 
-- `Core/` — boss contract, intent, duel resolution, phases, difficulty and stagger.
+- `Core/` — boss contract, intent, duel resolution, phases, difficulty, stagger and the `AvatarBossCombatContext` dependency boundary.
 - `Arena/` — arena controller and destructible sector state.
 - `Attacks/` — concrete Fire, Earth and Shockwave attack implementations.
 - `Presentation/` — HUD, bootstrap flow, weak points, VFX, audio and support presentation systems.

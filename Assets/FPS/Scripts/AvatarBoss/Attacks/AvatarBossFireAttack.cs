@@ -29,6 +29,7 @@ namespace Unity.FPS.AvatarBoss
 
         Transform m_Player;
         AvatarBossController m_Boss;
+        AvatarBossCombatContext m_Context;
         AvatarBossArenaController m_Arena;
         int m_TargetSector = -1;
         readonly List<GameObject> m_Telegraphs = new List<GameObject>();
@@ -44,7 +45,9 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
-            m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            m_Context = m_Boss != null ? m_Boss.GetCombatContext() : null;
+            m_Context?.ResolveSceneReferences();
+            m_Arena = m_Context != null ? m_Context.Arena : null;
         }
 
         public override void SetIntent(AvatarBossIntent intent)
@@ -58,10 +61,14 @@ namespace Unity.FPS.AvatarBoss
         public override void Prepare()
         {
             if (m_Arena == null)
-                m_Arena = FindFirstObjectByType<AvatarBossArenaController>();
+            {
+                m_Context?.ResolveSceneReferences();
+                m_Arena = m_Context != null ? m_Context.Arena : null;
+            }
             if (m_Player == null)
             {
-                var player = FindFirstObjectByType<PlayerCharacterController>();
+                m_Context?.ResolveSceneReferences();
+                var player = m_Context != null ? m_Context.Player : null;
                 m_Player = player != null ? player.transform : null;
             }
 

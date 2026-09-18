@@ -32,6 +32,7 @@ namespace Unity.FPS.AvatarBoss
 
         Transform m_Player;
         AvatarBossController m_Boss;
+        AvatarBossCombatContext m_Context;
         GameObject m_Ring;
         Vector3 m_WaveOrigin;
         Vector3 m_TargetDirection = Vector3.forward;
@@ -44,6 +45,8 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
+            m_Context = m_Boss != null ? m_Boss.GetCombatContext() : null;
+            m_Context?.ResolveSceneReferences();
         }
 
         public override void SetIntent(AvatarBossIntent intent)
@@ -56,7 +59,7 @@ namespace Unity.FPS.AvatarBoss
                 m_TargetDirection = Vector3.forward;
             m_TargetDirection.Normalize();
 
-            var arena = FindFirstObjectByType<AvatarBossArenaController>();
+            var arena = m_Context != null ? m_Context.Arena : null;
             if (arena != null)
                 m_SectorCount = Mathf.Clamp(arena.SectorCount, 8, 12);
         }
@@ -64,7 +67,8 @@ namespace Unity.FPS.AvatarBoss
         {
             if (m_Player == null)
             {
-                var player = FindFirstObjectByType<PlayerCharacterController>();
+                m_Context?.ResolveSceneReferences();
+                var player = m_Context != null ? m_Context.Player : null;
                 m_Player = player != null ? player.transform : null;
             }
 

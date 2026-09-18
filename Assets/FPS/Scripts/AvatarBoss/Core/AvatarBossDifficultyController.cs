@@ -103,7 +103,9 @@ namespace Unity.FPS.AvatarBoss
             m_Phase = GetComponent<AvatarBossPhaseController>();
             m_Summons = GetComponent<AvatarBossSummonController>();
             m_Stagger = GetComponent<AvatarBossStagger>();
-            m_Player = FindFirstObjectByType<PlayerCharacterController>();
+            var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
+            context?.ResolveSceneReferences();
+            m_Player = context != null ? context.Player : null;
             m_InitialComboEnabled = m_Scheduler != null && m_Scheduler.EnableCombo;
             ApplyDifficulty(DefaultDifficulty);
         }
@@ -171,7 +173,9 @@ namespace Unity.FPS.AvatarBoss
                 bodyDamageable.DamageMultiplier = ActiveProfile.BodyDamageMultiplier;
 
             if (m_Player == null)
-                m_Player = FindFirstObjectByType<PlayerCharacterController>();
+                var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
+                context?.ResolveSceneReferences();
+                m_Player = context != null ? context.Player : null;
             var playerDamageable = m_Player != null ? m_Player.GetComponent<Damageable>() : null;
             if (playerDamageable != null)
                 playerDamageable.DamageMultiplier = ActiveProfile.PlayerDamageMultiplier;
