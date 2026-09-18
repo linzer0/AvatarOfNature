@@ -12,6 +12,12 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossArenaController Arena { get; private set; }
         public PlayerCharacterController Player { get; private set; }
 
+        public AvatarBossCombatContext(AvatarBossArenaController arena, PlayerCharacterController player)
+        {
+            Arena = arena;
+            Player = player;
+        }
+
         public void ResolveSceneReferences()
         {
             if (Arena == null)

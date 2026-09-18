@@ -45,10 +45,13 @@ namespace Unity.FPS.AvatarBoss
     {
         [Header("Selection")]
         public AvatarBossDifficulty DefaultDifficulty = AvatarBossDifficulty.Normal;
+        [Tooltip("Shared balance asset. If empty, the legacy inline profiles below keep older scenes playable.")]
+        public AvatarBossEncounterConfig EncounterConfig;
         public AvatarBossDifficulty CurrentDifficulty { get; private set; }
         public AvatarBossDifficultyProfile ActiveProfile { get; private set; }
 
-        [Header("Profiles")]
+        [Header("Legacy fallback profiles")]
+        [Tooltip("Used only when EncounterConfig is missing from an older scene.")]
         public AvatarBossDifficultyProfile Easy = new AvatarBossDifficultyProfile
         {
             Difficulty = AvatarBossDifficulty.Easy, BodyDamageMultiplier = 0.15f, PlayerDamageMultiplier = 0.75f,
@@ -103,6 +106,8 @@ namespace Unity.FPS.AvatarBoss
             m_Phase = GetComponent<AvatarBossPhaseController>();
             m_Summons = GetComponent<AvatarBossSummonController>();
             m_Stagger = GetComponent<AvatarBossStagger>();
+            if (EncounterConfig == null)
+                EncounterConfig = Resources.Load<AvatarBossEncounterConfig>("AvatarBossEncounterConfig");
             var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
             context?.ResolveSceneReferences();
             m_Player = context != null ? context.Player : null;
@@ -113,18 +118,26 @@ namespace Unity.FPS.AvatarBoss
         public void ApplyDifficulty(AvatarBossDifficulty difficulty)
         {
             CurrentDifficulty = difficulty;
-            ActiveProfile = difficulty == AvatarBossDifficulty.Easy ? Easy :
+            var legacyProfile = difficulty == AvatarBossDifficulty.Easy ? Easy :
                 difficulty == AvatarBossDifficulty.Hard ? Hard : Normal;
+            ActiveProfile = EncounterConfig != null ? EncounterConfig.GetProfile(difficulty) : legacyProfile;
+
+            float baseAttackCooldown = EncounterConfig != null ? EncounterConfig.AttackCooldown : 3f;
+            float baseInitialGrace = EncounterConfig != null ? EncounterConfig.InitialGraceTime : 4f;
+            float baseRecover = EncounterConfig != null ? EncounterConfig.RecoverTime : 1.5f;
+            float baseWindup = EncounterConfig != null ? EncounterConfig.WindupTime : 0.9f;
+            float baseRecoveryCooldown = EncounterConfig != null ? EncounterConfig.RecoveryCooldown : 40f;
+            float baseSummonCooldown = EncounterConfig != null ? EncounterConfig.SummonCooldown : 20f;
 
             if (m_Scheduler != null)
             {
                 m_Scheduler.ComboFrequency = ActiveProfile.ComboFrequency;
                 m_Scheduler.UseMixedCombos = difficulty == AvatarBossDifficulty.Hard;
                 m_Scheduler.EnableCombo = difficulty == AvatarBossDifficulty.Hard || m_InitialComboEnabled;
-                m_Scheduler.AttackCooldown = 3f * ActiveProfile.AttackCooldownMultiplier;
-                m_Scheduler.InitialGraceTime = 4f * ActiveProfile.AttackCooldownMultiplier;
-                m_Scheduler.RecoverTime = 1.5f * ActiveProfile.AttackCooldownMultiplier;
-                m_Scheduler.WindupTime = Mathf.Max(0.6f, 0.9f * ActiveProfile.WindupMultiplier);
+                m_Scheduler.AttackCooldown = baseAttackCooldown * ActiveProfile.AttackCooldownMultiplier;
+                m_Scheduler.InitialGraceTime = baseInitialGrace * ActiveProfile.AttackCooldownMultiplier;
+                m_Scheduler.RecoverTime = baseRecover * ActiveProfile.AttackCooldownMultiplier;
+                m_Scheduler.WindupTime = Mathf.Max(0.6f, baseWindup * ActiveProfile.WindupMultiplier);
                 m_Scheduler.ComboCooldownMin = ActiveProfile.ComboCooldownMin;
                 m_Scheduler.ComboCooldownMax = ActiveProfile.ComboCooldownMax;
                 m_Scheduler.MeteorRainCooldownMin = ActiveProfile.MeteorCooldownMin;
@@ -164,8 +177,8 @@ namespace Unity.FPS.AvatarBoss
                     * normalBodyMultiplier / Mathf.Max(0.01f, ActiveProfile.BodyDamageMultiplier);
             }
             if (m_Phase != null) { m_Phase.PhaseTwoVulnerabilityDuration = ActiveProfile.VulnerabilityDuration * 0.72f; m_Phase.StaggerGainMultiplier = ActiveProfile.StaggerGainMultiplier; }
-            if (m_Orbs != null) { m_Orbs.OrbCount = ActiveProfile.OrbCount; m_Orbs.OrbHealth = ActiveProfile.OrbHealth; m_Orbs.OrbSpeed = ActiveProfile.OrbSpeed; m_Orbs.HealPercentOfMaxHealth = ActiveProfile.HealPercent; m_Orbs.RecoveryCooldown = 40f * ActiveProfile.RecoveryFrequency; }
-            if (m_Summons != null) { m_Summons.MaxActiveSummons = ActiveProfile.SummonCount; m_Summons.CooldownBetweenSummons = 20f * ActiveProfile.SummonCooldownMultiplier; }
+            if (m_Orbs != null) { m_Orbs.OrbCount = ActiveProfile.OrbCount; m_Orbs.OrbHealth = ActiveProfile.OrbHealth; m_Orbs.OrbSpeed = ActiveProfile.OrbSpeed; m_Orbs.HealPercentOfMaxHealth = ActiveProfile.HealPercent; m_Orbs.RecoveryCooldown = baseRecoveryCooldown * ActiveProfile.RecoveryFrequency; }
+            if (m_Summons != null) { m_Summons.MaxActiveSummons = ActiveProfile.SummonCount; m_Summons.CooldownBetweenSummons = baseSummonCooldown * ActiveProfile.SummonCooldownMultiplier; }
 
             var body = transform.Find("BossBody");
             var bodyDamageable = body != null ? body.GetComponent<Damageable>() : null;
@@ -173,9 +186,11 @@ namespace Unity.FPS.AvatarBoss
                 bodyDamageable.DamageMultiplier = ActiveProfile.BodyDamageMultiplier;
 
             if (m_Player == null)
+            {
                 var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
                 context?.ResolveSceneReferences();
                 m_Player = context != null ? context.Player : null;
+            }
             var playerDamageable = m_Player != null ? m_Player.GetComponent<Damageable>() : null;
             if (playerDamageable != null)
                 playerDamageable.DamageMultiplier = ActiveProfile.PlayerDamageMultiplier;

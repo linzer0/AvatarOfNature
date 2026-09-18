@@ -6,11 +6,17 @@ namespace Unity.FPS.AvatarBoss
 {
     /// M1: wires boss Health damage intake into the stagger meter and triggers
     /// the weak point vulnerability window when stagger breaks.
-    public class AvatarBossController : MonoBehaviour
+    public partial class AvatarBossController : MonoBehaviour
     {
         [Header("Vulnerability Window")]
         [Tooltip("Seconds that weak points stay exposed after a stagger break")]
         public float VulnerabilityDuration = 3.5f;
+
+        [Header("Encounter References")]
+        [Tooltip("Explicit arena reference. Legacy scenes may leave this empty and use the context fallback.")]
+        public AvatarBossArenaController ArenaReference;
+        [Tooltip("Explicit player reference. Legacy scenes may leave this empty and use the context fallback.")]
+        public PlayerCharacterController PlayerReference;
 
         public Health BossHealth { get; private set; }
         public AvatarBossStagger Stagger { get; private set; }
@@ -36,13 +42,13 @@ namespace Unity.FPS.AvatarBoss
         public AvatarBossCombatContext GetCombatContext()
         {
             if (CombatContext == null)
-                CombatContext = new AvatarBossCombatContext();
+                CombatContext = new AvatarBossCombatContext(ArenaReference, PlayerReference);
             return CombatContext;
         }
 
         void Awake()
         {
-            CombatContext = new AvatarBossCombatContext();
+            CombatContext = new AvatarBossCombatContext(ArenaReference, PlayerReference);
             CombatContext.ResolveSceneReferences();
 
             BossHealth = GetComponentInParent<Health>();
@@ -291,68 +297,6 @@ namespace Unity.FPS.AvatarBoss
         {
             if (!PhaseTwo)
                 PhaseTwo = true;
-        }
-
-        /// <summary>Debug/test-only: set boss health to a ratio of max (ignored while dead).</summary>
-        public void DebugSetHealth(float ratio)
-        {
-            if (BossHealth == null || m_IsDead)
-                return;
-            BossHealth.CurrentHealth = Mathf.Clamp(BossHealth.MaxHealth * ratio, 0f, BossHealth.MaxHealth);
-        }
-
-        /// <summary>Debug/test-only: fully reset the boss to a clean phase-1 state without a scene
-        /// reload. Restores health/stagger/scheduler, closes weak points, clears phase 2, summons
-        /// and presentation state.</summary>
-        public void DebugResetBoss()
-        {
-            m_IsDead = false;
-            PhaseTwo = false;            if (HealingOrbs != null)
-                HealingOrbs.ClearHealingOrbs();
-
-            SummonsActive = false;
-
-            if (m_VulnerabilityRoutine != null)
-            {
-                StopCoroutine(m_VulnerabilityRoutine);
-                m_VulnerabilityRoutine = null;
-            }
-
-            if (BossHealth != null)
-                BossHealth.ResetHealth();
-
-            if (Stagger != null)
-                Stagger.DebugReset();
-
-            if (WeakPoints != null)
-            {
-                foreach (var weakPoint in WeakPoints)
-                {
-                    if (weakPoint == null) continue;
-                    weakPoint.DebugReset();
-                }
-            }
-
-            if (Scheduler != null)
-                Scheduler.DebugReset();
-
-            var phase = GetComponentInChildren<AvatarBossPhaseController>();
-            if (phase != null)
-                phase.DebugResetPhase();
-
-            var summons = GetComponentInChildren<AvatarBossSummonController>();
-            if (summons != null)
-                summons.DebugReset();
-
-            var visual = GetComponentInChildren<AvatarBossVisualEffects>();
-            if (visual != null)
-                visual.DebugReset();
-
-            var duel = GetComponent<AvatarBossDuelController>();
-            if (duel != null)
-                duel.DebugReset();
-
-            Debug.Log("[AvatarOfNature] Debug reset: boss restored to phase 1.", this);
         }
 
         System.Collections.IEnumerator ExposeWeakPointsRoutine(float duration)
