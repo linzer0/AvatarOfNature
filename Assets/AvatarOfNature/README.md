@@ -25,7 +25,7 @@ The same scene is the first enabled scene in `ProjectSettings/EditorBuildSetting
 
 - `FPS/` is the FPS foundation and shared gameplay framework.
 - `ModAssets/` contains shared imported game content.
-- `Plugins/`, `NavMeshComponents/`, `Rendering/`, and `TextMesh Pro/` are technical dependencies.
+- `Plugins/`, `ThirdParty/NavMeshComponents/`, `Rendering/`, and `TextMesh Pro/` are technical dependencies.
 - `Documentation/BossDuel/` contains design notes, the implementation checklist, and validation evidence.
 
 Runtime type names, namespaces, assembly names, and scene names intentionally
