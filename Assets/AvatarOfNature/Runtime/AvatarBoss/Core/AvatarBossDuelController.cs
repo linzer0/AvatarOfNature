@@ -80,10 +80,12 @@ namespace Unity.FPS.AvatarBoss
         /// Difficulty owns this value; keeping it here avoids Start() overwriting the
         /// profile with the serialized fallback.
         /// </summary>
-        public void ApplyDifficultyTuning(float closedBodyDamageMultiplier, float vulnerabilityDuration)
+        public void ApplyDifficultyTuning(float closedBodyDamageMultiplier, float vulnerabilityDuration,
+            float openBodyDamageMultiplier = 1f)
         {
             ClosedBodyDamageMultiplier = Mathf.Max(0.01f, closedBodyDamageMultiplier);
             VulnerabilityDuration = Mathf.Max(0f, vulnerabilityDuration);
+            OpenBodyDamageMultiplier = Mathf.Max(0.01f, openBodyDamageMultiplier);
             if (m_BodyDamageable != null && !DuelWindowActive)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
         }

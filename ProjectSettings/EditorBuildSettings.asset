@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/FPS/Scenes/AvatarBossShowcaseBootstrap.unity
+    path: Assets/AvatarOfNature/Scenes/BossDuel/AvatarBossShowcaseBootstrap.unity
     guid: e446ff34d2cfff04aa2b68d0b27fc917
   - enabled: 1
     path: Assets/FPS/Scenes/IntroMenu.unity
@@ -21,10 +21,10 @@ EditorBuildSettings:
     path: Assets/FPS/Scenes/MainScene.unity
     guid: d794a2ef8ba31d847ad3c19d03e2ddb9
   - enabled: 1
-    path: Assets/FPS/Scenes/AvatarBossShowcase.unity
+    path: Assets/AvatarOfNature/Scenes/BossDuel/AvatarBossShowcase.unity
     guid: bc2f3e7961e05b94f80616eecf1ce2a9
   - enabled: 1
-    path: Assets/FPS/Scenes/AvatarBossDuelArena.unity
+    path: Assets/AvatarOfNature/Scenes/BossDuel/AvatarBossDuelArena.unity
     guid: b1e141c677c34134597fbe2245d8f606
   m_configObjects:
     com.unity.dt.app-ui: {fileID: 11400000, guid: 1b1c20d82303e4b5781c3ef50ac1449f,

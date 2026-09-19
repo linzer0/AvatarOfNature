@@ -16,6 +16,9 @@ namespace Unity.FPS.AvatarBoss
     {
         public AvatarBossDifficulty Difficulty;
         public float BodyDamageMultiplier;
+        public float OpenBodyDamageMultiplier;
+        public float BossHealthMultiplier;
+        public float WeakPointDamageMultiplier;
         public float PlayerDamageMultiplier;
         public float AttackCooldownMultiplier;
         public float TelegraphMultiplier;
@@ -39,6 +42,22 @@ namespace Unity.FPS.AvatarBoss
         public float MeteorCooldownMin;
         public float MeteorCooldownMax;
         public int MaxConcurrentThreats;
+        public int TargetCellCount;
+        public bool MixedCombosEnabled;
+        public float PhaseTwoTimingMultiplier;
+        public float PhaseTwoTelegraphMultiplier;
+        public float PhaseTwoStaggerGainMultiplier;
+        public float PhaseTwoStaggerThresholdMultiplier;
+        public float PhaseTwoStaggerDecayMultiplier;
+        public float PhaseTwoStaggerDecayDelayMultiplier;
+        public float PhaseTwoMinCooldown;
+        public float PhaseTwoMinTelegraph;
+        public float PhaseTwoMinWindup;
+        public float PhaseTwoMinRecover;
+        public float PhaseTwoMeteorDamage;
+        public float PhaseTwoShockwaveSpeed;
+        public float PhaseTwoVulnerabilityDuration;
+        public bool PhaseTwoComboEnabled;
     }
 
     public sealed class AvatarBossDifficultyController : MonoBehaviour
@@ -60,7 +79,7 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossSummonController m_Summons;
         AvatarBossStagger m_Stagger;
         PlayerCharacterController m_Player;
-        bool m_InitialComboEnabled;
+        float m_BaseBossMaxHealth;
 
         void Awake()
         {
@@ -73,12 +92,13 @@ namespace Unity.FPS.AvatarBoss
             m_Phase = GetComponent<AvatarBossPhaseController>();
             m_Summons = GetComponent<AvatarBossSummonController>();
             m_Stagger = GetComponent<AvatarBossStagger>();
+            if (m_Boss != null && m_Boss.BossHealth != null)
+                m_BaseBossMaxHealth = m_Boss.BossHealth.MaxHealth;
             if (EncounterConfig == null)
                 EncounterConfig = Resources.Load<AvatarBossEncounterConfig>("AvatarBossEncounterConfig");
             var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
             context?.ResolveSceneReferences();
             m_Player = context != null ? context.Player : null;
-            m_InitialComboEnabled = m_Scheduler != null && m_Scheduler.EnableCombo;
             ApplyDifficulty(DefaultDifficulty);
         }
 
@@ -92,6 +112,20 @@ namespace Unity.FPS.AvatarBoss
                     : AvatarBossEncounterConfig.CreateNormal();
             ActiveProfile = EncounterConfig != null ? EncounterConfig.GetProfile(difficulty) : legacyProfile;
 
+            if (m_Boss != null && m_Boss.BossHealth != null)
+            {
+                if (m_BaseBossMaxHealth <= 0f)
+                    m_BaseBossMaxHealth = m_Boss.BossHealth.MaxHealth;
+                if (m_BaseBossMaxHealth > 0f)
+                {
+                    float healthRatio = m_Boss.BossHealth.MaxHealth > 0f
+                        ? m_Boss.BossHealth.CurrentHealth / m_Boss.BossHealth.MaxHealth
+                        : 1f;
+                    m_Boss.BossHealth.MaxHealth = m_BaseBossMaxHealth * Mathf.Max(0.1f, ActiveProfile.BossHealthMultiplier);
+                    m_Boss.BossHealth.CurrentHealth = m_Boss.BossHealth.MaxHealth * Mathf.Clamp01(healthRatio);
+                }
+            }
+
             float baseAttackCooldown = EncounterConfig != null ? EncounterConfig.AttackCooldown : 3f;
             float baseInitialGrace = EncounterConfig != null ? EncounterConfig.InitialGraceTime : 4f;
             float baseRecover = EncounterConfig != null ? EncounterConfig.RecoverTime : 1.5f;
@@ -102,8 +136,8 @@ namespace Unity.FPS.AvatarBoss
             if (m_Scheduler != null)
             {
                 m_Scheduler.ComboFrequency = ActiveProfile.ComboFrequency;
-                m_Scheduler.UseMixedCombos = difficulty == AvatarBossDifficulty.Hard;
-                m_Scheduler.EnableCombo = difficulty == AvatarBossDifficulty.Hard || m_InitialComboEnabled;
+                m_Scheduler.UseMixedCombos = ActiveProfile.MixedCombosEnabled;
+                m_Scheduler.EnableCombo = ActiveProfile.PhaseTwoComboEnabled;
                 m_Scheduler.AttackCooldown = baseAttackCooldown * ActiveProfile.AttackCooldownMultiplier;
                 m_Scheduler.InitialGraceTime = baseInitialGrace * ActiveProfile.AttackCooldownMultiplier;
                 m_Scheduler.RecoverTime = baseRecover * ActiveProfile.AttackCooldownMultiplier;
@@ -114,8 +148,7 @@ namespace Unity.FPS.AvatarBoss
                 m_Scheduler.MeteorRainCooldownMax = ActiveProfile.MeteorCooldownMax;
             }
 
-            int arenaTargetCells = difficulty == AvatarBossDifficulty.Easy ? 1 :
-                difficulty == AvatarBossDifficulty.Hard ? 3 : 2;
+            int arenaTargetCells = ActiveProfile.TargetCellCount;
             if (m_Earth != null)
             {
                 m_Earth.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier;
@@ -133,7 +166,8 @@ namespace Unity.FPS.AvatarBoss
             if (m_Boss != null) m_Boss.VulnerabilityDuration = ActiveProfile.VulnerabilityDuration;
             var duel = GetComponent<AvatarBossDuelController>();
             if (duel != null)
-                duel.ApplyDifficultyTuning(ActiveProfile.BodyDamageMultiplier, ActiveProfile.VulnerabilityDuration);
+                duel.ApplyDifficultyTuning(ActiveProfile.BodyDamageMultiplier,
+                    ActiveProfile.VulnerabilityDuration, ActiveProfile.OpenBodyDamageMultiplier);
             if (m_Stagger != null)
             {
                 m_Stagger.MaxStagger = 100f;
@@ -146,7 +180,23 @@ namespace Unity.FPS.AvatarBoss
                 m_Stagger.StaggerGainPerDamage = 1.2f * ActiveProfile.DifficultyStaggerMultiplier
                     * normalBodyMultiplier / Mathf.Max(0.01f, ActiveProfile.BodyDamageMultiplier);
             }
-            if (m_Phase != null) { m_Phase.PhaseTwoVulnerabilityDuration = ActiveProfile.VulnerabilityDuration * 0.72f; m_Phase.StaggerGainMultiplier = ActiveProfile.StaggerGainMultiplier; }
+            if (m_Phase != null)
+            {
+                m_Phase.TimingMultiplier = ActiveProfile.PhaseTwoTimingMultiplier;
+                m_Phase.TelegraphMultiplier = ActiveProfile.PhaseTwoTelegraphMultiplier;
+                m_Phase.StaggerGainMultiplier = ActiveProfile.PhaseTwoStaggerGainMultiplier;
+                m_Phase.StaggerThresholdMultiplier = ActiveProfile.PhaseTwoStaggerThresholdMultiplier;
+                m_Phase.StaggerDecayMultiplier = ActiveProfile.PhaseTwoStaggerDecayMultiplier;
+                m_Phase.StaggerDecayDelayMultiplier = ActiveProfile.PhaseTwoStaggerDecayDelayMultiplier;
+                m_Phase.PhaseTwoVulnerabilityDuration = ActiveProfile.PhaseTwoVulnerabilityDuration;
+                m_Phase.PhaseTwoMinCooldown = ActiveProfile.PhaseTwoMinCooldown;
+                m_Phase.PhaseTwoMinTelegraph = ActiveProfile.PhaseTwoMinTelegraph;
+                m_Phase.PhaseTwoMinWindup = ActiveProfile.PhaseTwoMinWindup;
+                m_Phase.PhaseTwoMinRecover = ActiveProfile.PhaseTwoMinRecover;
+                m_Phase.PhaseTwoMeteorDamage = ActiveProfile.PhaseTwoMeteorDamage;
+                m_Phase.PhaseTwoShockwaveSpeed = ActiveProfile.PhaseTwoShockwaveSpeed;
+                m_Phase.EnableCombo = ActiveProfile.PhaseTwoComboEnabled;
+            }
             if (m_Orbs != null) { m_Orbs.OrbCount = ActiveProfile.OrbCount; m_Orbs.OrbHealth = ActiveProfile.OrbHealth; m_Orbs.OrbSpeed = ActiveProfile.OrbSpeed; m_Orbs.HealPercentOfMaxHealth = ActiveProfile.HealPercent; m_Orbs.RecoveryCooldown = baseRecoveryCooldown * ActiveProfile.RecoveryFrequency; }
             if (m_Summons != null) { m_Summons.MaxActiveSummons = ActiveProfile.SummonCount; m_Summons.CooldownBetweenSummons = baseSummonCooldown * ActiveProfile.SummonCooldownMultiplier; }
 
@@ -154,6 +204,11 @@ namespace Unity.FPS.AvatarBoss
             var bodyDamageable = body != null ? body.GetComponent<Damageable>() : null;
             if (bodyDamageable != null)
                 bodyDamageable.DamageMultiplier = ActiveProfile.BodyDamageMultiplier;
+
+            if (m_Boss != null && m_Boss.WeakPoints != null)
+                foreach (var weakPoint in m_Boss.WeakPoints)
+                    if (weakPoint != null)
+                        weakPoint.ExposedMultiplier = ActiveProfile.WeakPointDamageMultiplier;
 
             if (m_Player == null)
             {

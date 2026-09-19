@@ -32,13 +32,17 @@ namespace Unity.FPS.AvatarBoss
         {
             return new AvatarBossDifficultyProfile
             {
-                Difficulty = AvatarBossDifficulty.Easy, BodyDamageMultiplier = 0.15f, PlayerDamageMultiplier = 0.75f,
+                Difficulty = AvatarBossDifficulty.Easy, BodyDamageMultiplier = 0.15f, OpenBodyDamageMultiplier = 1f, BossHealthMultiplier = 1f, WeakPointDamageMultiplier = 2f, PlayerDamageMultiplier = 0.75f,
                 AttackCooldownMultiplier = 1.2f, TelegraphMultiplier = 1.25f, WindupMultiplier = 1.15f,
                 DifficultyStaggerMultiplier = 1.15f, StaggerGainMultiplier = 1.15f, VulnerabilityDuration = 4.2f,
                 ShockwaveSpeedMultiplier = 0.85f, MeteorDamage = 15f, OrbCount = 2, OrbHealth = 24f, OrbSpeed = 3.5f,
                 HealPercent = 0.06f, SummonCount = 2, SummonCooldownMultiplier = 1.2f, ComboFrequency = 0.55f,
                 RecoveryFrequency = 1.2f, ComboCooldownMin = 30f, ComboCooldownMax = 38f, MeteorCooldownMin = 30f,
-                MeteorCooldownMax = 38f, MaxConcurrentThreats = 1
+                MeteorCooldownMax = 38f, MaxConcurrentThreats = 1, TargetCellCount = 1, MixedCombosEnabled = false,
+                PhaseTwoTimingMultiplier = 0.82f, PhaseTwoTelegraphMultiplier = 0.9f, PhaseTwoStaggerGainMultiplier = 0.75f,
+                PhaseTwoStaggerThresholdMultiplier = 0.7f, PhaseTwoStaggerDecayMultiplier = 1.1f, PhaseTwoStaggerDecayDelayMultiplier = 0.9f,
+                PhaseTwoMinCooldown = 2.4f, PhaseTwoMinTelegraph = 1.4f, PhaseTwoMinWindup = 0.75f, PhaseTwoMinRecover = 1.3f,
+                PhaseTwoMeteorDamage = 18f, PhaseTwoShockwaveSpeed = 20f, PhaseTwoVulnerabilityDuration = 3f, PhaseTwoComboEnabled = false
             };
         }
 
@@ -46,13 +50,17 @@ namespace Unity.FPS.AvatarBoss
         {
             return new AvatarBossDifficultyProfile
             {
-                Difficulty = AvatarBossDifficulty.Normal, BodyDamageMultiplier = 0.12f, PlayerDamageMultiplier = 1f,
+                Difficulty = AvatarBossDifficulty.Normal, BodyDamageMultiplier = 0.12f, OpenBodyDamageMultiplier = 1f, BossHealthMultiplier = 1f, WeakPointDamageMultiplier = 2f, PlayerDamageMultiplier = 1f,
                 AttackCooldownMultiplier = 1f, TelegraphMultiplier = 1f, WindupMultiplier = 1f,
                 DifficultyStaggerMultiplier = 1f, StaggerGainMultiplier = 1f, VulnerabilityDuration = 3.5f,
                 ShockwaveSpeedMultiplier = 1f, MeteorDamage = 20f, OrbCount = 3, OrbHealth = 30f, OrbSpeed = 4.5f,
                 HealPercent = 0.08f, SummonCount = 3, SummonCooldownMultiplier = 1f, ComboFrequency = 0.8f,
                 RecoveryFrequency = 1f, ComboCooldownMin = 25f, ComboCooldownMax = 35f, MeteorCooldownMin = 25f,
-                MeteorCooldownMax = 35f, MaxConcurrentThreats = 1
+                MeteorCooldownMax = 35f, MaxConcurrentThreats = 1, TargetCellCount = 2, MixedCombosEnabled = false,
+                PhaseTwoTimingMultiplier = 0.77f, PhaseTwoTelegraphMultiplier = 0.8f, PhaseTwoStaggerGainMultiplier = 0.75f,
+                PhaseTwoStaggerThresholdMultiplier = 0.6f, PhaseTwoStaggerDecayMultiplier = 1.25f, PhaseTwoStaggerDecayDelayMultiplier = 0.8f,
+                PhaseTwoMinCooldown = 2.1f, PhaseTwoMinTelegraph = 1.3f, PhaseTwoMinWindup = 0.7f, PhaseTwoMinRecover = 1.2f,
+                PhaseTwoMeteorDamage = 22f, PhaseTwoShockwaveSpeed = 24f, PhaseTwoVulnerabilityDuration = 2.5f, PhaseTwoComboEnabled = true
             };
         }
 
@@ -60,13 +68,17 @@ namespace Unity.FPS.AvatarBoss
         {
             return new AvatarBossDifficultyProfile
             {
-                Difficulty = AvatarBossDifficulty.Hard, BodyDamageMultiplier = 0.08f, PlayerDamageMultiplier = 1.2f,
+                Difficulty = AvatarBossDifficulty.Hard, BodyDamageMultiplier = 0.04f, OpenBodyDamageMultiplier = 0.45f, BossHealthMultiplier = 2f, WeakPointDamageMultiplier = 1f, PlayerDamageMultiplier = 1.2f,
                 AttackCooldownMultiplier = 0.85f, TelegraphMultiplier = 0.85f, WindupMultiplier = 0.85f,
                 DifficultyStaggerMultiplier = 0.85f, StaggerGainMultiplier = 0.9f, VulnerabilityDuration = 3f,
                 ShockwaveSpeedMultiplier = 1.1f, MeteorDamage = 24f, OrbCount = 4, OrbHealth = 42f, OrbSpeed = 5.75f,
                 HealPercent = 0.10f, SummonCount = 3, SummonCooldownMultiplier = 0.85f, ComboFrequency = 1f,
                 RecoveryFrequency = 0.85f, ComboCooldownMin = 18f, ComboCooldownMax = 25f, MeteorCooldownMin = 18f,
-                MeteorCooldownMax = 25f, MaxConcurrentThreats = 1
+                MeteorCooldownMax = 25f, MaxConcurrentThreats = 1, TargetCellCount = 3, MixedCombosEnabled = true,
+                PhaseTwoTimingMultiplier = 0.7f, PhaseTwoTelegraphMultiplier = 0.75f, PhaseTwoStaggerGainMultiplier = 0.65f,
+                PhaseTwoStaggerThresholdMultiplier = 0.55f, PhaseTwoStaggerDecayMultiplier = 1.35f, PhaseTwoStaggerDecayDelayMultiplier = 0.7f,
+                PhaseTwoMinCooldown = 1.9f, PhaseTwoMinTelegraph = 1.15f, PhaseTwoMinWindup = 0.6f, PhaseTwoMinRecover = 1.05f,
+                PhaseTwoMeteorDamage = 28f, PhaseTwoShockwaveSpeed = 27f, PhaseTwoVulnerabilityDuration = 2.1f, PhaseTwoComboEnabled = true
             };
         }
     }

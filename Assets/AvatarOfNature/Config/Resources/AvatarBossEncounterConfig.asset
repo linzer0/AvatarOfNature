@@ -21,6 +21,9 @@ MonoBehaviour:
   Easy:
     Difficulty: 0
     BodyDamageMultiplier: 0.15
+    OpenBodyDamageMultiplier: 1
+    BossHealthMultiplier: 1
+    WeakPointDamageMultiplier: 2
     PlayerDamageMultiplier: 0.75
     AttackCooldownMultiplier: 1.2
     TelegraphMultiplier: 1.25
@@ -43,9 +46,28 @@ MonoBehaviour:
     MeteorCooldownMin: 30
     MeteorCooldownMax: 38
     MaxConcurrentThreats: 1
+    TargetCellCount: 1
+    MixedCombosEnabled: 0
+    PhaseTwoTimingMultiplier: 0.82
+    PhaseTwoTelegraphMultiplier: 0.9
+    PhaseTwoStaggerGainMultiplier: 0.75
+    PhaseTwoStaggerThresholdMultiplier: 0.7
+    PhaseTwoStaggerDecayMultiplier: 1.1
+    PhaseTwoStaggerDecayDelayMultiplier: 0.9
+    PhaseTwoMinCooldown: 2.4
+    PhaseTwoMinTelegraph: 1.4
+    PhaseTwoMinWindup: 0.75
+    PhaseTwoMinRecover: 1.3
+    PhaseTwoMeteorDamage: 18
+    PhaseTwoShockwaveSpeed: 20
+    PhaseTwoVulnerabilityDuration: 3
+    PhaseTwoComboEnabled: 0
   Normal:
     Difficulty: 1
     BodyDamageMultiplier: 0.12
+    OpenBodyDamageMultiplier: 1
+    BossHealthMultiplier: 1
+    WeakPointDamageMultiplier: 2
     PlayerDamageMultiplier: 1
     AttackCooldownMultiplier: 1
     TelegraphMultiplier: 1
@@ -68,9 +90,28 @@ MonoBehaviour:
     MeteorCooldownMin: 25
     MeteorCooldownMax: 35
     MaxConcurrentThreats: 1
+    TargetCellCount: 2
+    MixedCombosEnabled: 0
+    PhaseTwoTimingMultiplier: 0.77
+    PhaseTwoTelegraphMultiplier: 0.8
+    PhaseTwoStaggerGainMultiplier: 0.75
+    PhaseTwoStaggerThresholdMultiplier: 0.6
+    PhaseTwoStaggerDecayMultiplier: 1.25
+    PhaseTwoStaggerDecayDelayMultiplier: 0.8
+    PhaseTwoMinCooldown: 2.1
+    PhaseTwoMinTelegraph: 1.3
+    PhaseTwoMinWindup: 0.7
+    PhaseTwoMinRecover: 1.2
+    PhaseTwoMeteorDamage: 22
+    PhaseTwoShockwaveSpeed: 24
+    PhaseTwoVulnerabilityDuration: 2.5
+    PhaseTwoComboEnabled: 1
   Hard:
     Difficulty: 2
-    BodyDamageMultiplier: 0.08
+    BodyDamageMultiplier: 0.04
+    OpenBodyDamageMultiplier: 0.45
+    BossHealthMultiplier: 2
+    WeakPointDamageMultiplier: 1
     PlayerDamageMultiplier: 1.2
     AttackCooldownMultiplier: 0.85
     TelegraphMultiplier: 0.85
@@ -93,3 +134,19 @@ MonoBehaviour:
     MeteorCooldownMin: 18
     MeteorCooldownMax: 25
     MaxConcurrentThreats: 1
+    TargetCellCount: 3
+    MixedCombosEnabled: 1
+    PhaseTwoTimingMultiplier: 0.7
+    PhaseTwoTelegraphMultiplier: 0.75
+    PhaseTwoStaggerGainMultiplier: 0.65
+    PhaseTwoStaggerThresholdMultiplier: 0.55
+    PhaseTwoStaggerDecayMultiplier: 1.35
+    PhaseTwoStaggerDecayDelayMultiplier: 0.7
+    PhaseTwoMinCooldown: 1.9
+    PhaseTwoMinTelegraph: 1.15
+    PhaseTwoMinWindup: 0.6
+    PhaseTwoMinRecover: 1.05
+    PhaseTwoMeteorDamage: 28
+    PhaseTwoShockwaveSpeed: 27
+    PhaseTwoVulnerabilityDuration: 2.1
+    PhaseTwoComboEnabled: 1
