@@ -7,6 +7,9 @@ namespace Unity.FPS.Game
         [Tooltip("Multiplier to apply to the received damage")]
         public float DamageMultiplier = 1f;
 
+        [Tooltip("When several Damageable colliders overlap, higher priority wins within the same hierarchy root.")]
+        public int HitPriority;
+
         [Range(0, 1)] [Tooltip("Multiplier to apply to self damage")]
         public float SensibilityToSelfdamage = 0.5f;
 

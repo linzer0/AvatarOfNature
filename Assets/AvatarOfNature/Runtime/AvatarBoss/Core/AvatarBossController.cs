@@ -19,6 +19,12 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Explicit player reference. Legacy scenes may leave this empty and use the context fallback.")]
         public PlayerCharacterController PlayerReference;
 
+        [Header("Hitbox")]
+        [Tooltip("Normalizes BossBody to a capsule at runtime so the active arena cannot keep a stale box collider.")]
+        public bool NormalizeBodyHitbox = true;
+        [Min(0.01f)] public float BodyHitboxRadius = 0.575f;
+        [Min(0.01f)] public float BodyHitboxHeight = 1.25f;
+
         public Health BossHealth { get; private set; }
         public AvatarBossStagger Stagger { get; private set; }
         public AvatarBossWeakPoint[] WeakPoints { get; private set; }
@@ -49,6 +55,9 @@ namespace Unity.FPS.AvatarBoss
 
         void Awake()
         {
+            ConfigureBodyHitbox();
+            ConfigureArenaProjectileBlockers();
+
             CombatContext = new AvatarBossCombatContext(ArenaReference, PlayerReference);
             CombatContext.ResolveSceneReferences();
 
@@ -67,6 +76,123 @@ namespace Unity.FPS.AvatarBoss
                 Debug.LogError($"[{nameof(AvatarBossController)}] No AvatarBossStagger in children of '{name}'.", this);
             if (WeakPoints == null || WeakPoints.Length == 0)
                 Debug.LogWarning($"[{nameof(AvatarBossController)}] No AvatarBossWeakPoint in children of '{name}'.", this);
+        }
+
+        void ConfigureBodyHitbox()
+        {
+            if (!NormalizeBodyHitbox)
+                return;
+
+            var body = transform.Find("BossBody");
+            if (body == null)
+            {
+                Debug.LogWarning($"[AvatarOfNature][BossHitbox] BossBody was not found on '{name}' in scene '{gameObject.scene.name}'.", this);
+                return;
+            }
+
+            var capsule = body.GetComponent<CapsuleCollider>();
+            if (capsule == null)
+                capsule = body.gameObject.AddComponent<CapsuleCollider>();
+
+            capsule.center = Vector3.zero;
+            capsule.radius = BodyHitboxRadius;
+            capsule.height = Mathf.Max(BodyHitboxHeight, BodyHitboxRadius * 2f);
+            capsule.direction = 1;
+            capsule.isTrigger = false;
+            capsule.enabled = true;
+
+            ConfigureUpperBodyHitbox(body);
+            ConfigureArmHitboxes(body);
+
+            // The old box is the source of the inconsistent top/bottom hit results.
+            // Keep it in the scene for backwards compatibility, but never let physics use it.
+            var legacyBox = body.GetComponent<BoxCollider>();
+            if (legacyBox != null)
+                legacyBox.enabled = false;
+
+            Debug.Log($"[AvatarOfNature][BossHitbox] scene={gameObject.scene.name} " +
+                      $"boss={name} body={body.name} collider=CapsuleCollider " +
+                      $"radius={capsule.radius:F3} height={capsule.height:F3} " +
+                      $"worldSize={capsule.bounds.size}", this);
+        }
+
+        void ConfigureUpperBodyHitbox(Transform body)
+        {
+            var capsules = body.GetComponents<CapsuleCollider>();
+            CapsuleCollider upper = capsules.Length > 1 ? capsules[1] : body.gameObject.AddComponent<CapsuleCollider>();
+
+            // VisualRoot's head reaches well above the torso collider. This second
+            // capsule covers the head/shoulders while still sharing BossBody's
+            // Damageable and damage multiplier.
+            upper.center = new Vector3(0f, 1.05f, 0f);
+            upper.radius = 0.40f;
+            upper.height = 1.10f;
+            upper.direction = 1;
+            upper.isTrigger = false;
+            upper.enabled = true;
+
+            Debug.Log($"[AvatarOfNature][BossHitbox] upperBody=CapsuleCollider " +
+                      $"center={upper.bounds.center} worldSize={upper.bounds.size}", body);
+        }
+
+        void ConfigureArmHitboxes(Transform body)
+        {
+            var boxes = body.GetComponents<BoxCollider>();
+            var left = FindOrAddArmBox(body, boxes, "left");
+            var right = FindOrAddArmBox(body, boxes, "right");
+
+            ConfigureArmBox(left, new Vector3(-0.68f, 0.50f, 0f));
+            ConfigureArmBox(right, new Vector3(0.68f, 0.50f, 0f));
+
+            Debug.Log($"[AvatarOfNature][BossHitbox] arms=BoxCollider " +
+                      $"leftWorld={left.bounds.size} rightWorld={right.bounds.size}", body);
+        }
+
+        BoxCollider FindOrAddArmBox(Transform body, BoxCollider[] existing, string side)
+        {
+            // The first BoxCollider is the legacy torso collider. Reuse later
+            // components when domain reload/runtime setup is repeated.
+            int desiredIndex = side == "left" ? 1 : 2;
+            if (existing.Length > desiredIndex)
+                return existing[desiredIndex];
+            return body.gameObject.AddComponent<BoxCollider>();
+        }
+
+        void ConfigureArmBox(BoxCollider box, Vector3 localCenter)
+        {
+            box.center = localCenter;
+            box.size = new Vector3(1.04f, 0.86f, 0.24f);
+            box.isTrigger = false;
+            box.enabled = true;
+        }
+
+        void ConfigureArenaProjectileBlockers()
+        {
+            // BossCenterPlatform is authored with a very wide non-uniform scale.
+            // A CapsuleCollider on that object becomes a tall rounded volume and
+            // intercepts shots in front of the boss, leaving only the upper body
+            // apparently hittable. Keep the platform physical, but make its
+            // collider match the visible flat platform.
+            var platform = GameObject.Find("BossCenterPlatform");
+            if (platform == null)
+                return;
+
+            var legacyCapsule = platform.GetComponent<CapsuleCollider>();
+            if (legacyCapsule != null)
+                legacyCapsule.enabled = false;
+
+            var box = platform.GetComponent<BoxCollider>();
+            if (box == null)
+                box = platform.AddComponent<BoxCollider>();
+
+            box.center = Vector3.zero;
+            box.size = new Vector3(1f, 2f, 1f);
+            box.isTrigger = false;
+            box.enabled = true;
+
+            Debug.Log($"[AvatarOfNature][BossHitbox] platform={platform.name} " +
+                      $"legacyCapsule={(legacyCapsule != null ? "disabled" : "none")} " +
+                      $"collider=BoxCollider worldSize={box.bounds.size}", platform);
         }
 
         void Start()
@@ -125,8 +251,10 @@ namespace Unity.FPS.AvatarBoss
                 float mult = part != null ? part.DamageMultiplier : 1f;
                 float applied = damage;
                 float raw = mult > 0.0001f ? damage / mult : damage;
-                Debug.Log($"HIT target={(part != null ? part.name : "null")} rawDamage={raw:F1} " +
-                          $"appliedDamage={applied:F1} multiplier={mult:F2} hpAfter={hpAfter:F1} stagger={stagger:F1}", part);
+                Debug.Log($"HIT target={(part != null ? part.name : "null")} " +
+                          $"weakPoint={weakPoint} collider={(part != null ? part.GetComponent<Collider>()?.GetType().Name : "null")} " +
+                          $"rawDamage={raw:F1} appliedDamage={applied:F1} multiplier={mult:F2} " +
+                          $"hpAfter={hpAfter:F1} stagger={stagger:F1}", part);
             }
 
             Vector3 pos = part != null ? part.transform.position : transform.position;

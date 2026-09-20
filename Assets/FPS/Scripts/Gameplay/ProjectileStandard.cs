@@ -174,7 +174,7 @@ namespace Unity.FPS.Gameplay
                     k_TriggerInteraction);
                 foreach (var hit in hits)
                 {
-                    if (IsHitValid(hit) && hit.distance < closestHit.distance)
+                    if (IsHitValid(hit) && IsBetterHit(hit, closestHit, foundHit))
                     {
                         foundHit = true;
                         closestHit = hit;
@@ -195,6 +195,21 @@ namespace Unity.FPS.Gameplay
             }
 
             m_LastRootPosition = Root.position;
+        }
+
+        bool IsBetterHit(RaycastHit candidate, RaycastHit current, bool hasCurrent)
+        {
+            if (!hasCurrent)
+                return true;
+
+            var candidateDamageable = candidate.collider.GetComponent<Damageable>();
+            var currentDamageable = current.collider.GetComponent<Damageable>();
+            if (candidateDamageable != null && currentDamageable != null
+                && candidateDamageable.HitPriority > currentDamageable.HitPriority
+                && candidate.collider.transform.root == current.collider.transform.root)
+                return true;
+
+            return candidate.distance < current.distance;
         }
 
         bool IsHitValid(RaycastHit hit)

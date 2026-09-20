@@ -46,7 +46,7 @@ namespace Unity.FPS.AvatarBoss
         public static AvatarBossDifficultyProfile CreateEasy()
         {
             var profile = CreateProfile(AvatarBossDifficulty.Easy);
-            profile.BodyDamageMultiplier = 0.15f; profile.OpenBodyDamageMultiplier = 1f; profile.BossHealthMultiplier = 1f; profile.WeakPointDamageMultiplier = 1.5f; profile.PlayerDamageMultiplier = 0.75f; profile.MaxVulnerabilityDamagePercent = 0.35f; profile.HighImpactWindowDamagePercent = 0.40f;
+            profile.BodyDamageMultiplier = 0.25f; profile.OpenBodyDamageMultiplier = 1f; profile.BossHealthMultiplier = 1f; profile.WeakPointDamageMultiplier = 1.2f; profile.PlayerDamageMultiplier = 0.75f; profile.MaxVulnerabilityDamagePercent = 0.30f; profile.HighImpactWindowDamagePercent = 0.38f;
             profile.AttackCooldownMultiplier = 1.2f; profile.TelegraphMultiplier = 1.25f; profile.WindupMultiplier = 1.15f;
             profile.DifficultyStaggerMultiplier = 1.15f; profile.StaggerGainMultiplier = 1.15f; profile.VulnerabilityDuration = 4.2f;
             profile.ShockwaveSpeedMultiplier = 0.85f; profile.MeteorDamage = 15f; profile.OrbCount = 2; profile.OrbHealth = 24f; profile.OrbSpeed = 3.5f;
@@ -63,7 +63,7 @@ namespace Unity.FPS.AvatarBoss
         public static AvatarBossDifficultyProfile CreateNormal()
         {
             var profile = CreateProfile(AvatarBossDifficulty.Normal);
-            profile.BodyDamageMultiplier = 0.12f; profile.OpenBodyDamageMultiplier = 0.8f; profile.BossHealthMultiplier = 1.2f; profile.WeakPointDamageMultiplier = 1.25f; profile.PlayerDamageMultiplier = 1f; profile.MaxVulnerabilityDamagePercent = 0.27f; profile.HighImpactWindowDamagePercent = 0.38f;
+            profile.BodyDamageMultiplier = 0.20f; profile.OpenBodyDamageMultiplier = 0.8f; profile.BossHealthMultiplier = 1.2f; profile.WeakPointDamageMultiplier = 1.05f; profile.PlayerDamageMultiplier = 1f; profile.MaxVulnerabilityDamagePercent = 0.22f; profile.HighImpactWindowDamagePercent = 0.32f;
             profile.AttackCooldownMultiplier = 1f; profile.TelegraphMultiplier = 1f; profile.WindupMultiplier = 1f; profile.DifficultyStaggerMultiplier = 1f; profile.StaggerGainMultiplier = 1f; profile.VulnerabilityDuration = 3.5f;
             profile.ShockwaveSpeedMultiplier = 1f; profile.MeteorDamage = 20f; profile.OrbCount = 3; profile.OrbHealth = 30f; profile.OrbSpeed = 4.5f; profile.HealPercent = 0.08f;
             profile.SummonCount = 3; profile.SummonCooldownMultiplier = 1f; profile.ComboFrequency = 0.8f; profile.RecoveryFrequency = 1f; profile.ComboCooldownMin = 25f; profile.ComboCooldownMax = 35f;
@@ -77,7 +77,7 @@ namespace Unity.FPS.AvatarBoss
         public static AvatarBossDifficultyProfile CreateHard()
         {
             var profile = CreateProfile(AvatarBossDifficulty.Hard);
-            profile.BodyDamageMultiplier = 0.04f; profile.OpenBodyDamageMultiplier = 0.45f; profile.BossHealthMultiplier = 1.6f; profile.WeakPointDamageMultiplier = 1f; profile.PlayerDamageMultiplier = 1f; profile.MaxVulnerabilityDamagePercent = 0.18f; profile.HighImpactWindowDamagePercent = 0.35f;
+            profile.BodyDamageMultiplier = 0.08f; profile.OpenBodyDamageMultiplier = 0.45f; profile.BossHealthMultiplier = 1.6f; profile.WeakPointDamageMultiplier = 0.6f; profile.PlayerDamageMultiplier = 1f; profile.MaxVulnerabilityDamagePercent = 0.18f; profile.HighImpactWindowDamagePercent = 0.32f;
             profile.AttackCooldownMultiplier = 0.85f; profile.TelegraphMultiplier = 0.85f; profile.WindupMultiplier = 0.85f; profile.DifficultyStaggerMultiplier = 0.85f; profile.StaggerGainMultiplier = 0.9f; profile.VulnerabilityDuration = 2.5f;
             profile.ShockwaveSpeedMultiplier = 1.1f; profile.MeteorDamage = 24f; profile.OrbCount = 4; profile.OrbHealth = 42f; profile.OrbSpeed = 5.75f; profile.HealPercent = 0.10f;
             profile.SummonCount = 3; profile.SummonCooldownMultiplier = 0.85f; profile.ComboFrequency = 1f; profile.RecoveryFrequency = 0.85f; profile.ComboCooldownMin = 18f; profile.ComboCooldownMax = 25f;

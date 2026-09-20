@@ -35,13 +35,13 @@ MonoBehaviour:
   m_Name: Easy Profile
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
   Difficulty: 0
-  BodyDamageMultiplier: 0.15
+  BodyDamageMultiplier: 0.25
   OpenBodyDamageMultiplier: 1
   BossHealthMultiplier: 1
-  WeakPointDamageMultiplier: 1.5
+  WeakPointDamageMultiplier: 1.2
   PlayerDamageMultiplier: 0.75
-  MaxVulnerabilityDamagePercent: 0.35
-  HighImpactWindowDamagePercent: 0.4
+  MaxVulnerabilityDamagePercent: 0.3
+  HighImpactWindowDamagePercent: 0.38
   AttackCooldownMultiplier: 1.2
   TelegraphMultiplier: 1.25
   WindupMultiplier: 1.15
@@ -92,13 +92,13 @@ MonoBehaviour:
   m_Name: Normal Profile
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
   Difficulty: 1
-  BodyDamageMultiplier: 0.12
+  BodyDamageMultiplier: 0.2
   OpenBodyDamageMultiplier: 0.8
   BossHealthMultiplier: 1.2
-  WeakPointDamageMultiplier: 1.25
+  WeakPointDamageMultiplier: 1.05
   PlayerDamageMultiplier: 1
-  MaxVulnerabilityDamagePercent: 0.27
-  HighImpactWindowDamagePercent: 0.38
+  MaxVulnerabilityDamagePercent: 0.22
+  HighImpactWindowDamagePercent: 0.32
   AttackCooldownMultiplier: 1
   TelegraphMultiplier: 1
   WindupMultiplier: 1
@@ -149,13 +149,13 @@ MonoBehaviour:
   m_Name: Hard Profile
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
   Difficulty: 2
-  BodyDamageMultiplier: 0.04
+  BodyDamageMultiplier: 0.08
   OpenBodyDamageMultiplier: 0.45
   BossHealthMultiplier: 1.6
-  WeakPointDamageMultiplier: 1
+  WeakPointDamageMultiplier: 0.6
   PlayerDamageMultiplier: 1
   MaxVulnerabilityDamagePercent: 0.18
-  HighImpactWindowDamagePercent: 0.35
+  HighImpactWindowDamagePercent: 0.32
   AttackCooldownMultiplier: 0.85
   TelegraphMultiplier: 0.85
   WindupMultiplier: 0.85

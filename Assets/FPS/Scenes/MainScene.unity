@@ -175,7 +175,7 @@ GameObject:
   m_Component:
   - component: {fileID: 281979175}
   - component: {fileID: 281979179}
-  - component: {fileID: 281979178}
+  - component: {fileID: 281979180}
   - component: {fileID: 281979177}
   - component: {fileID: 281979176}
   m_Layer: 0
@@ -263,8 +263,8 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!65 &281979178
-BoxCollider:
+--- !u!136 &281979180
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -282,7 +282,9 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
+  m_Radius: 0.575
+  m_Height: 1.25
+  m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!33 &281979179
 MeshFilter:
@@ -904,6 +906,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: fps.AvatarBoss.Testing::Unity.FPS.AvatarBoss.AvatarBossDebugHUD
   Boss: {fileID: 0}
+  ShowOnStart: 1
 --- !u!114 &1099317687
 MonoBehaviour:
   m_ObjectHideFlags: 0

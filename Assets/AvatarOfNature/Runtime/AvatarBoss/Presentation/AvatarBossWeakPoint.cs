@@ -14,6 +14,9 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Damageable.DamageMultiplier while the window is closed (collider is disabled, kept as a serialized safety floor)")]
         public float ClosedDamageMultiplier = 0.12f;
 
+        [Tooltip("Priority over the overlapping BossBody collider while this weak point is exposed.")]
+        public int HitPriority = 100;
+
         [Tooltip("True = weak point available only from Phase 2 (WeakPointB)")]
         public bool PhaseTwoAttached = false;
 
@@ -28,6 +31,7 @@ namespace Unity.FPS.AvatarBoss
             m_PhaseTwoAttachedInit = PhaseTwoAttached;
             m_Damageable = GetComponent<Damageable>();
             m_Multiplier = m_Damageable.DamageMultiplier;
+            m_Damageable.HitPriority = HitPriority;
             SetExposed(false);
         }
 
@@ -41,7 +45,10 @@ namespace Unity.FPS.AvatarBoss
                 m_Multiplier = m_Damageable != null ? m_Damageable.DamageMultiplier : 1f;
             }
             if (m_Damageable != null)
+            {
+                m_Damageable.HitPriority = HitPriority;
                 m_Damageable.DamageMultiplier = exposed ? ExposedMultiplier : ClosedDamageMultiplier;
+            }
 
             Collider col = GetComponent<Collider>();
             if (col != null)
