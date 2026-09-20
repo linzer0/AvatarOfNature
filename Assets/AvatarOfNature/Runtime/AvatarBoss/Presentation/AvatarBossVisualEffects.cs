@@ -5,8 +5,8 @@ using UnityEngine;
 namespace Unity.FPS.AvatarBoss
 {
     /// Presentation pass: readable, lit, color-separated silhouette (VisualRoot)
-    /// from primitives: distinct materials per part, gold emissive crown/cores,
-    /// elemental cores, weak point halos + world markers, warm rim light,
+    /// from primitives: distinct materials per part, weak point halos + world
+    /// markers, a restrained cast telegraph and warm rim light,
     /// phase-2 aura tint, hit / stagger flashes. Gameplay untouched.
     public class AvatarBossVisualEffects : MonoBehaviour
     {
@@ -23,9 +23,6 @@ namespace Unity.FPS.AvatarBoss
         readonly List<GameObject> m_Cores = new List<GameObject>();
         Transform m_Torso;
         Transform m_Head;
-        Transform m_Crown;
-        Transform m_ShoulderL;
-        Transform m_ShoulderR;
         Transform m_ArmL;
         Transform m_ArmR;
         Vector3 m_VisualRootBasePosition;
@@ -62,8 +59,7 @@ namespace Unity.FPS.AvatarBoss
 
         readonly Color m_TorsoColor = new Color(0.18f, 0.28f, 0.24f, 1f);   // deep nature stone
         readonly Color m_HeadColor = new Color(0.09f, 0.13f, 0.14f, 1f);   // dark ceremonial mask
-        readonly Color m_CrownColor = new Color(0.92f, 0.72f, 0.18f, 1f);  // emissive gold
-        readonly Color m_ShoulderColor = new Color(0.50f, 0.36f, 0.20f, 1f); // bronze
+        readonly Color m_AccentColor = new Color(0.32f, 0.68f, 0.46f, 1f); // restrained nature accent
         readonly Color m_ArmColor = new Color(0.32f, 0.42f, 0.30f, 1f);    // lighter stone
         readonly Color m_AuraColor = new Color(0.55f, 0.85f, 0.65f, 0.10f); // nature aura
         readonly Color m_PhaseTwoTint = new Color(1f, 0.32f, 0.14f, 1f);   // phase-2 fire accent
@@ -81,11 +77,15 @@ namespace Unity.FPS.AvatarBoss
             if (body != null)
                 m_BodyRenderer = body.GetComponent<MeshRenderer>();
 
+            // Build the readable silhouette immediately. The difficulty gate only
+            // pauses attacks; it must not leave the gameplay placeholder visible
+            // while the fight is waiting to start (or when the arena is opened
+            // directly from the editor).
+            BuildSilhouette();
+
             var gate = m_Boss.GetComponent<AvatarBossShowcaseDifficultySelect>();
             if (gate != null && !gate.FightStarted)
                 gate.FightStartedEvent += BuildDeferred;
-            else
-                BuildSilhouette();
 
             // presentation-only reaction subscriptions (precise per-part hit feedback)
             m_Boss.OnBossHit += OnBossHit;
@@ -153,8 +153,8 @@ namespace Unity.FPS.AvatarBoss
                 var r = core.GetComponent<MeshRenderer>();
                 if (r == null) continue;
                 var mat = new Material(r.material);
-                mat.color = m_CrownColor;
-                mat.SetColor("_EmissionColor", m_CrownColor * 1.6f);
+                mat.color = m_AccentColor;
+                mat.SetColor("_EmissionColor", m_AccentColor * 0.35f);
                 r.material = mat;
             }
 
@@ -227,19 +227,17 @@ namespace Unity.FPS.AvatarBoss
             return go;
         }
 
-        void AddCore(string coreName, Vector3 localPosition)
-        {
-            var go = AddVisual(coreName, PrimitiveType.Sphere, localPosition,
-                Vector3.one * 0.55f, m_CrownColor, emissive: true);
-            m_Cores.Add(go);
-        }
-
         void BuildSilhouette()
         {
             var existing = transform.Find("VisualRoot");
             if (existing != null)
             {
                 m_VisualRoot = existing.gameObject;
+                RemoveLegacyDecorations();
+                // A scene-authored VisualRoot can coexist with the gameplay body.
+                // The latter is only a damage receiver and must never be rendered.
+                if (m_BodyRenderer != null)
+                    m_BodyRenderer.enabled = false;
                 CacheRigParts();
                 BuildWeakPointMarkers();
                 m_Built = true;
@@ -249,29 +247,17 @@ namespace Unity.FPS.AvatarBoss
             m_VisualRoot = new GameObject("VisualRoot");
             m_VisualRoot.transform.SetParent(transform, false);
 
-            // A readable golem silhouette: rounded stone mass, separated shoulders,
-            // ceremonial mask and a crown that can visibly rotate during a cast.
+            // Readable golem silhouette: one strong body mass, compact head and
+            // two deliberate arms. Decorative crown, shoulder balls and yellow
+            // front cores are omitted to keep attack poses readable at range.
             AddVisual("Torso", PrimitiveType.Capsule, new Vector3(0f, 3.35f, 0f),
-                new Vector3(2.9f, 3.25f, 2.9f), m_TorsoColor);
+                new Vector3(2.75f, 3.35f, 2.75f), m_TorsoColor);
             AddVisual("Head", PrimitiveType.Sphere, new Vector3(0f, 6.6f, 0f),
-                new Vector3(2.35f, 2.1f, 2.35f), m_HeadColor);
-            AddVisual("Crown", PrimitiveType.Cylinder, new Vector3(0f, 7.85f, 0f),
-                new Vector3(1.85f, 0.28f, 1.85f), m_CrownColor, emissive: true);
-            AddVisual("CrownTip", PrimitiveType.Cylinder, new Vector3(0f, 8.5f, 0f),
-                new Vector3(0.72f, 0.9f, 0.72f), m_CrownColor, emissive: true);
-            // shoulders and arms: the raised pose becomes the attack telegraph.
-            AddVisual("ShoulderL", PrimitiveType.Sphere, new Vector3(-2.35f, 5.15f, 0f),
-                new Vector3(1.6f, 1.35f, 1.9f), m_ShoulderColor);
-            AddVisual("ShoulderR", PrimitiveType.Sphere, new Vector3(2.35f, 5.15f, 0f),
-                new Vector3(1.6f, 1.35f, 1.9f), m_ShoulderColor);
-            AddVisual("ArmL", PrimitiveType.Capsule, new Vector3(-3.05f, 3.45f, 0f),
-                new Vector3(0.78f, 2.1f, 0.78f), m_ArmColor);
-            AddVisual("ArmR", PrimitiveType.Capsule, new Vector3(3.05f, 3.45f, 0f),
-                new Vector3(0.78f, 2.1f, 0.78f), m_ArmColor);
-
-            // elemental cores on the front face, near the weak points
-            AddCore("CoreL", new Vector3(-1.15f, 3.3f, -1.8f));
-            AddCore("CoreR", new Vector3(1.15f, 3.3f, -1.8f));
+                new Vector3(2.15f, 1.65f, 2.15f), m_HeadColor);
+            AddVisual("ArmL", PrimitiveType.Capsule, new Vector3(-2.05f, 4.05f, 0f),
+                new Vector3(0.62f, 1.95f, 0.62f), m_ArmColor);
+            AddVisual("ArmR", PrimitiveType.Capsule, new Vector3(2.05f, 4.05f, 0f),
+                new Vector3(0.62f, 1.95f, 0.62f), m_ArmColor);
 
             // translucent nature aura (unlit so it reads as a glow, not a solid).
             // Compact shell hugging the silhouette — never encloses the whole boss.
@@ -330,15 +316,32 @@ namespace Unity.FPS.AvatarBoss
             m_Built = true;
         }
 
+        void RemoveLegacyDecorations()
+        {
+            if (m_VisualRoot == null)
+                return;
+
+            string[] legacyNames =
+            {
+                "Crown_Visual", "CrownTip_Visual",
+                "ShoulderL_Visual", "ShoulderR_Visual",
+                "CoreL_Visual", "CoreR_Visual"
+            };
+
+            foreach (var legacyName in legacyNames)
+            {
+                var legacy = m_VisualRoot.transform.Find(legacyName);
+                if (legacy != null)
+                    Destroy(legacy.gameObject);
+            }
+        }
+
         void CacheRigParts()
         {
             if (m_VisualRoot == null)
                 return;
             m_Torso = m_VisualRoot.transform.Find("Torso_Visual");
             m_Head = m_VisualRoot.transform.Find("Head_Visual");
-            m_Crown = m_VisualRoot.transform.Find("Crown_Visual");
-            m_ShoulderL = m_VisualRoot.transform.Find("ShoulderL_Visual");
-            m_ShoulderR = m_VisualRoot.transform.Find("ShoulderR_Visual");
             m_ArmL = m_VisualRoot.transform.Find("ArmL_Visual");
             m_ArmR = m_VisualRoot.transform.Find("ArmR_Visual");
             m_VisualRootBasePosition = m_VisualRoot.transform.localPosition;
@@ -498,40 +501,29 @@ namespace Unity.FPS.AvatarBoss
                 m_Head.localRotation = Quaternion.Euler(headTilt, 0f,
                     element == AvatarBossElement.Fire ? Mathf.Sin(Time.time * 3f) * pulse * 7f : 0f);
             }
-            if (m_Crown != null)
-            {
-                float crownRoll = element == AvatarBossElement.Earth ? pulse * 18f : pulse * 12f;
-                m_Crown.localRotation = Quaternion.Euler(0f,
-                    Time.time * (m_Boss.PhaseTwo ? 130f : 85f), crownRoll);
-            }
-            if (m_ShoulderL != null)
-                m_ShoulderL.localRotation = Quaternion.Euler(0f, Time.time * 38f,
-                    pulse * (element == AvatarBossElement.Shockwave ? 18f : 7f));
-            if (m_ShoulderR != null)
-                m_ShoulderR.localRotation = Quaternion.Euler(0f, -Time.time * 38f,
-                    -pulse * (element == AvatarBossElement.Shockwave ? 18f : 7f));
-
-            float leftArmAngle = 18f + pulse * 42f + burst * 16f;
-            float rightArmAngle = -18f - pulse * 42f - burst * 16f;
+            // Arms are the primary readable telegraph. Keep a visible neutral pose
+            // and use large, element-specific silhouettes during wind-up.
+            float leftArmAngle = 18f + pulse * 30f + burst * 20f;
+            float rightArmAngle = -18f - pulse * 30f - burst * 20f;
             float elementLean = 0f;
             switch (element)
             {
                 case AvatarBossElement.Earth:
                     // Heavy overhead slam: elbows tuck in, then the shoulders drop.
-                    leftArmAngle = 28f + pulse * 30f + burst * 24f;
-                    rightArmAngle = -28f - pulse * 30f - burst * 24f;
+                    leftArmAngle = 42f + pulse * 24f + burst * 30f;
+                    rightArmAngle = -42f - pulse * 24f - burst * 30f;
                     elementLean = -pulse * 4f;
                     break;
                 case AvatarBossElement.Fire:
                     // Meteor cast: both hands visibly rise above the shoulders.
-                    leftArmAngle = 66f + pulse * 22f + burst * 18f;
-                    rightArmAngle = -66f - pulse * 22f - burst * 18f;
+                    leftArmAngle = 72f + pulse * 18f + burst * 18f;
+                    rightArmAngle = -72f - pulse * 18f - burst * 18f;
                     elementLean = pulse * 4f;
                     break;
                 case AvatarBossElement.Shockwave:
                     // Shockwave wind-up: wide cruciform pose, easy to read at range.
-                    leftArmAngle = 92f + pulse * 12f + burst * 20f;
-                    rightArmAngle = -92f - pulse * 12f - burst * 20f;
+                    leftArmAngle = 108f + pulse * 10f + burst * 24f;
+                    rightArmAngle = -108f - pulse * 10f - burst * 24f;
                     elementLean = -pulse * 2f;
                     break;
             }
@@ -609,7 +601,7 @@ namespace Unity.FPS.AvatarBoss
                 if (renderer == null)
                     continue;
                 var mat = new Material(renderer.material);
-                Color color = exposed ? exposedCore : (m_PhaseTwoApplied ? m_PhaseTwoTint : m_CrownColor);
+                Color color = exposed ? exposedCore : (m_PhaseTwoApplied ? m_PhaseTwoTint : m_AccentColor);
                 mat.color = color;
                 mat.EnableKeyword("_EMISSION");
                 mat.SetColor("_EmissionColor", color * (exposed ? 2.4f : 1.6f));

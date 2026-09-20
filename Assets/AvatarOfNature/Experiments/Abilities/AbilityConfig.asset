@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bc964bac8095d0f498c437ff1d658e36, type: 3}
+  m_Name: AbilityConfig
+  m_EditorClassIdentifier: fps.AvatarBoss.Experiments::Unity.FPS.AvatarBoss.Configs.Demo.AbilityConfig
+  _elements:
+  - {fileID: 7667727833414637000}
+  - {fileID: 1071514368870717169}
+  m_AbilityId: fireball
+--- !u!114 &1071514368870717169
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7597f9df1b89bac4e8fb869d9a5a77b4, type: 3}
+  m_Name: Recovery
+  m_EditorClassIdentifier: fps.AvatarBoss.Experiments::Unity.FPS.AvatarBoss.Configs.Demo.HealAbilityPart
+  m_DisplayName: 
+  m_HealAmount: 50
+--- !u!114 &7667727833414637000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 20b04563e6269dd4cbf8fb29fa2e3366, type: 3}
+  m_Name: Burn
+  m_EditorClassIdentifier: fps.AvatarBoss.Experiments::Unity.FPS.AvatarBoss.Configs.Demo.DamageAbilityPart
+  m_DisplayName: 
+  m_Damage: 100

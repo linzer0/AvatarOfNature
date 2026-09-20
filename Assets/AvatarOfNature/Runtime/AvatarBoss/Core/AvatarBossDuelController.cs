@@ -6,6 +6,12 @@ using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
 {
+    public enum AvatarBossVulnerabilityKind
+    {
+        Standard,
+        HighImpact
+    }
+
     /// <summary>
     /// Integrates boss intent, the destructible arena and the vulnerability window.
     /// Ordinary body damage is reduced until an attack resolves against its target sector.
@@ -23,9 +29,16 @@ namespace Unity.FPS.AvatarBoss
         [Min(0.01f)] public float OpenBodyDamageMultiplier = 1f;
         [Min(0f)] public float VulnerabilityDuration = 3.5f;
         [Min(0f)] public float VulnerabilityDelayAfterCollapse = 0.15f;
+        [Range(0f, 1f)] public float MaxVulnerabilityDamagePercent = 0.27f;
+        [Range(0f, 1f)] public float HighImpactWindowDamagePercent = 0.38f;
+
+        [Header("Diagnostics")]
+        [Tooltip("Logs every boss damage event, vulnerability budget decision and window transition.")]
+        public bool EnableDamageDiagnostics = true;
 
         public bool DuelWindowActive { get; private set; }
         public int ResolvedSectorCount { get; private set; }
+        public float VulnerabilityDamageRemaining => m_VulnerabilityDamageRemaining;
 
         /// Fired when an intent successfully resolves against an arena sector.
         public event Action<AvatarBossIntent> OnIntentResolved;
@@ -35,6 +48,10 @@ namespace Unity.FPS.AvatarBoss
         Coroutine m_VulnerabilityRoutine;
         AvatarBossIntent m_LastResolvedIntent;
         bool m_HasLastResolvedIntent;
+        AvatarBossVulnerabilityKind m_PendingWindowKind = AvatarBossVulnerabilityKind.Standard;
+        float m_VulnerabilityDamageRemaining;
+        bool m_DamageBudgetActive;
+        bool m_LastWindowWasHighImpact;
 
         void Awake()
         {
@@ -81,11 +98,14 @@ namespace Unity.FPS.AvatarBoss
         /// profile with the serialized fallback.
         /// </summary>
         public void ApplyDifficultyTuning(float closedBodyDamageMultiplier, float vulnerabilityDuration,
-            float openBodyDamageMultiplier = 1f)
+            float openBodyDamageMultiplier = 1f, float maxVulnerabilityDamagePercent = 0.27f,
+            float highImpactWindowDamagePercent = 0.38f)
         {
             ClosedBodyDamageMultiplier = Mathf.Max(0.01f, closedBodyDamageMultiplier);
             VulnerabilityDuration = Mathf.Max(0f, vulnerabilityDuration);
             OpenBodyDamageMultiplier = Mathf.Max(0.01f, openBodyDamageMultiplier);
+            MaxVulnerabilityDamagePercent = Mathf.Clamp01(maxVulnerabilityDamagePercent);
+            HighImpactWindowDamagePercent = Mathf.Clamp01(highImpactWindowDamagePercent);
             if (m_BodyDamageable != null && !DuelWindowActive)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
         }
@@ -145,6 +165,9 @@ namespace Unity.FPS.AvatarBoss
             m_LastResolvedIntent = intent;
             m_HasLastResolvedIntent = true;
             ResolvedSectorCount += brokenSectors;
+            m_PendingWindowKind = brokenSectors >= 2 && !m_LastWindowWasHighImpact
+                ? AvatarBossVulnerabilityKind.HighImpact
+                : AvatarBossVulnerabilityKind.Standard;
             OnIntentResolved?.Invoke(intent);
             EventManager.Broadcast(new CameraImpulseEvent
             {
@@ -168,7 +191,6 @@ namespace Unity.FPS.AvatarBoss
             if (Boss == null || Boss.IsDead)
                 yield break;
 
-            DuelWindowActive = true;
             EventManager.Broadcast(new CameraImpulseEvent
             {
                 Strength = 0.18f,
@@ -177,15 +199,78 @@ namespace Unity.FPS.AvatarBoss
             });
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = OpenBodyDamageMultiplier;
+            PrepareVulnerabilityWindow(m_PendingWindowKind);
             Boss.TriggerDuelWindow(VulnerabilityDuration);
 
             if (VulnerabilityDuration > 0f)
                 yield return new WaitForSeconds(VulnerabilityDuration);
 
+            CloseVulnerabilityWindow();
+            m_VulnerabilityRoutine = null;
+        }
+
+        /// <summary>Arms the damage budget used by the next exposed weak-point window.</summary>
+        public void PrepareVulnerabilityWindow(AvatarBossVulnerabilityKind kind)
+        {
+            if (Boss == null)
+                Boss = GetComponent<AvatarBossController>();
+            var bossHealth = Boss != null ? Boss.BossHealth : null;
+            if (bossHealth == null)
+                bossHealth = GetComponent<Health>() ?? GetComponentInParent<Health>();
+
+            m_PendingWindowKind = kind;
+            m_VulnerabilityDamageRemaining = bossHealth != null
+                ? bossHealth.MaxHealth * (kind == AvatarBossVulnerabilityKind.HighImpact
+                    ? HighImpactWindowDamagePercent
+                    : MaxVulnerabilityDamagePercent)
+                : 0f;
+            m_DamageBudgetActive = true;
+            m_LastWindowWasHighImpact = kind == AvatarBossVulnerabilityKind.HighImpact;
+            DuelWindowActive = true;
+            if (m_BodyDamageable != null)
+                m_BodyDamageable.DamageMultiplier = OpenBodyDamageMultiplier;
+
+            DamageLog($"WINDOW OPEN kind={kind} budget={m_VulnerabilityDamageRemaining:F1} " +
+                      $"duration={VulnerabilityDuration:F2}s bossHp={bossHealth?.CurrentHealth:F1}/{bossHealth?.MaxHealth:F1}");
+        }
+
+        public void CloseVulnerabilityWindow()
+        {
+            DamageLog($"WINDOW CLOSE kind={m_PendingWindowKind} remainingBudget={m_VulnerabilityDamageRemaining:F1} " +
+                      $"bossHp={Boss?.BossHealth?.CurrentHealth:F1}/{Boss?.BossHealth?.MaxHealth:F1}");
+            m_DamageBudgetActive = false;
+            m_VulnerabilityDamageRemaining = 0f;
             DuelWindowActive = false;
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
-            m_VulnerabilityRoutine = null;
+        }
+
+        /// <summary>Refunds overflow after Health.TakeDamage and keeps the actual HP loss within the window budget.</summary>
+        public float ConsumeVulnerabilityDamage(float damage)
+        {
+            if (!m_DamageBudgetActive || damage <= 0f)
+                return damage;
+
+            float accepted = Mathf.Min(damage, m_VulnerabilityDamageRemaining);
+            m_VulnerabilityDamageRemaining -= accepted;
+            float overflow = damage - accepted;
+            var bossHealth = Boss != null ? Boss.BossHealth : null;
+            if (bossHealth == null)
+                bossHealth = GetComponent<Health>() ?? GetComponentInParent<Health>();
+            if (overflow > 0f && bossHealth != null)
+                bossHealth.CurrentHealth = Mathf.Min(bossHealth.MaxHealth,
+                    bossHealth.CurrentHealth + overflow);
+
+            DamageLog($"DAMAGE BUDGET kind={m_PendingWindowKind} raw={damage:F1} accepted={accepted:F1} " +
+                      $"overflow={overflow:F1} remaining={m_VulnerabilityDamageRemaining:F1} " +
+                      $"bossHp={bossHealth?.CurrentHealth:F1}/{bossHealth?.MaxHealth:F1}");
+            return accepted;
+        }
+
+        public void DamageLog(string message)
+        {
+            if (EnableDamageDiagnostics)
+                Debug.Log($"[AvatarOfNature][BossDamage] {message}", this);
         }
 
         /// <summary>Clears duel runtime state without rebuilding the arena.</summary>
@@ -198,6 +283,8 @@ namespace Unity.FPS.AvatarBoss
             }
 
             DuelWindowActive = false;
+            m_DamageBudgetActive = false;
+            m_VulnerabilityDamageRemaining = 0f;
             ResolvedSectorCount = 0;
             m_HasLastResolvedIntent = false;
             if (m_BodyDamageable != null)

@@ -27,12 +27,15 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             m_Difficulty = GetComponent<AvatarBossDifficultyController>();
-            if (AvatarBossShowcaseSession.HasSelection)
-                BeginFight(AvatarBossShowcaseSession.SelectedDifficulty);
         }
 
         void Start()
         {
+            // Apply the cross-scene selection after every component has finished
+            // Awake. Applying it from Awake races AvatarBossDifficultyController,
+            // which can otherwise overwrite Hard with its serialized Normal default.
+            if (AvatarBossShowcaseSession.HasSelection)
+                BeginFight(AvatarBossShowcaseSession.SelectedDifficulty);
             StartCoroutine(BuildWhenHudIsReady());
         }
 
@@ -70,7 +73,7 @@ namespace Unity.FPS.AvatarBoss
             if (FightStarted)
                 return;
             m_Selected = difficulty;
-            if (m_Difficulty != null)
+            if (m_Difficulty != null && m_Difficulty.CurrentDifficulty != difficulty)
                 m_Difficulty.ApplyDifficulty(difficulty);
             FightStarted = true;
             Cursor.lockState = CursorLockMode.Locked;

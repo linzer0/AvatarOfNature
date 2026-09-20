@@ -11,55 +11,6 @@ namespace Unity.FPS.AvatarBoss
         Hard
     }
 
-    [System.Serializable]
-    public struct AvatarBossDifficultyProfile
-    {
-        public AvatarBossDifficulty Difficulty;
-        public float BodyDamageMultiplier;
-        public float OpenBodyDamageMultiplier;
-        public float BossHealthMultiplier;
-        public float WeakPointDamageMultiplier;
-        public float PlayerDamageMultiplier;
-        public float AttackCooldownMultiplier;
-        public float TelegraphMultiplier;
-        public float WindupMultiplier;
-        [Tooltip("Difficulty-only stagger gain multiplier. Phase 2 tuning remains separate.")]
-        public float DifficultyStaggerMultiplier;
-        public float StaggerGainMultiplier;
-        public float VulnerabilityDuration;
-        public float ShockwaveSpeedMultiplier;
-        public float MeteorDamage;
-        public int OrbCount;
-        public float OrbHealth;
-        public float OrbSpeed;
-        public float HealPercent;
-        public int SummonCount;
-        public float SummonCooldownMultiplier;
-        public float ComboFrequency;
-        public float RecoveryFrequency;
-        public float ComboCooldownMin;
-        public float ComboCooldownMax;
-        public float MeteorCooldownMin;
-        public float MeteorCooldownMax;
-        public int MaxConcurrentThreats;
-        public int TargetCellCount;
-        public bool MixedCombosEnabled;
-        public float PhaseTwoTimingMultiplier;
-        public float PhaseTwoTelegraphMultiplier;
-        public float PhaseTwoStaggerGainMultiplier;
-        public float PhaseTwoStaggerThresholdMultiplier;
-        public float PhaseTwoStaggerDecayMultiplier;
-        public float PhaseTwoStaggerDecayDelayMultiplier;
-        public float PhaseTwoMinCooldown;
-        public float PhaseTwoMinTelegraph;
-        public float PhaseTwoMinWindup;
-        public float PhaseTwoMinRecover;
-        public float PhaseTwoMeteorDamage;
-        public float PhaseTwoShockwaveSpeed;
-        public float PhaseTwoVulnerabilityDuration;
-        public bool PhaseTwoComboEnabled;
-    }
-
     public sealed class AvatarBossDifficultyController : MonoBehaviour
     {
         [Header("Selection")]
@@ -99,7 +50,9 @@ namespace Unity.FPS.AvatarBoss
             var context = GetComponentInParent<AvatarBossController>()?.GetCombatContext();
             context?.ResolveSceneReferences();
             m_Player = context != null ? context.Player : null;
-            ApplyDifficulty(DefaultDifficulty);
+            ApplyDifficulty(AvatarBossShowcaseSession.HasSelection
+                ? AvatarBossShowcaseSession.SelectedDifficulty
+                : DefaultDifficulty);
         }
 
         public void ApplyDifficulty(AvatarBossDifficulty difficulty)
@@ -111,6 +64,14 @@ namespace Unity.FPS.AvatarBoss
                     ? AvatarBossEncounterConfig.CreateHard()
                     : AvatarBossEncounterConfig.CreateNormal();
             ActiveProfile = EncounterConfig != null ? EncounterConfig.GetProfile(difficulty) : legacyProfile;
+
+            Debug.Log($"[AvatarOfNature][BossBalance] difficulty={CurrentDifficulty} " +
+                      $"source={(EncounterConfig != null ? EncounterConfig.name : "legacy")} " +
+                      $"baseHp={m_BaseBossMaxHealth:F1} hpMultiplier={ActiveProfile.BossHealthMultiplier:F2} " +
+                      $"body={ActiveProfile.BodyDamageMultiplier:F2} weak={ActiveProfile.WeakPointDamageMultiplier:F2} " +
+                      $"standardWindow={ActiveProfile.MaxVulnerabilityDamagePercent:P0} " +
+                      $"highImpactWindow={ActiveProfile.HighImpactWindowDamagePercent:P0} " +
+                      $"duration={ActiveProfile.VulnerabilityDuration:F2}s", this);
 
             if (m_Boss != null && m_Boss.BossHealth != null)
             {
@@ -167,7 +128,9 @@ namespace Unity.FPS.AvatarBoss
             var duel = GetComponent<AvatarBossDuelController>();
             if (duel != null)
                 duel.ApplyDifficultyTuning(ActiveProfile.BodyDamageMultiplier,
-                    ActiveProfile.VulnerabilityDuration, ActiveProfile.OpenBodyDamageMultiplier);
+                    ActiveProfile.VulnerabilityDuration, ActiveProfile.OpenBodyDamageMultiplier,
+                    ActiveProfile.MaxVulnerabilityDamagePercent,
+                    ActiveProfile.HighImpactWindowDamagePercent);
             if (m_Stagger != null)
             {
                 m_Stagger.MaxStagger = 100f;

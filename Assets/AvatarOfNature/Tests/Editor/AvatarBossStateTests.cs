@@ -43,6 +43,38 @@ namespace Unity.FPS.AvatarBoss.EditorTests
         }
 
         [Test]
+        public void DuelWindow_StandardBudgetClampsAcceptedDamage()
+        {
+            var health = m_Root.GetComponent<Health>();
+            health.MaxHealth = 1000f;
+            health.CurrentHealth = 1000f;
+            var duel = m_Root.AddComponent<AvatarBossDuelController>();
+            duel.Boss = m_Boss;
+            duel.MaxVulnerabilityDamagePercent = 0.18f;
+            duel.PrepareVulnerabilityWindow(AvatarBossVulnerabilityKind.Standard);
+
+            Assert.AreEqual(180f, duel.ConsumeVulnerabilityDamage(180f), 0.001f);
+            Assert.AreEqual(0f, duel.ConsumeVulnerabilityDamage(50f), 0.001f,
+                "standard vulnerability window must not spend damage beyond its budget");
+        }
+
+        [Test]
+        public void DuelWindow_HighImpactBudgetAllowsBurstWithoutFullKill()
+        {
+            var health = m_Root.GetComponent<Health>();
+            health.MaxHealth = 1000f;
+            health.CurrentHealth = 1000f;
+            var duel = m_Root.AddComponent<AvatarBossDuelController>();
+            duel.Boss = m_Boss;
+            duel.HighImpactWindowDamagePercent = 0.35f;
+            duel.PrepareVulnerabilityWindow(AvatarBossVulnerabilityKind.HighImpact);
+
+            Assert.AreEqual(350f, duel.ConsumeVulnerabilityDamage(350f), 0.001f);
+            Assert.AreEqual(0f, duel.ConsumeVulnerabilityDamage(700f), 0.001f,
+                "high-impact window must still leave the boss alive for follow-up cycles");
+        }
+
+        [Test]
         public void Stagger_FullTriggersOnStaggerFullOnce()
         {
             var stagger = m_Root.GetComponent<AvatarBossStagger>();

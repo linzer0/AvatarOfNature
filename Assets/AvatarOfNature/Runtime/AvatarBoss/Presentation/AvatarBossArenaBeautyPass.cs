@@ -208,8 +208,8 @@ namespace Unity.FPS.AvatarBoss
             for (int ring = 0; ring <= rings; ring++)
             {
                 float radius = ring == 0
-                    ? m_Arena.CenterPlatformRadius + 0.2f
-                    : Mathf.Lerp(m_Arena.ArenaInnerRadius, m_Arena.ArenaRadius, (float)ring / rings);
+                    ? m_Arena.PlayableInnerRadius + 0.2f
+                    : Mathf.Lerp(m_Arena.PlayableInnerRadius, m_Arena.ArenaRadius, (float)ring / rings);
                 CreateRuneRing($"RuneRing_{ring}", radius, ring == 0 ? 0.12f : RuneWidth);
             }
 

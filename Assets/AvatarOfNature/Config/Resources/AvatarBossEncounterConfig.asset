@@ -11,142 +11,185 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2c40da8e3fa84ca596c54f1a6bb8db3e, type: 3}
   m_Name: AvatarBossEncounterConfig
-  m_EditorClassIdentifier:
+  m_EditorClassIdentifier: 
+  _elements:
+  - {fileID: 7799128758405163888}
+  - {fileID: 4137973937477960450}
+  - {fileID: 2143283471875839613}
   AttackCooldown: 3
   InitialGraceTime: 4
   RecoverTime: 1.5
   WindupTime: 0.9
   RecoveryCooldown: 40
   SummonCooldown: 20
-  Easy:
-    Difficulty: 0
-    BodyDamageMultiplier: 0.15
-    OpenBodyDamageMultiplier: 1
-    BossHealthMultiplier: 1
-    WeakPointDamageMultiplier: 2
-    PlayerDamageMultiplier: 0.75
-    AttackCooldownMultiplier: 1.2
-    TelegraphMultiplier: 1.25
-    WindupMultiplier: 1.15
-    DifficultyStaggerMultiplier: 1.15
-    StaggerGainMultiplier: 1.15
-    VulnerabilityDuration: 4.2
-    ShockwaveSpeedMultiplier: 0.85
-    MeteorDamage: 15
-    OrbCount: 2
-    OrbHealth: 24
-    OrbSpeed: 3.5
-    HealPercent: 0.06
-    SummonCount: 2
-    SummonCooldownMultiplier: 1.2
-    ComboFrequency: 0.55
-    RecoveryFrequency: 1.2
-    ComboCooldownMin: 30
-    ComboCooldownMax: 38
-    MeteorCooldownMin: 30
-    MeteorCooldownMax: 38
-    MaxConcurrentThreats: 1
-    TargetCellCount: 1
-    MixedCombosEnabled: 0
-    PhaseTwoTimingMultiplier: 0.82
-    PhaseTwoTelegraphMultiplier: 0.9
-    PhaseTwoStaggerGainMultiplier: 0.75
-    PhaseTwoStaggerThresholdMultiplier: 0.7
-    PhaseTwoStaggerDecayMultiplier: 1.1
-    PhaseTwoStaggerDecayDelayMultiplier: 0.9
-    PhaseTwoMinCooldown: 2.4
-    PhaseTwoMinTelegraph: 1.4
-    PhaseTwoMinWindup: 0.75
-    PhaseTwoMinRecover: 1.3
-    PhaseTwoMeteorDamage: 18
-    PhaseTwoShockwaveSpeed: 20
-    PhaseTwoVulnerabilityDuration: 3
-    PhaseTwoComboEnabled: 0
-  Normal:
-    Difficulty: 1
-    BodyDamageMultiplier: 0.12
-    OpenBodyDamageMultiplier: 1
-    BossHealthMultiplier: 1
-    WeakPointDamageMultiplier: 2
-    PlayerDamageMultiplier: 1
-    AttackCooldownMultiplier: 1
-    TelegraphMultiplier: 1
-    WindupMultiplier: 1
-    DifficultyStaggerMultiplier: 1
-    StaggerGainMultiplier: 1
-    VulnerabilityDuration: 3.5
-    ShockwaveSpeedMultiplier: 1
-    MeteorDamage: 20
-    OrbCount: 3
-    OrbHealth: 30
-    OrbSpeed: 4.5
-    HealPercent: 0.08
-    SummonCount: 3
-    SummonCooldownMultiplier: 1
-    ComboFrequency: 0.8
-    RecoveryFrequency: 1
-    ComboCooldownMin: 25
-    ComboCooldownMax: 35
-    MeteorCooldownMin: 25
-    MeteorCooldownMax: 35
-    MaxConcurrentThreats: 1
-    TargetCellCount: 2
-    MixedCombosEnabled: 0
-    PhaseTwoTimingMultiplier: 0.77
-    PhaseTwoTelegraphMultiplier: 0.8
-    PhaseTwoStaggerGainMultiplier: 0.75
-    PhaseTwoStaggerThresholdMultiplier: 0.6
-    PhaseTwoStaggerDecayMultiplier: 1.25
-    PhaseTwoStaggerDecayDelayMultiplier: 0.8
-    PhaseTwoMinCooldown: 2.1
-    PhaseTwoMinTelegraph: 1.3
-    PhaseTwoMinWindup: 0.7
-    PhaseTwoMinRecover: 1.2
-    PhaseTwoMeteorDamage: 22
-    PhaseTwoShockwaveSpeed: 24
-    PhaseTwoVulnerabilityDuration: 2.5
-    PhaseTwoComboEnabled: 1
-  Hard:
-    Difficulty: 2
-    BodyDamageMultiplier: 0.04
-    OpenBodyDamageMultiplier: 0.45
-    BossHealthMultiplier: 2
-    WeakPointDamageMultiplier: 1
-    PlayerDamageMultiplier: 1.2
-    AttackCooldownMultiplier: 0.85
-    TelegraphMultiplier: 0.85
-    WindupMultiplier: 0.85
-    DifficultyStaggerMultiplier: 0.85
-    StaggerGainMultiplier: 0.9
-    VulnerabilityDuration: 3
-    ShockwaveSpeedMultiplier: 1.1
-    MeteorDamage: 24
-    OrbCount: 4
-    OrbHealth: 42
-    OrbSpeed: 5.75
-    HealPercent: 0.1
-    SummonCount: 3
-    SummonCooldownMultiplier: 0.85
-    ComboFrequency: 1
-    RecoveryFrequency: 0.85
-    ComboCooldownMin: 18
-    ComboCooldownMax: 25
-    MeteorCooldownMin: 18
-    MeteorCooldownMax: 25
-    MaxConcurrentThreats: 1
-    TargetCellCount: 3
-    MixedCombosEnabled: 1
-    PhaseTwoTimingMultiplier: 0.7
-    PhaseTwoTelegraphMultiplier: 0.75
-    PhaseTwoStaggerGainMultiplier: 0.65
-    PhaseTwoStaggerThresholdMultiplier: 0.55
-    PhaseTwoStaggerDecayMultiplier: 1.35
-    PhaseTwoStaggerDecayDelayMultiplier: 0.7
-    PhaseTwoMinCooldown: 1.9
-    PhaseTwoMinTelegraph: 1.15
-    PhaseTwoMinWindup: 0.6
-    PhaseTwoMinRecover: 1.05
-    PhaseTwoMeteorDamage: 28
-    PhaseTwoShockwaveSpeed: 27
-    PhaseTwoVulnerabilityDuration: 2.1
-    PhaseTwoComboEnabled: 1
+--- !u!114 &2143283471875839613
+MonoBehaviour:
+  m_ObjectHideFlags: 33
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c6febeb2e0c79408875b0e9078da15, type: 3}
+  m_Name: Easy Profile
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
+  Difficulty: 0
+  BodyDamageMultiplier: 0.15
+  OpenBodyDamageMultiplier: 1
+  BossHealthMultiplier: 1
+  WeakPointDamageMultiplier: 1.5
+  PlayerDamageMultiplier: 0.75
+  MaxVulnerabilityDamagePercent: 0.35
+  HighImpactWindowDamagePercent: 0.4
+  AttackCooldownMultiplier: 1.2
+  TelegraphMultiplier: 1.25
+  WindupMultiplier: 1.15
+  DifficultyStaggerMultiplier: 1.15
+  StaggerGainMultiplier: 1.15
+  VulnerabilityDuration: 4
+  ShockwaveSpeedMultiplier: 0.85
+  MeteorDamage: 15
+  OrbCount: 2
+  OrbHealth: 24
+  OrbSpeed: 3.5
+  HealPercent: 0.06
+  SummonCount: 2
+  SummonCooldownMultiplier: 1.2
+  ComboFrequency: 0.55
+  RecoveryFrequency: 1.2
+  ComboCooldownMin: 30
+  ComboCooldownMax: 38
+  MeteorCooldownMin: 30
+  MeteorCooldownMax: 38
+  MaxConcurrentThreats: 1
+  TargetCellCount: 1
+  MixedCombosEnabled: 0
+  PhaseTwoTimingMultiplier: 0.82
+  PhaseTwoTelegraphMultiplier: 0.9
+  PhaseTwoStaggerGainMultiplier: 0.75
+  PhaseTwoStaggerThresholdMultiplier: 0.7
+  PhaseTwoStaggerDecayMultiplier: 1.1
+  PhaseTwoStaggerDecayDelayMultiplier: 0.9
+  PhaseTwoMinCooldown: 2.4
+  PhaseTwoMinTelegraph: 1.4
+  PhaseTwoMinWindup: 0.75
+  PhaseTwoMinRecover: 1.3
+  PhaseTwoMeteorDamage: 18
+  PhaseTwoShockwaveSpeed: 20
+  PhaseTwoVulnerabilityDuration: 3
+  PhaseTwoComboEnabled: 0
+--- !u!114 &4137973937477960450
+MonoBehaviour:
+  m_ObjectHideFlags: 33
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c6febeb2e0c79408875b0e9078da15, type: 3}
+  m_Name: Normal Profile
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
+  Difficulty: 1
+  BodyDamageMultiplier: 0.12
+  OpenBodyDamageMultiplier: 0.8
+  BossHealthMultiplier: 1.2
+  WeakPointDamageMultiplier: 1.25
+  PlayerDamageMultiplier: 1
+  MaxVulnerabilityDamagePercent: 0.27
+  HighImpactWindowDamagePercent: 0.38
+  AttackCooldownMultiplier: 1
+  TelegraphMultiplier: 1
+  WindupMultiplier: 1
+  DifficultyStaggerMultiplier: 1
+  StaggerGainMultiplier: 1
+  VulnerabilityDuration: 3.3
+  ShockwaveSpeedMultiplier: 1
+  MeteorDamage: 20
+  OrbCount: 3
+  OrbHealth: 30
+  OrbSpeed: 4.5
+  HealPercent: 0.08
+  SummonCount: 3
+  SummonCooldownMultiplier: 1
+  ComboFrequency: 0.8
+  RecoveryFrequency: 1
+  ComboCooldownMin: 25
+  ComboCooldownMax: 35
+  MeteorCooldownMin: 25
+  MeteorCooldownMax: 35
+  MaxConcurrentThreats: 1
+  TargetCellCount: 2
+  MixedCombosEnabled: 0
+  PhaseTwoTimingMultiplier: 0.77
+  PhaseTwoTelegraphMultiplier: 0.8
+  PhaseTwoStaggerGainMultiplier: 0.75
+  PhaseTwoStaggerThresholdMultiplier: 0.6
+  PhaseTwoStaggerDecayMultiplier: 1.25
+  PhaseTwoStaggerDecayDelayMultiplier: 0.8
+  PhaseTwoMinCooldown: 2.1
+  PhaseTwoMinTelegraph: 1.3
+  PhaseTwoMinWindup: 0.7
+  PhaseTwoMinRecover: 1.2
+  PhaseTwoMeteorDamage: 22
+  PhaseTwoShockwaveSpeed: 24
+  PhaseTwoVulnerabilityDuration: 2.5
+  PhaseTwoComboEnabled: 1
+--- !u!114 &7799128758405163888
+MonoBehaviour:
+  m_ObjectHideFlags: 33
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b3c6febeb2e0c79408875b0e9078da15, type: 3}
+  m_Name: Hard Profile
+  m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
+  Difficulty: 2
+  BodyDamageMultiplier: 0.04
+  OpenBodyDamageMultiplier: 0.45
+  BossHealthMultiplier: 1.6
+  WeakPointDamageMultiplier: 1
+  PlayerDamageMultiplier: 1
+  MaxVulnerabilityDamagePercent: 0.18
+  HighImpactWindowDamagePercent: 0.35
+  AttackCooldownMultiplier: 0.85
+  TelegraphMultiplier: 0.85
+  WindupMultiplier: 0.85
+  DifficultyStaggerMultiplier: 0.85
+  StaggerGainMultiplier: 0.9
+  VulnerabilityDuration: 2.5
+  ShockwaveSpeedMultiplier: 1.1
+  MeteorDamage: 24
+  OrbCount: 4
+  OrbHealth: 42
+  OrbSpeed: 5.75
+  HealPercent: 0.1
+  SummonCount: 3
+  SummonCooldownMultiplier: 0.85
+  ComboFrequency: 1
+  RecoveryFrequency: 0.85
+  ComboCooldownMin: 18
+  ComboCooldownMax: 25
+  MeteorCooldownMin: 18
+  MeteorCooldownMax: 25
+  MaxConcurrentThreats: 1
+  TargetCellCount: 3
+  MixedCombosEnabled: 1
+  PhaseTwoTimingMultiplier: 0.7
+  PhaseTwoTelegraphMultiplier: 0.75
+  PhaseTwoStaggerGainMultiplier: 0.65
+  PhaseTwoStaggerThresholdMultiplier: 0.55
+  PhaseTwoStaggerDecayMultiplier: 1.35
+  PhaseTwoStaggerDecayDelayMultiplier: 0.7
+  PhaseTwoMinCooldown: 1.9
+  PhaseTwoMinTelegraph: 1.15
+  PhaseTwoMinWindup: 0.6
+  PhaseTwoMinRecover: 1.05
+  PhaseTwoMeteorDamage: 28
+  PhaseTwoShockwaveSpeed: 27
+  PhaseTwoVulnerabilityDuration: 2.1
+  PhaseTwoComboEnabled: 1

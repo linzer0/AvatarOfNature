@@ -13,14 +13,16 @@ namespace Unity.FPS.AvatarBoss
         [Min(0.05f)] public float SectorHeight = 0.25f;
         [Range(8, 12)] public int SectorCount = 8;
         [Range(2, 5)] public int RingCount = 3;
-        [Min(0f)] public float RingGap = 0.18f;
+        [Min(0f)] public float RingGap = 0f;
         [Min(1)] public int SectorMaxHitPoints = 3;
         [Min(0f)] public float CollapseDuration = 1f;
         public bool CreateRuntimeVisuals = true;
         public bool CreateCenterPlatform = true;
         [Min(0.1f)] public float CenterPlatformRadius = 3.7f;
+        [Min(0f)] public float CenterPlatformClearance = 0.75f;
+        [Min(0.1f)] public float BossZoneRadius = 5f;
         [Min(0f)] public float SectorVisualLift = 0.22f;
-        [Range(0.35f, 0.95f)] public float SectorArcFill = 0.86f;
+        [Range(0.35f, 0.95f)] public float SectorArcFill = 0.58f;
 
         [SerializeField] List<AvatarBossArenaSector> m_Sectors = new List<AvatarBossArenaSector>();
 
@@ -37,6 +39,16 @@ namespace Unity.FPS.AvatarBoss
             }
         }
 
+        // Keep the first part of every sector visibly outside the boss platform.
+        // The scene can override ArenaInnerRadius, so derive the final playable
+        // boundary from both values instead of relying on the default alone.
+        float EffectiveArenaInnerRadius => Mathf.Max(ArenaInnerRadius,
+            BossZoneRadius + CenterPlatformClearance,
+            CreateCenterPlatform ? CenterPlatformRadius + CenterPlatformClearance : ArenaInnerRadius);
+
+        /// <summary>Final inner edge used by arena geometry and presentation dressing.</summary>
+        public float PlayableInnerRadius => EffectiveArenaInnerRadius;
+
         /// <summary>Creates the configured sectors, or registers the sectors already assigned in the inspector.</summary>
         public void InitializeArena()
         {
@@ -44,7 +56,10 @@ namespace Unity.FPS.AvatarBoss
             if (m_Sectors.Count == 0)
                 CreateSectors();
             else
+            {
                 ReindexSectors();
+                RefreshGeneratedSectors();
+            }
         }
 
         /// <summary>Registers an existing sector without taking ownership of or destroying its GameObject.</summary>
@@ -105,13 +120,14 @@ namespace Unity.FPS.AvatarBoss
             EnsureInitialized();
             Vector3 local = transform.InverseTransformPoint(worldPosition);
             float radius = new Vector2(local.x, local.z).magnitude;
-            if (radius < ArenaInnerRadius || radius > ArenaRadius || m_Sectors.Count == 0)
+            float innerRadiusBoundary = EffectiveArenaInnerRadius;
+            if (radius < innerRadiusBoundary || radius > ArenaRadius || m_Sectors.Count == 0)
                 return -1;
 
             int count = Mathf.Clamp(SectorCount, 8, 12);
             int rings = Mathf.Clamp(RingCount, 2, 5);
-            float ringSize = (ArenaRadius - ArenaInnerRadius) / rings;
-            int ring = Mathf.Clamp(Mathf.FloorToInt((radius - ArenaInnerRadius) / ringSize), 0, rings - 1);
+            float ringSize = (ArenaRadius - innerRadiusBoundary) / rings;
+            int ring = Mathf.Clamp(Mathf.FloorToInt((radius - innerRadiusBoundary) / ringSize), 0, rings - 1);
             float angle = Mathf.Atan2(local.z, local.x);
             float sectorStep = Mathf.PI * 2f / count;
             // Sector zero occupies [0, sectorStep); its visual center is at half a step.
@@ -130,8 +146,9 @@ namespace Unity.FPS.AvatarBoss
             int rings = Mathf.Clamp(RingCount, 2, 5);
             int ring = index / count;
             int angular = index % count;
-            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
-            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float innerRadiusBoundary = EffectiveArenaInnerRadius;
+            float ringStart = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)(ring + 1) / rings);
             float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
             float innerRadius = ringStart + safeGap * 0.5f + edgeInset;
             float outerRadius = ringEnd - safeGap * 0.5f - edgeInset;
@@ -166,8 +183,9 @@ namespace Unity.FPS.AvatarBoss
             int rings = Mathf.Clamp(RingCount, 2, 5);
             int ring = index / count;
             int angular = index % count;
-            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
-            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float innerRadiusBoundary = EffectiveArenaInnerRadius;
+            float ringStart = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)(ring + 1) / rings);
             float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
             float innerRadius = ringStart + safeGap * 0.5f + edgeInset;
             float outerRadius = ringEnd - safeGap * 0.5f - edgeInset;
@@ -235,8 +253,9 @@ namespace Unity.FPS.AvatarBoss
             int count = Mathf.Clamp(SectorCount, 8, 12);
             int rings = Mathf.Clamp(RingCount, 2, 5);
             int ring = index / count;
-            float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
-            float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+            float innerRadiusBoundary = EffectiveArenaInnerRadius;
+            float ringStart = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)ring / rings);
+            float ringEnd = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)(ring + 1) / rings);
             float safeGap = Mathf.Min(RingGap, (ringEnd - ringStart) * 0.45f);
             float innerRadius = ringStart + safeGap * 0.5f;
             float outerRadius = ringEnd - safeGap * 0.5f;
@@ -338,8 +357,9 @@ namespace Unity.FPS.AvatarBoss
 
             for (var ring = 0; ring < rings; ring++)
             {
-                float ringStart = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)ring / rings);
-                float ringEnd = Mathf.Lerp(ArenaInnerRadius, ArenaRadius, (float)(ring + 1) / rings);
+                float innerRadiusBoundary = EffectiveArenaInnerRadius;
+                float ringStart = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)ring / rings);
+                float ringEnd = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)(ring + 1) / rings);
                 float midRadius = (ringStart + ringEnd) * 0.5f;
                 for (var angular = 0; angular < count; angular++)
                 {
@@ -361,6 +381,61 @@ namespace Unity.FPS.AvatarBoss
                     m_Sectors.Add(sector);
                 }
             }
+        }
+
+        /// <summary>
+        /// Reapplies the current radial layout to sectors serialized in a scene.
+        /// Older arena scenes contain generated sectors already, so simply
+        /// changing the controller settings would otherwise leave stale meshes
+        /// and transforms in place.
+        /// </summary>
+        void RefreshGeneratedSectors()
+        {
+            var count = Mathf.Clamp(SectorCount, 8, 12);
+            var rings = Mathf.Clamp(RingCount, 2, 5);
+            var innerRadiusBoundary = EffectiveArenaInnerRadius;
+
+            for (var index = 0; index < m_Sectors.Count; index++)
+            {
+                var sector = m_Sectors[index];
+                if (sector == null)
+                    continue;
+
+                var ring = index / count;
+                var angular = index % count;
+                if (ring >= rings)
+                    continue;
+
+                var ringStart = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)ring / rings);
+                var ringEnd = Mathf.Lerp(innerRadiusBoundary, ArenaRadius, (float)(ring + 1) / rings);
+                var midRadius = (ringStart + ringEnd) * 0.5f;
+                var angle = (angular + 0.5f) * Mathf.PI * 2f / count;
+                var sectorObject = sector.gameObject;
+                sectorObject.transform.localPosition = new Vector3(
+                    Mathf.Cos(angle) * midRadius, SectorVisualLift, Mathf.Sin(angle) * midRadius);
+                sectorObject.transform.localRotation = Quaternion.Euler(0f,
+                    90f - angle * Mathf.Rad2Deg, 0f);
+
+                if (!CreateRuntimeVisuals)
+                    continue;
+
+                RemoveGeneratedVisual(sectorObject, "SectorIntactVisual");
+                RemoveGeneratedVisual(sectorObject, "SectorDamagedVisual");
+                RemoveGeneratedVisual(sectorObject, "SectorDestroyedVisual");
+                CreateSectorVisuals(sectorObject, count, ring, ringStart, ringEnd);
+            }
+        }
+
+        void RemoveGeneratedVisual(GameObject sectorObject, string visualName)
+        {
+            var visual = sectorObject.transform.Find(visualName);
+            if (visual == null)
+                return;
+
+            if (Application.isPlaying)
+                Destroy(visual.gameObject);
+            else
+                DestroyImmediate(visual.gameObject);
         }
 
         void CreateCenterPlatformVisual()

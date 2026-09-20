@@ -52,8 +52,10 @@ namespace Unity.FPS.AvatarBoss
 
             m_LastDamageTime = Time.time;
             CurrentStagger = Mathf.Clamp(CurrentStagger + damage * StaggerGainPerDamage, 0f, MaxStagger);
-            Debug.Log($"[AvatarOfNature] Stagger +{damage * StaggerGainPerDamage:F1} " +
-                      $"({CurrentStagger:F0}/{MaxStagger:F0}) from {(damageSource != null ? damageSource.name : "null")}", this);
+            Debug.Log($"[AvatarOfNature] Stagger rawDamage={damage:F1} gainMultiplier={StaggerGainPerDamage:F2} " +
+                      $"added={damage * StaggerGainPerDamage:F1} " +
+                      $"meter=({CurrentStagger:F0}/{MaxStagger:F0}) " +
+                      $"from {(damageSource != null ? damageSource.name : "null")}", this);
 
             if (IsFull)
             {

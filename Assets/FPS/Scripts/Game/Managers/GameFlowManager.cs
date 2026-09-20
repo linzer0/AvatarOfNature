@@ -34,15 +34,23 @@ namespace Unity.FPS.Game
         string m_SceneToLoad;
 
         bool m_FadeGroupProvisional;
+        bool m_IsAvatarBossArena;
 
         void Awake()
         {
+            m_IsAvatarBossArena = IsAvatarBossArena();
+            if (m_IsAvatarBossArena)
+                return;
+
             EventManager.AddListener<AllObjectivesCompletedEvent>(OnAllObjectivesCompleted);
             EventManager.AddListener<PlayerDeathEvent>(OnPlayerDeath);
         }
 
         void Start()
         {
+            if (m_IsAvatarBossArena)
+                return;
+
             AudioUtility.SetMasterVolume(1);
 
             // safety net: if no fade canvas group is assigned in this scene
@@ -68,6 +76,9 @@ namespace Unity.FPS.Game
 
         void Update()
         {
+            if (m_IsAvatarBossArena)
+                return;
+
             if (GameIsEnding)
             {
                 if (EndGameFadeCanvasGroup == null)
@@ -89,6 +100,12 @@ namespace Unity.FPS.Game
 
         void OnAllObjectivesCompleted(AllObjectivesCompletedEvent evt) => EndGame(true);
         void OnPlayerDeath(PlayerDeathEvent evt) => EndGame(false);
+
+        static bool IsAvatarBossArena()
+        {
+            string sceneName = SceneManager.GetActiveScene().name;
+            return sceneName == "AvatarBossShowcase" || sceneName == "AvatarBossDuelArena";
+        }
 
         void EndGame(bool win)
         {
@@ -134,6 +151,9 @@ namespace Unity.FPS.Game
 
         void OnDestroy()
         {
+            if (m_IsAvatarBossArena)
+                return;
+
             EventManager.RemoveListener<AllObjectivesCompletedEvent>(OnAllObjectivesCompleted);
             EventManager.RemoveListener<PlayerDeathEvent>(OnPlayerDeath);
         }
