@@ -1,5 +1,7 @@
 # Avatar of Nature — Boss Duel
 
+[Русская версия](README.ru.md)
+
 Avatar of Nature is a Unity prototype built around a readable boss duel: the player studies the Avatar's intent, survives telegraphed attacks, breaks the arena one sector at a time, and uses the resulting vulnerability window to damage the boss.
 
 The project is currently a focused Windows desktop prototype rather than a finished game. The main goal is to explore encounter readability, positional pressure, and a combat loop where solving the arena matters more than holding the fire button.
