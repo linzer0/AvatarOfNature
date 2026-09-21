@@ -11,8 +11,8 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Damageable.DamageMultiplier while exposed")]
         public float ExposedMultiplier = 2f;
 
-        [Tooltip("Damageable.DamageMultiplier while the window is closed (collider is disabled, kept as a serialized safety floor)")]
-        public float ClosedDamageMultiplier = 0.12f;
+        [Tooltip("Legacy inspector value. Closed weak points are always damage-proof so in-flight projectiles cannot leak damage after the window closes.")]
+        public float ClosedDamageMultiplier = 0f;
 
         [Tooltip("Priority over the overlapping BossBody collider while this weak point is exposed.")]
         public int HitPriority = 100;
@@ -47,7 +47,7 @@ namespace Unity.FPS.AvatarBoss
             if (m_Damageable != null)
             {
                 m_Damageable.HitPriority = HitPriority;
-                m_Damageable.DamageMultiplier = exposed ? ExposedMultiplier : ClosedDamageMultiplier;
+                m_Damageable.DamageMultiplier = exposed ? ExposedMultiplier : 0f;
             }
 
             Collider col = GetComponent<Collider>();

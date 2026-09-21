@@ -37,6 +37,11 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Max summons alive at once")]
         public int MaxActiveSummons = 3;
 
+        [Header("Difficulty tuning")]
+        [Min(0f)] public float SummonHealthMultiplier = 1f;
+        [Min(0f)] public float SummonDamageMultiplier = 1f;
+        [Min(0f)] public float SummonAttackCooldownMultiplier = 1f;
+
         [Tooltip("Summon telegraph time before the enemies spawn")]
         public float SummonTelegraphTime = 2f;
 
@@ -304,8 +309,31 @@ namespace Unity.FPS.AvatarBoss
                 Vector3 anchor = GetAnchor(i);
                 var summons = Instantiate(prefab, anchor + Vector3.up * 0.25f, Quaternion.identity);
                 m_Summons.Add(summons);
+                ApplyDifficultyTuning(summons);
             }
-            Debug.Log("[AvatarOfNature] Summons spawned: " + m_Summons.Count, this);
+            Debug.Log($"[AvatarOfNature] Summons spawned: {m_Summons.Count} " +
+                      $"healthMultiplier={SummonHealthMultiplier:F2} damageMultiplier={SummonDamageMultiplier:F2}", this);
+        }
+
+        void ApplyDifficultyTuning(GameObject summon)
+        {
+            var health = summon.GetComponentInChildren<Health>();
+            if (health != null)
+            {
+                float baseHealth = health.MaxHealth;
+                health.MaxHealth = baseHealth * Mathf.Max(0f, SummonHealthMultiplier);
+                health.CurrentHealth = health.MaxHealth;
+            }
+
+            foreach (var weapon in summon.GetComponentsInChildren<WeaponController>(true))
+            {
+                weapon.ProjectileDamageMultiplier = Mathf.Max(0f, SummonDamageMultiplier);
+                weapon.AttackCooldownMultiplier = Mathf.Max(0.01f, SummonAttackCooldownMultiplier);
+            }
+
+            Debug.Log($"[AvatarOfNature] Summon tuned name={summon.name} " +
+                      $"hp={health?.MaxHealth:F1} damageMultiplier={SummonDamageMultiplier:F2} " +
+                      $"attackCooldownMultiplier={SummonAttackCooldownMultiplier:F2}", summon);
         }
 
         Vector3 GetAnchor(int i)

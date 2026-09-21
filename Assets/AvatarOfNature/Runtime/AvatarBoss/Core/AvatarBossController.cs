@@ -245,6 +245,10 @@ namespace Unity.FPS.AvatarBoss
             float hpAfter = BossHealth != null ? BossHealth.CurrentHealth : 0f;
             float stagger = Stagger != null ? Stagger.CurrentStagger : 0f;
             bool weakPoint = part != null && part.GetComponent<AvatarBossWeakPoint>() != null;
+            var duel = GetComponent<AvatarBossDuelController>();
+            duel?.DamageLog($"PART HIT target={(part != null ? part.name : "null")} weakPoint={weakPoint} " +
+                            $"multiplier={(part != null ? part.DamageMultiplier : 1f):F2} applied={damage:F1} " +
+                            $"windowActive={(duel != null && duel.DuelWindowActive)}");
 
             if (AvatarBossDiagnostics.F10DiagnosticsEnabled)
             {

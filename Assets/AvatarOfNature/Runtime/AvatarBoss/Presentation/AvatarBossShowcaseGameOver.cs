@@ -93,6 +93,7 @@ namespace Unity.FPS.AvatarBoss
 
         void OnPlayerDie()
         {
+            m_Boss?.GetComponent<AvatarBossDuelController>()?.LogFightSummary("player-dead");
             // direct safety net: if death slipped through before the interception
             if (!m_Shown)
                 ShowOverlay();

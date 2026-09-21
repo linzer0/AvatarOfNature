@@ -10,6 +10,7 @@ namespace Unity.FPS.Game
         public Vector3 InitialDirection { get; private set; }
         public Vector3 InheritedMuzzleVelocity { get; private set; }
         public float InitialCharge { get; private set; }
+        public float DamageMultiplier { get; private set; } = 1f;
 
         public UnityAction OnShoot;
 
@@ -20,6 +21,7 @@ namespace Unity.FPS.Game
             InitialDirection = transform.forward;
             InheritedMuzzleVelocity = controller.MuzzleWorldVelocity;
             InitialCharge = controller.CurrentCharge;
+            DamageMultiplier = Mathf.Max(0f, controller.ProjectileDamageMultiplier);
 
             OnShoot?.Invoke();
         }

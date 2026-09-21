@@ -36,6 +36,12 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float TelegraphTime = 0.7f;
         [Min(0f)] public float Cooldown = 4f;
 
+        [Header("Head landing")]
+        [Tooltip("Horizontal radius around the boss where landing on the head is rejected.")]
+        [Min(0.5f)] public float HeadTriggerRadius = 2.4f;
+        [Tooltip("Height above the boss root that counts as standing on the head.")]
+        [Min(0.5f)] public float HeadTriggerHeight = 2.2f;
+
         [Header("Impact")]
         [Min(0.1f)] public float ImpactRadius = 2.7f;
         [Min(0f)] public float Damage = 20f;
@@ -78,6 +84,7 @@ namespace Unity.FPS.AvatarBoss
                 return;
 
             float distance = HorizontalDistance(transform.position, m_Player.transform.position);
+            bool inHeadZone = IsPlayerInHeadZone(distance);
             if (distance >= ResetRadius)
             {
                 m_Armed = true;
@@ -85,10 +92,15 @@ namespace Unity.FPS.AvatarBoss
             }
 
             m_CooldownRemaining = Mathf.Max(0f, m_CooldownRemaining - Time.deltaTime);
+            // A player standing on the head cannot satisfy the normal horizontal
+            // reset distance. Re-arm after cooldown so the boss keeps rejecting
+            // the exploit instead of allowing one burst and then going quiet.
+            if (inHeadZone && m_CooldownRemaining <= 0f)
+                m_Armed = true;
             if (!m_Armed || m_CooldownRemaining > 0f || IsDuelWindowActive())
                 return;
 
-            if (distance <= TriggerRadius)
+            if (distance <= TriggerRadius || inHeadZone)
                 m_InsideTime += Time.deltaTime;
             else
                 m_InsideTime = 0f;
@@ -107,7 +119,10 @@ namespace Unity.FPS.AvatarBoss
             float elapsed = 0f;
             while (elapsed < TelegraphTime)
             {
-                if (m_Player == null || HorizontalDistance(transform.position, m_Player.transform.position) > TriggerRadius)
+                float distance = m_Player != null
+                    ? HorizontalDistance(transform.position, m_Player.transform.position)
+                    : float.MaxValue;
+                if (m_Player == null || (distance > TriggerRadius && !IsPlayerInHeadZone(distance)))
                 {
                     CleanupTelegraph();
                     m_CooldownRemaining = 0.75f;
@@ -124,14 +139,19 @@ namespace Unity.FPS.AvatarBoss
             CleanupTelegraph();
             if (m_Player != null)
             {
-                Vector3 pushDirection = m_Player.transform.position - transform.position;
-                pushDirection.y = 0f;
+                Vector3 fromBoss = m_Player.transform.position - transform.position;
+                bool wasOnHead = IsPlayerInHeadZone(HorizontalDistance(transform.position, m_Player.transform.position));
+                Vector3 pushDirection = fromBoss;
                 if (pushDirection.sqrMagnitude < 0.001f)
                     pushDirection = transform.forward;
+                if (wasOnHead)
+                    pushDirection.y = Mathf.Max(pushDirection.y, 0.45f);
+                else
+                    pushDirection.y = 0f;
                 pushDirection.Normalize();
 
                 float distance = HorizontalDistance(transform.position, m_Player.transform.position);
-                if (distance <= ImpactRadius)
+                if (distance <= ImpactRadius || wasOnHead)
                 {
                     m_Player.ApplyExternalImpulse(pushDirection * PushForce + Vector3.up * PushLift);
                     Health playerHealth = m_Player.GetComponent<Health>();
@@ -154,6 +174,13 @@ namespace Unity.FPS.AvatarBoss
         {
             var duel = m_Boss != null ? m_Boss.GetComponent<AvatarBossDuelController>() : null;
             return duel != null && duel.DuelWindowActive;
+        }
+
+        bool IsPlayerInHeadZone(float horizontalDistance)
+        {
+            if (m_Player == null || horizontalDistance > HeadTriggerRadius)
+                return false;
+            return m_Player.transform.position.y - transform.position.y >= HeadTriggerHeight;
         }
 
         void CreateTelegraph()

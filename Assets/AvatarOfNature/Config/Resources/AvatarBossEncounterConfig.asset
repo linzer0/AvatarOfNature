@@ -42,6 +42,8 @@ MonoBehaviour:
   PlayerDamageMultiplier: 0.75
   MaxVulnerabilityDamagePercent: 0.3
   HighImpactWindowDamagePercent: 0.38
+  HighImpactCooldown: 30
+  StandardVulnerabilityCooldown: 15
   AttackCooldownMultiplier: 1.2
   TelegraphMultiplier: 1.25
   WindupMultiplier: 1.15
@@ -56,6 +58,9 @@ MonoBehaviour:
   HealPercent: 0.06
   SummonCount: 2
   SummonCooldownMultiplier: 1.2
+  SummonHealthMultiplier: 0.6
+  SummonDamageMultiplier: 0.45
+  SummonAttackCooldownMultiplier: 1.5
   ComboFrequency: 0.55
   RecoveryFrequency: 1.2
   ComboCooldownMin: 30
@@ -92,13 +97,15 @@ MonoBehaviour:
   m_Name: Normal Profile
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
   Difficulty: 1
-  BodyDamageMultiplier: 0.2
+  BodyDamageMultiplier: 0.04
   OpenBodyDamageMultiplier: 0.8
   BossHealthMultiplier: 1.2
-  WeakPointDamageMultiplier: 1.05
+  WeakPointDamageMultiplier: 0.5
   PlayerDamageMultiplier: 1
-  MaxVulnerabilityDamagePercent: 0.22
-  HighImpactWindowDamagePercent: 0.32
+  MaxVulnerabilityDamagePercent: 0.08
+  HighImpactWindowDamagePercent: 0.18
+  HighImpactCooldown: 45
+  StandardVulnerabilityCooldown: 25
   AttackCooldownMultiplier: 1
   TelegraphMultiplier: 1
   WindupMultiplier: 1
@@ -113,6 +120,9 @@ MonoBehaviour:
   HealPercent: 0.08
   SummonCount: 3
   SummonCooldownMultiplier: 1
+  SummonHealthMultiplier: 0.5
+  SummonDamageMultiplier: 0.25
+  SummonAttackCooldownMultiplier: 2
   ComboFrequency: 0.8
   RecoveryFrequency: 1
   ComboCooldownMin: 25
@@ -149,13 +159,15 @@ MonoBehaviour:
   m_Name: Hard Profile
   m_EditorClassIdentifier: fps.AvatarBoss::Unity.FPS.AvatarBoss.AvatarBossDifficultyProfile
   Difficulty: 2
-  BodyDamageMultiplier: 0.08
+  BodyDamageMultiplier: 0.06
   OpenBodyDamageMultiplier: 0.45
   BossHealthMultiplier: 1.6
-  WeakPointDamageMultiplier: 0.6
+  WeakPointDamageMultiplier: 0.45
   PlayerDamageMultiplier: 1
-  MaxVulnerabilityDamagePercent: 0.18
-  HighImpactWindowDamagePercent: 0.32
+  MaxVulnerabilityDamagePercent: 0.15
+  HighImpactWindowDamagePercent: 0.24
+  HighImpactCooldown: 45
+  StandardVulnerabilityCooldown: 25
   AttackCooldownMultiplier: 0.85
   TelegraphMultiplier: 0.85
   WindupMultiplier: 0.85
@@ -170,6 +182,9 @@ MonoBehaviour:
   HealPercent: 0.1
   SummonCount: 3
   SummonCooldownMultiplier: 0.85
+  SummonHealthMultiplier: 0.75
+  SummonDamageMultiplier: 0.6
+  SummonAttackCooldownMultiplier: 1.25
   ComboFrequency: 1
   RecoveryFrequency: 0.85
   ComboCooldownMin: 18

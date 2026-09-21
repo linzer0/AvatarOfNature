@@ -31,6 +31,8 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float VulnerabilityDelayAfterCollapse = 0.15f;
         [Range(0f, 1f)] public float MaxVulnerabilityDamagePercent = 0.27f;
         [Range(0f, 1f)] public float HighImpactWindowDamagePercent = 0.38f;
+        [Min(0f)] public float HighImpactCooldown = 45f;
+        [Min(0f)] public float StandardVulnerabilityCooldown = 25f;
 
         [Header("Diagnostics")]
         [Tooltip("Logs every boss damage event, vulnerability budget decision and window transition.")]
@@ -52,6 +54,19 @@ namespace Unity.FPS.AvatarBoss
         float m_VulnerabilityDamageRemaining;
         bool m_DamageBudgetActive;
         bool m_LastWindowWasHighImpact;
+        float m_NextHighImpactTime;
+        float m_NextStandardWindowTime;
+        int m_VulnerabilityWindowId;
+        float m_FirstDamageTime = -1f;
+        float m_TotalRawDamage;
+        float m_TotalAcceptedDamage;
+        float m_ClosedBodyDamage;
+        int m_TotalHitCount;
+        int m_VulnerabilityHitCount;
+        float m_WindowRawDamage;
+        float m_WindowAcceptedDamage;
+        int m_WindowHitCount;
+        float m_WindowOpenedAt = -1f;
 
         void Awake()
         {
@@ -99,13 +114,16 @@ namespace Unity.FPS.AvatarBoss
         /// </summary>
         public void ApplyDifficultyTuning(float closedBodyDamageMultiplier, float vulnerabilityDuration,
             float openBodyDamageMultiplier = 1f, float maxVulnerabilityDamagePercent = 0.27f,
-            float highImpactWindowDamagePercent = 0.38f)
+            float highImpactWindowDamagePercent = 0.38f, float highImpactCooldown = 45f,
+            float standardVulnerabilityCooldown = 25f)
         {
             ClosedBodyDamageMultiplier = Mathf.Max(0.01f, closedBodyDamageMultiplier);
             VulnerabilityDuration = Mathf.Max(0f, vulnerabilityDuration);
             OpenBodyDamageMultiplier = Mathf.Max(0.01f, openBodyDamageMultiplier);
             MaxVulnerabilityDamagePercent = Mathf.Clamp01(maxVulnerabilityDamagePercent);
             HighImpactWindowDamagePercent = Mathf.Clamp01(highImpactWindowDamagePercent);
+            HighImpactCooldown = Mathf.Max(0f, highImpactCooldown);
+            StandardVulnerabilityCooldown = Mathf.Max(0f, standardVulnerabilityCooldown);
             if (m_BodyDamageable != null && !DuelWindowActive)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
         }
@@ -162,12 +180,34 @@ namespace Unity.FPS.AvatarBoss
             if (brokenSectors == 0)
                 return;
 
+            if (DuelWindowActive)
+            {
+                DamageLog($"WINDOW REQUEST IGNORED reason=active-window id={m_VulnerabilityWindowId} " +
+                          $"brokenSectors={brokenSectors}");
+                OnIntentResolved?.Invoke(intent);
+                return;
+            }
+
             m_LastResolvedIntent = intent;
             m_HasLastResolvedIntent = true;
             ResolvedSectorCount += brokenSectors;
-            m_PendingWindowKind = brokenSectors >= 2 && !m_LastWindowWasHighImpact
+            bool isHighImpactReady = Time.time >= m_NextHighImpactTime;
+            bool isStandardReady = Time.time >= m_NextStandardWindowTime;
+            bool shouldOpenHighImpact = brokenSectors >= 2 && !m_LastWindowWasHighImpact && isHighImpactReady;
+            if (!shouldOpenHighImpact && !isStandardReady)
+            {
+                DamageLog($"WINDOW REQUEST IGNORED reason=standard-cooldown remaining={m_NextStandardWindowTime - Time.time:F1}s " +
+                          $"brokenSectors={brokenSectors}");
+                OnIntentResolved?.Invoke(intent);
+                return;
+            }
+            m_PendingWindowKind = shouldOpenHighImpact
                 ? AvatarBossVulnerabilityKind.HighImpact
                 : AvatarBossVulnerabilityKind.Standard;
+            if (brokenSectors >= 2 && !shouldOpenHighImpact && !isHighImpactReady)
+            {
+                DamageLog($"HIGH IMPACT DOWNGRADED reason=cooldown remaining={m_NextHighImpactTime - Time.time:F1}s");
+            }
             OnIntentResolved?.Invoke(intent);
             EventManager.Broadcast(new CameraImpulseEvent
             {
@@ -199,8 +239,7 @@ namespace Unity.FPS.AvatarBoss
             });
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = OpenBodyDamageMultiplier;
-            PrepareVulnerabilityWindow(m_PendingWindowKind);
-            Boss.TriggerDuelWindow(VulnerabilityDuration);
+            Boss.TriggerDuelWindow(VulnerabilityDuration, m_PendingWindowKind);
 
             if (VulnerabilityDuration > 0f)
                 yield return new WaitForSeconds(VulnerabilityDuration);
@@ -209,9 +248,25 @@ namespace Unity.FPS.AvatarBoss
             m_VulnerabilityRoutine = null;
         }
 
-        /// <summary>Arms the damage budget used by the next exposed weak-point window.</summary>
-        public void PrepareVulnerabilityWindow(AvatarBossVulnerabilityKind kind)
+        /// <summary>Returns whether the requested window may open at the current time.</summary>
+        public bool CanOpenVulnerabilityWindow(AvatarBossVulnerabilityKind kind)
         {
+            if (DuelWindowActive)
+                return false;
+            return kind == AvatarBossVulnerabilityKind.HighImpact
+                ? Time.time >= m_NextHighImpactTime
+                : Time.time >= m_NextStandardWindowTime;
+        }
+
+        /// <summary>Arms the damage budget used by the next exposed weak-point window.</summary>
+        public bool PrepareVulnerabilityWindow(AvatarBossVulnerabilityKind kind)
+        {
+            if (DuelWindowActive)
+            {
+                DamageLog($"WINDOW PREPARE IGNORED reason=active-window id={m_VulnerabilityWindowId} requested={kind}");
+                return false;
+            }
+
             if (Boss == null)
                 Boss = GetComponent<AvatarBossController>();
             var bossHealth = Boss != null ? Boss.BossHealth : null;
@@ -219,6 +274,7 @@ namespace Unity.FPS.AvatarBoss
                 bossHealth = GetComponent<Health>() ?? GetComponentInParent<Health>();
 
             m_PendingWindowKind = kind;
+            m_VulnerabilityWindowId++;
             m_VulnerabilityDamageRemaining = bossHealth != null
                 ? bossHealth.MaxHealth * (kind == AvatarBossVulnerabilityKind.HighImpact
                     ? HighImpactWindowDamagePercent
@@ -226,21 +282,36 @@ namespace Unity.FPS.AvatarBoss
                 : 0f;
             m_DamageBudgetActive = true;
             m_LastWindowWasHighImpact = kind == AvatarBossVulnerabilityKind.HighImpact;
+            if (m_LastWindowWasHighImpact)
+                m_NextHighImpactTime = Time.time + HighImpactCooldown;
+            m_NextStandardWindowTime = Time.time + StandardVulnerabilityCooldown;
+            m_WindowRawDamage = 0f;
+            m_WindowAcceptedDamage = 0f;
+            m_WindowHitCount = 0;
+            m_WindowOpenedAt = Time.time;
             DuelWindowActive = true;
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = OpenBodyDamageMultiplier;
 
-            DamageLog($"WINDOW OPEN kind={kind} budget={m_VulnerabilityDamageRemaining:F1} " +
+            DamageLog($"WINDOW OPEN id={m_VulnerabilityWindowId} kind={kind} budget={m_VulnerabilityDamageRemaining:F1} " +
                       $"duration={VulnerabilityDuration:F2}s bossHp={bossHealth?.CurrentHealth:F1}/{bossHealth?.MaxHealth:F1}");
+            DamageLog($"WINDOW BASELINE id={m_VulnerabilityWindowId} kind={kind} targetDamage={m_VulnerabilityDamageRemaining:F1}");
+            return true;
         }
 
         public void CloseVulnerabilityWindow()
         {
-            DamageLog($"WINDOW CLOSE kind={m_PendingWindowKind} remainingBudget={m_VulnerabilityDamageRemaining:F1} " +
-                      $"bossHp={Boss?.BossHealth?.CurrentHealth:F1}/{Boss?.BossHealth?.MaxHealth:F1}");
+            if (!m_DamageBudgetActive && !DuelWindowActive)
+                return;
+
+            DamageLog($"WINDOW CLOSE id={m_VulnerabilityWindowId} kind={m_PendingWindowKind} remainingBudget={m_VulnerabilityDamageRemaining:F1} " +
+                      $"bossHp={Boss?.BossHealth?.CurrentHealth:F1}/{Boss?.BossHealth?.MaxHealth:F1} " +
+                      $"rawWindow={m_WindowRawDamage:F1} acceptedWindow={m_WindowAcceptedDamage:F1} " +
+                      $"hits={m_WindowHitCount} windowTime={(m_WindowOpenedAt >= 0f ? Time.time - m_WindowOpenedAt : 0f):F1}s");
             m_DamageBudgetActive = false;
             m_VulnerabilityDamageRemaining = 0f;
             DuelWindowActive = false;
+            m_WindowOpenedAt = -1f;
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
         }
@@ -261,16 +332,57 @@ namespace Unity.FPS.AvatarBoss
                 bossHealth.CurrentHealth = Mathf.Min(bossHealth.MaxHealth,
                     bossHealth.CurrentHealth + overflow);
 
-            DamageLog($"DAMAGE BUDGET kind={m_PendingWindowKind} raw={damage:F1} accepted={accepted:F1} " +
+            DamageLog($"DAMAGE BUDGET id={m_VulnerabilityWindowId} kind={m_PendingWindowKind} raw={damage:F1} accepted={accepted:F1} " +
                       $"overflow={overflow:F1} remaining={m_VulnerabilityDamageRemaining:F1} " +
-                      $"bossHp={bossHealth?.CurrentHealth:F1}/{bossHealth?.MaxHealth:F1}");
+                      $"bossHp={bossHealth?.CurrentHealth:F1}/{bossHealth?.MaxHealth:F1} t={Time.time:F1}s");
             return accepted;
+        }
+
+        /// <summary>Collects a compact fight-level damage sample from AvatarBossController.</summary>
+        public void RecordDamageEvent(float rawDamage, float acceptedDamage, bool vulnerabilityWindow, string sourceName)
+        {
+            if (rawDamage <= 0f)
+                return;
+
+            if (m_FirstDamageTime < 0f)
+                m_FirstDamageTime = Time.time;
+
+            m_TotalRawDamage += rawDamage;
+            m_TotalAcceptedDamage += acceptedDamage;
+            m_TotalHitCount++;
+            if (vulnerabilityWindow)
+            {
+                m_VulnerabilityHitCount++;
+                m_WindowRawDamage += rawDamage;
+                m_WindowAcceptedDamage += acceptedDamage;
+                m_WindowHitCount++;
+            }
+            else
+            {
+                m_ClosedBodyDamage += acceptedDamage;
+            }
+
+            DamageLog($"DAMAGE SAMPLE source={sourceName} kind={(vulnerabilityWindow ? m_PendingWindowKind.ToString() : "ClosedBody")} " +
+                      $"raw={rawDamage:F1} accepted={acceptedDamage:F1} totalAccepted={m_TotalAcceptedDamage:F1} " +
+                      $"fightDps={m_TotalAcceptedDamage / Mathf.Max(0.1f, Time.time - m_FirstDamageTime):F1}");
+        }
+
+        /// <summary>Prints the final numbers needed to compare the playthrough with the target TTK.</summary>
+        public void LogFightSummary(string result)
+        {
+            float fightTime = m_FirstDamageTime >= 0f ? Time.time - m_FirstDamageTime : 0f;
+            float maxHealth = Boss?.BossHealth?.MaxHealth ?? 0f;
+            DamageLog($"FIGHT SUMMARY result={result} duration={fightTime:F1}s maxHp={maxHealth:F1} " +
+                      $"raw={m_TotalRawDamage:F1} accepted={m_TotalAcceptedDamage:F1} " +
+                      $"closedBody={m_ClosedBodyDamage:F1} vulnerability={m_TotalAcceptedDamage - m_ClosedBodyDamage:F1} " +
+                      $"hits={m_TotalHitCount} vulnerabilityHits={m_VulnerabilityHitCount} " +
+                      $"avgAcceptedDps={m_TotalAcceptedDamage / Mathf.Max(0.1f, fightTime):F1}");
         }
 
         public void DamageLog(string message)
         {
             if (EnableDamageDiagnostics)
-                Debug.Log($"[AvatarOfNature][BossDamage] {message}", this);
+                Debug.Log($"[AvatarOfNature][BossDamage] t={Time.time:F1}s {message}", this);
         }
 
         /// <summary>Clears duel runtime state without rebuilding the arena.</summary>
@@ -287,6 +399,19 @@ namespace Unity.FPS.AvatarBoss
             m_VulnerabilityDamageRemaining = 0f;
             ResolvedSectorCount = 0;
             m_HasLastResolvedIntent = false;
+            m_LastWindowWasHighImpact = false;
+            m_NextHighImpactTime = 0f;
+            m_NextStandardWindowTime = 0f;
+            m_FirstDamageTime = -1f;
+            m_TotalRawDamage = 0f;
+            m_TotalAcceptedDamage = 0f;
+            m_ClosedBodyDamage = 0f;
+            m_TotalHitCount = 0;
+            m_VulnerabilityHitCount = 0;
+            m_WindowRawDamage = 0f;
+            m_WindowAcceptedDamage = 0f;
+            m_WindowHitCount = 0;
+            m_WindowOpenedAt = -1f;
             if (m_BodyDamageable != null)
                 m_BodyDamageable.DamageMultiplier = ClosedBodyDamageMultiplier;
         }

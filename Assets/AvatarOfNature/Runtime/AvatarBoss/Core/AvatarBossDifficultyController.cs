@@ -71,6 +71,11 @@ namespace Unity.FPS.AvatarBoss
                       $"body={ActiveProfile.BodyDamageMultiplier:F2} weak={ActiveProfile.WeakPointDamageMultiplier:F2} " +
                       $"standardWindow={ActiveProfile.MaxVulnerabilityDamagePercent:P0} " +
                       $"highImpactWindow={ActiveProfile.HighImpactWindowDamagePercent:P0} " +
+                      $"highImpactCooldown={ActiveProfile.HighImpactCooldown:F0}s " +
+                      $"standardCooldown={ActiveProfile.StandardVulnerabilityCooldown:F0}s " +
+                      $"summons={ActiveProfile.SummonCount} summonHp={ActiveProfile.SummonHealthMultiplier:F2} " +
+                      $"summonDamage={ActiveProfile.SummonDamageMultiplier:F2} " +
+                      $"summonAttackCooldown={ActiveProfile.SummonAttackCooldownMultiplier:F2} " +
                       $"duration={ActiveProfile.VulnerabilityDuration:F2}s", this);
 
             if (m_Boss != null && m_Boss.BossHealth != null)
@@ -130,7 +135,9 @@ namespace Unity.FPS.AvatarBoss
                 duel.ApplyDifficultyTuning(ActiveProfile.BodyDamageMultiplier,
                     ActiveProfile.VulnerabilityDuration, ActiveProfile.OpenBodyDamageMultiplier,
                     ActiveProfile.MaxVulnerabilityDamagePercent,
-                    ActiveProfile.HighImpactWindowDamagePercent);
+                    ActiveProfile.HighImpactWindowDamagePercent,
+                    ActiveProfile.HighImpactCooldown,
+                    ActiveProfile.StandardVulnerabilityCooldown);
             if (m_Stagger != null)
             {
                 m_Stagger.MaxStagger = 100f;
@@ -161,7 +168,14 @@ namespace Unity.FPS.AvatarBoss
                 m_Phase.EnableCombo = ActiveProfile.PhaseTwoComboEnabled;
             }
             if (m_Orbs != null) { m_Orbs.OrbCount = ActiveProfile.OrbCount; m_Orbs.OrbHealth = ActiveProfile.OrbHealth; m_Orbs.OrbSpeed = ActiveProfile.OrbSpeed; m_Orbs.HealPercentOfMaxHealth = ActiveProfile.HealPercent; m_Orbs.RecoveryCooldown = baseRecoveryCooldown * ActiveProfile.RecoveryFrequency; }
-            if (m_Summons != null) { m_Summons.MaxActiveSummons = ActiveProfile.SummonCount; m_Summons.CooldownBetweenSummons = baseSummonCooldown * ActiveProfile.SummonCooldownMultiplier; }
+            if (m_Summons != null)
+            {
+                m_Summons.MaxActiveSummons = ActiveProfile.SummonCount;
+                m_Summons.CooldownBetweenSummons = baseSummonCooldown * ActiveProfile.SummonCooldownMultiplier;
+                m_Summons.SummonHealthMultiplier = ActiveProfile.SummonHealthMultiplier;
+                m_Summons.SummonDamageMultiplier = ActiveProfile.SummonDamageMultiplier;
+                m_Summons.SummonAttackCooldownMultiplier = ActiveProfile.SummonAttackCooldownMultiplier;
+            }
 
             var body = transform.Find("BossBody");
             var bodyDamageable = body != null ? body.GetComponent<Damageable>() : null;

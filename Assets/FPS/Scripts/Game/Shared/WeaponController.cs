@@ -52,6 +52,15 @@ namespace Unity.FPS.Game
 
         [Tooltip("The projectile prefab")] public ProjectileBase ProjectilePrefab;
 
+        /// <summary>
+        /// Runtime-only damage scaling copied into each projectile when it is fired.
+        /// This lets spawned enemies tune damage without cloning or mutating projectile prefabs.
+        /// </summary>
+        public float ProjectileDamageMultiplier { get; set; } = 1f;
+
+        /// <summary>Runtime-only fire-rate scaling used by difficulty-tuned summons.</summary>
+        public float AttackCooldownMultiplier { get; set; } = 1f;
+
         [Tooltip("Minimum duration between two shots")]
         public float DelayBetweenShots = 0.5f;
 
@@ -393,7 +402,7 @@ namespace Unity.FPS.Game
         bool TryShoot()
         {
             if (m_CurrentAmmo >= 1f
-                && m_LastTimeShot + DelayBetweenShots < Time.time)
+                && m_LastTimeShot + DelayBetweenShots * Mathf.Max(0.01f, AttackCooldownMultiplier) < Time.time)
             {
                 HandleShoot();
                 m_CurrentAmmo -= 1f;

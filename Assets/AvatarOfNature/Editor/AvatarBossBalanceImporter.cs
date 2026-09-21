@@ -93,6 +93,8 @@ namespace Unity.FPS.AvatarBoss.Editor
         public float PlayerDamageMultiplier;
         public float MaxVulnerabilityDamagePercent;
         public float HighImpactWindowDamagePercent;
+        public float HighImpactCooldown;
+        public float StandardVulnerabilityCooldown;
         public float AttackCooldownMultiplier;
         public float TelegraphMultiplier;
         public float WindupMultiplier;
@@ -107,6 +109,9 @@ namespace Unity.FPS.AvatarBoss.Editor
         public float HealPercent;
         public int SummonCount;
         public float SummonCooldownMultiplier;
+        public float SummonHealthMultiplier;
+        public float SummonDamageMultiplier;
+        public float SummonAttackCooldownMultiplier;
         public float ComboFrequency;
         public float RecoveryFrequency;
         public float ComboCooldownMin;
