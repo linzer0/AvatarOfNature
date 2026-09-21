@@ -117,4 +117,8 @@ InitTestScene*.unity*
 /[Aa]ssets/Resources/PerformanceTestRun*.json
 /[Aa]ssets/Screenshots/screenshot-*.png
 /[Aa]ssets/Screenshots/screenshot-*.png.meta
+# Curated Boss Duel reference frames are kept in Git; new captures are local-only.
+/[Aa]ssets/Screenshots/*
+/TestResults/
+/.idea/
 /ProjectSettings/Packages/com.unity.connect.share/
