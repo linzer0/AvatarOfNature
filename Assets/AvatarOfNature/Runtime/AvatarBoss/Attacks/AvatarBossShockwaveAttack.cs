@@ -25,6 +25,8 @@ namespace Unity.FPS.AvatarBoss
         [Range(0f, 0.4f)] public float LaneAngularPadding = 0.08f;
         [Tooltip("Small lift that makes the push readable without becoming a jump attack")]
         public float PushLift = 1.1f;
+        [Tooltip("Difficulty-controlled physical knockback toggle. The wave telegraph remains active when disabled.")]
+        public bool KnockbackEnabled = true;
 
         [Header("Visuals")]
         [Tooltip("Ring alpha pulse frequency (visual readability only)")]
@@ -176,8 +178,9 @@ namespace Unity.FPS.AvatarBoss
                             else
                                 pushDirection.Normalize();
 
-                            controller.ApplyExternalImpulse(pushDirection * (PushForce * forceMultiplier)
-                                + Vector3.up * PushLift);
+                            if (KnockbackEnabled)
+                                controller.ApplyExternalImpulse(pushDirection * (PushForce * forceMultiplier)
+                                    + Vector3.up * PushLift);
                             pushDone = true;
                             // Shockwave language: force burst where the wave lands.
                             SpawnImpactEffect(m_Player.position);

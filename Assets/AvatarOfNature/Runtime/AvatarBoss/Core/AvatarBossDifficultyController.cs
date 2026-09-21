@@ -26,6 +26,7 @@ namespace Unity.FPS.AvatarBoss
         AvatarBossEarthAttack m_Earth;
         AvatarBossShockwaveAttack m_Shockwave;
         AvatarBossFireAttack m_Fire;
+        AvatarBossProximityThreat m_Proximity;
         AvatarBossPhaseController m_Phase;
         AvatarBossSummonController m_Summons;
         AvatarBossStagger m_Stagger;
@@ -40,6 +41,7 @@ namespace Unity.FPS.AvatarBoss
             m_Earth = GetComponent<AvatarBossEarthAttack>();
             m_Shockwave = GetComponent<AvatarBossShockwaveAttack>();
             m_Fire = GetComponent<AvatarBossFireAttack>();
+            m_Proximity = GetComponent<AvatarBossProximityThreat>();
             m_Phase = GetComponent<AvatarBossPhaseController>();
             m_Summons = GetComponent<AvatarBossSummonController>();
             m_Stagger = GetComponent<AvatarBossStagger>();
@@ -58,6 +60,8 @@ namespace Unity.FPS.AvatarBoss
         public void ApplyDifficulty(AvatarBossDifficulty difficulty)
         {
             CurrentDifficulty = difficulty;
+            if (m_Proximity == null)
+                m_Proximity = GetComponent<AvatarBossProximityThreat>();
             var legacyProfile = difficulty == AvatarBossDifficulty.Easy
                 ? AvatarBossEncounterConfig.CreateEasy()
                 : difficulty == AvatarBossDifficulty.Hard
@@ -76,6 +80,7 @@ namespace Unity.FPS.AvatarBoss
                       $"summons={ActiveProfile.SummonCount} summonHp={ActiveProfile.SummonHealthMultiplier:F2} " +
                       $"summonDamage={ActiveProfile.SummonDamageMultiplier:F2} " +
                       $"summonAttackCooldown={ActiveProfile.SummonAttackCooldownMultiplier:F2} " +
+                      $"knockback={ActiveProfile.BossKnockbackEnabled} summonsEnabled={ActiveProfile.SummonsEnabled} " +
                       $"duration={ActiveProfile.VulnerabilityDuration:F2}s", this);
 
             if (m_Boss != null && m_Boss.BossHealth != null)
@@ -115,13 +120,23 @@ namespace Unity.FPS.AvatarBoss
             }
 
             int arenaTargetCells = ActiveProfile.TargetCellCount;
+            var arena = m_Boss != null ? m_Boss.ArenaReference : FindFirstObjectByType<AvatarBossArenaController>();
+            if (arena != null)
+            {
+                arena.SectorRegenerationDelay = ActiveProfile.SectorRegenerationDelay;
+                arena.HealthPickupCooldown = ActiveProfile.HealthPickupCooldown;
+                arena.MaxActiveHealthPickups = ActiveProfile.MaxActiveHealthPickups;
+                arena.HealthPickupHealAmount = ActiveProfile.HealthPickupHealAmount;
+            }
             if (m_Earth != null)
             {
                 m_Earth.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier;
                 m_Earth.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier;
                 m_Earth.TargetCellCount = arenaTargetCells;
             }
-            if (m_Shockwave != null) { m_Shockwave.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier; m_Shockwave.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Shockwave.WaveSpeed = 22f * ActiveProfile.ShockwaveSpeedMultiplier; }
+            if (m_Shockwave != null) { m_Shockwave.TelegraphTime = 1.6f * ActiveProfile.TelegraphMultiplier; m_Shockwave.Cooldown = 2.7f * ActiveProfile.AttackCooldownMultiplier; m_Shockwave.WaveSpeed = 22f * ActiveProfile.ShockwaveSpeedMultiplier; m_Shockwave.KnockbackEnabled = ActiveProfile.BossKnockbackEnabled; }
+            if (m_Proximity != null)
+                m_Proximity.KnockbackEnabled = ActiveProfile.BossKnockbackEnabled;
             if (m_Fire != null)
             {
                 m_Fire.TelegraphTime = 1.8f * ActiveProfile.TelegraphMultiplier;
@@ -175,6 +190,7 @@ namespace Unity.FPS.AvatarBoss
                 m_Summons.SummonHealthMultiplier = ActiveProfile.SummonHealthMultiplier;
                 m_Summons.SummonDamageMultiplier = ActiveProfile.SummonDamageMultiplier;
                 m_Summons.SummonAttackCooldownMultiplier = ActiveProfile.SummonAttackCooldownMultiplier;
+                m_Summons.EnableSummons = ActiveProfile.SummonsEnabled;
             }
 
             var body = transform.Find("BossBody");

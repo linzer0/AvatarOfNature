@@ -55,7 +55,7 @@ MonoBehaviour:
   OrbCount: 2
   OrbHealth: 24
   OrbSpeed: 3.5
-  HealPercent: 0.06
+  HealPercent: 0.03
   SummonCount: 2
   SummonCooldownMultiplier: 1.2
   SummonHealthMultiplier: 0.6
@@ -70,6 +70,12 @@ MonoBehaviour:
   MaxConcurrentThreats: 1
   TargetCellCount: 1
   MixedCombosEnabled: 0
+  SectorRegenerationDelay: 42
+  HealthPickupCooldown: 34
+  MaxActiveHealthPickups: 1
+  HealthPickupHealAmount: 45
+  BossKnockbackEnabled: 0
+  SummonsEnabled: 0
   PhaseTwoTimingMultiplier: 0.82
   PhaseTwoTelegraphMultiplier: 0.9
   PhaseTwoStaggerGainMultiplier: 0.75
@@ -117,7 +123,7 @@ MonoBehaviour:
   OrbCount: 3
   OrbHealth: 30
   OrbSpeed: 4.5
-  HealPercent: 0.08
+  HealPercent: 0.04
   SummonCount: 3
   SummonCooldownMultiplier: 1
   SummonHealthMultiplier: 0.5
@@ -132,6 +138,12 @@ MonoBehaviour:
   MaxConcurrentThreats: 1
   TargetCellCount: 2
   MixedCombosEnabled: 0
+  SectorRegenerationDelay: 28
+  HealthPickupCooldown: 25
+  MaxActiveHealthPickups: 1
+  HealthPickupHealAmount: 40
+  BossKnockbackEnabled: 1
+  SummonsEnabled: 0
   PhaseTwoTimingMultiplier: 0.77
   PhaseTwoTelegraphMultiplier: 0.8
   PhaseTwoStaggerGainMultiplier: 0.75
@@ -179,7 +191,7 @@ MonoBehaviour:
   OrbCount: 4
   OrbHealth: 42
   OrbSpeed: 5.75
-  HealPercent: 0.1
+  HealPercent: 0.06
   SummonCount: 3
   SummonCooldownMultiplier: 0.85
   SummonHealthMultiplier: 0.75
@@ -194,6 +206,12 @@ MonoBehaviour:
   MaxConcurrentThreats: 1
   TargetCellCount: 3
   MixedCombosEnabled: 1
+  SectorRegenerationDelay: 16
+  HealthPickupCooldown: 18
+  MaxActiveHealthPickups: 2
+  HealthPickupHealAmount: 35
+  BossKnockbackEnabled: 1
+  SummonsEnabled: 1
   PhaseTwoTimingMultiplier: 0.7
   PhaseTwoTelegraphMultiplier: 0.75
   PhaseTwoStaggerGainMultiplier: 0.65

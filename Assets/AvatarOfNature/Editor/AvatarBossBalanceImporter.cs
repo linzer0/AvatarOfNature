@@ -121,6 +121,12 @@ namespace Unity.FPS.AvatarBoss.Editor
         public int MaxConcurrentThreats;
         public int TargetCellCount;
         public bool MixedCombosEnabled;
+        public float SectorRegenerationDelay;
+        public float HealthPickupCooldown;
+        public int MaxActiveHealthPickups;
+        public float HealthPickupHealAmount;
+        public bool BossKnockbackEnabled;
+        public bool SummonsEnabled;
         public float PhaseTwoTimingMultiplier;
         public float PhaseTwoTelegraphMultiplier;
         public float PhaseTwoStaggerGainMultiplier;

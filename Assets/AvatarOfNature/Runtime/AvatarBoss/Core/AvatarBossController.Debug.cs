@@ -25,6 +25,13 @@ namespace Unity.FPS.AvatarBoss
                 HealingOrbs.ClearHealingOrbs();
 
             SummonsActive = false;
+            StaggerBreakPending = false;
+
+            if (m_PendingStaggerRoutine != null)
+            {
+                StopCoroutine(m_PendingStaggerRoutine);
+                m_PendingStaggerRoutine = null;
+            }
 
             if (m_VulnerabilityRoutine != null)
             {

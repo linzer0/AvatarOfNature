@@ -52,6 +52,18 @@ namespace Unity.FPS.AvatarBoss
         public int TargetCellCount;
         public bool MixedCombosEnabled;
 
+        [Header("Arena recovery")]
+        [Min(0f)] public float SectorRegenerationDelay = 22f;
+        [Min(0f)] public float HealthPickupCooldown = 24f;
+        [Min(0)] public int MaxActiveHealthPickups = 1;
+        [Min(1f)] public float HealthPickupHealAmount = 40f;
+
+        [Header("Difficulty mechanics")]
+        [Tooltip("Whether boss attacks can apply physical knockback to the player.")]
+        public bool BossKnockbackEnabled = true;
+        [Tooltip("Whether the boss can start summon intermissions in Phase 2.")]
+        public bool SummonsEnabled = true;
+
         [Header("Phase two")]
         public float PhaseTwoTimingMultiplier;
         public float PhaseTwoTelegraphMultiplier;

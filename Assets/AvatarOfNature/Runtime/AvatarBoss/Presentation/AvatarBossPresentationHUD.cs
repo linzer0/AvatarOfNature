@@ -336,14 +336,16 @@ namespace Unity.FPS.AvatarBoss
             if (healing != null && healing.RecoveryActive)
             {
                 if (m_Boss.PhaseTwo && !healing.HealEnabledInPhaseTwo)
-                    return difficultyText + "PHASE 2 — ORBS ARE A DISTRACTION · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount;
-                return difficultyText + "BOSS RECOVERING · DESTROY THE ORBS · ORBS: "
+                    return difficultyText + "PHASE 2 · STOP THE ORBS · " + healing.ActiveOrbCount + " LEFT";
+                return difficultyText + "BOSS RECOVERING · DESTROY THE ORBS · "
                     + healing.ActiveOrbCount + " / " + healing.OrbCount;
             }
             string phase = m_Boss.PhaseTwo ? "PHASE 2" : "PHASE 1";
             string state = "IDLE";
             var sched = m_Boss.Scheduler;
-            if (m_Boss.Stagger != null && m_Boss.Stagger.IsFull)
+            if (m_Boss.StaggerBreakPending)
+                return difficultyText + phase + " · STAGGER FULL · WINDOW SOON";
+            else if (m_Boss.Stagger != null && m_Boss.Stagger.IsFull)
                 return difficultyText + phase + " · STAGGER BREAK · SHOOT THE GREEN CORE";
             else if (m_Boss.Scheduler != null)
             {
@@ -361,13 +363,10 @@ namespace Unity.FPS.AvatarBoss
                         break;
                 }
             }
-            string orbSuffix = healing != null && healing.SpawnedOrbCount > 0
-                ? " · ORBS: " + healing.ActiveOrbCount + " / " + healing.OrbCount
-                : "";
             string objective = m_Boss.PhaseTwo
                 ? "SHOOT THE GREEN CORE WHEN IT OPENS"
                 : "BUILD STAGGER OR BREAK MARKED CELLS";
-            return difficultyText + phase + " · " + state + " · " + objective + orbSuffix;
+            return difficultyText + phase + " · " + state + " · " + objective;
         }
 
         string ElementName(AvatarBossAttackScheduler sched)
@@ -399,7 +398,12 @@ namespace Unity.FPS.AvatarBoss
             m_LastOpenWeakPoints = open;
 
             if (m_Initialized && m_Boss.Stagger != null && m_Boss.Stagger.IsFull && !m_LastStaggerFull)
-                ShowMessage("STAGGER BREAK", new Color(0.98f, 0.85f, 0.3f, 1f));
+            {
+                string staggerMessage = m_Boss.StaggerBreakPending
+                    ? "STAGGER FULL · WINDOW SOON"
+                    : "STAGGER BREAK · SHOOT THE GREEN CORE";
+                ShowMessage(staggerMessage, new Color(0.98f, 0.85f, 0.3f, 1f));
+            }
             m_LastStaggerFull = m_Boss.Stagger != null && m_Boss.Stagger.IsFull;
 
             if (m_Boss.PhaseTwo && !m_LastPhaseTwo && m_Initialized)
@@ -440,7 +444,7 @@ namespace Unity.FPS.AvatarBoss
         float m_MessageTime;
         float m_MessageHold;
 
-        void ShowMessage(string message, Color color, float hold = 1.4f)
+        public void ShowMessage(string message, Color color, float hold = 1.4f)
         {
             m_EventMessage.text = message;
             m_EventMessage.color = color;

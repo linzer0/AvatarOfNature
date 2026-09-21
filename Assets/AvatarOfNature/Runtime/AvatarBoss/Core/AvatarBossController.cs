@@ -37,10 +37,14 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>True while a summon intermission holds the boss. Blocks stagger breaks.</summary>
         public bool SummonsActive { get; set; }
 
+        /// <summary>True when stagger is full but its reward is waiting for the vulnerability cooldown.</summary>
+        public bool StaggerBreakPending { get; private set; }
+
         /// <summary>Fired on a validated hit: (world position, final damage, isWeakPoint).</summary>
         public event System.Action<Vector3, float, bool> OnBossHit;
 
         Coroutine m_VulnerabilityRoutine;
+        Coroutine m_PendingStaggerRoutine;
         bool m_IsDead;
         readonly List<Damageable> m_PartDamageables = new List<Damageable>();
 

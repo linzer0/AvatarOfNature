@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Unity.FPS.Gameplay;
 using UnityEngine;
 
 namespace Unity.FPS.AvatarBoss
@@ -24,10 +25,30 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float SectorVisualLift = 0.22f;
         [Range(0.35f, 0.95f)] public float SectorArcFill = 0.58f;
 
+        [Header("Recovery")]
+        [Min(0f)] public float SectorRegenerationDelay = 22f;
+        [Min(0f)] public float HealthPickupCooldown = 24f;
+        [Min(0)] public int MaxActiveHealthPickups = 1;
+        [Min(1f)] public float HealthPickupHealAmount = 40f;
+        [Min(0f)] public float HealthPickupSpawnHeight = 1.2f;
+        public bool RecoveryEnabled = true;
+
         [SerializeField] List<AvatarBossArenaSector> m_Sectors = new List<AvatarBossArenaSector>();
+        readonly Dictionary<AvatarBossArenaSector, float> m_DestroyedAt = new Dictionary<AvatarBossArenaSector, float>();
+        readonly List<HealthPickup> m_HealthPickups = new List<HealthPickup>();
+        float m_NextHealthPickupTime;
 
         /// <summary>Raised after a sector changes state: sector, previous state, new state.</summary>
         public event Action<AvatarBossArenaSector, AvatarBossArenaSectorState, AvatarBossArenaSectorState> SectorStateChanged;
+
+        public int ActiveHealthPickupCount
+        {
+            get
+            {
+                CleanupHealthPickups();
+                return m_HealthPickups.Count;
+            }
+        }
 
         /// <summary>Registered sectors in ascending index order.</summary>
         public IReadOnlyList<AvatarBossArenaSector> Sectors
@@ -319,6 +340,7 @@ namespace Unity.FPS.AvatarBoss
                 // the corresponding event, whose previous state is known here.
                 SectorStateChanged?.Invoke(sector, AvatarBossArenaSectorState.Collapsing,
                     AvatarBossArenaSectorState.Destroyed);
+                TrackDestroyedSector(sector);
             });
             return true;
         }
@@ -326,7 +348,27 @@ namespace Unity.FPS.AvatarBoss
         /// <summary>Immediately marks a sector as destroyed and raises the state-change event.</summary>
         public bool DestroySector(int index)
         {
-            return SetSectorState(index, AvatarBossArenaSectorState.Destroyed);
+            bool destroyed = SetSectorState(index, AvatarBossArenaSectorState.Destroyed);
+            if (destroyed)
+                TrackDestroyedSector(GetSector(index));
+            return destroyed;
+        }
+
+        /// <summary>Restores one destroyed sector and raises the normal state event.</summary>
+        public bool RegenerateSector(int index)
+        {
+            var sector = GetSector(index);
+            if (sector == null || sector.State != AvatarBossArenaSectorState.Destroyed)
+                return false;
+
+            var previous = sector.State;
+            sector.Regenerate();
+            m_DestroyedAt.Remove(sector);
+            SectorStateChanged?.Invoke(sector, previous, sector.State);
+            var hud = FindFirstObjectByType<AvatarBossPresentationHUD>();
+            if (hud != null)
+                hud.ShowMessage("NEW CELL SPAWNED", new Color(0.25f, 1f, 0.5f, 1f), 2.2f);
+            return true;
         }
 
         /// <summary>Resets every registered sector to Intact without destroying its GameObjects.</summary>
@@ -346,6 +388,101 @@ namespace Unity.FPS.AvatarBoss
         void Awake()
         {
             InitializeArena();
+        }
+
+        void Start()
+        {
+            m_NextHealthPickupTime = Time.time + HealthPickupCooldown;
+        }
+
+        void Update()
+        {
+            if (!RecoveryEnabled || !Application.isPlaying)
+                return;
+
+            RegenerateDestroyedSectors();
+            TrySpawnHealthPickup();
+        }
+
+        void TrackDestroyedSector(AvatarBossArenaSector sector)
+        {
+            if (sector != null)
+                m_DestroyedAt[sector] = Time.time;
+        }
+
+        void RegenerateDestroyedSectors()
+        {
+            if (SectorRegenerationDelay <= 0f)
+            {
+                for (var i = 0; i < m_Sectors.Count; i++)
+                    if (m_Sectors[i] != null && m_Sectors[i].State == AvatarBossArenaSectorState.Destroyed)
+                        RegenerateSector(i);
+                return;
+            }
+
+            for (var i = 0; i < m_Sectors.Count; i++)
+            {
+                var sector = m_Sectors[i];
+                if (sector == null || sector.State != AvatarBossArenaSectorState.Destroyed)
+                    continue;
+                if (!m_DestroyedAt.TryGetValue(sector, out var destroyedAt))
+                {
+                    TrackDestroyedSector(sector);
+                    continue;
+                }
+                if (Time.time - destroyedAt >= SectorRegenerationDelay)
+                    RegenerateSector(i);
+            }
+        }
+
+        void TrySpawnHealthPickup()
+        {
+            if (MaxActiveHealthPickups <= 0 || HealthPickupCooldown <= 0f || Time.time < m_NextHealthPickupTime)
+                return;
+
+            CleanupHealthPickups();
+            if (m_HealthPickups.Count < MaxActiveHealthPickups)
+                SpawnHealthPickup();
+            m_NextHealthPickupTime = Time.time + HealthPickupCooldown;
+        }
+
+        void SpawnHealthPickup()
+        {
+            var candidates = new List<int>();
+            for (var i = 0; i < m_Sectors.Count; i++)
+                if (m_Sectors[i] != null && m_Sectors[i].State == AvatarBossArenaSectorState.Intact)
+                    candidates.Add(i);
+            if (candidates.Count == 0)
+                return;
+
+            var position = GetRandomPointInSector(candidates[UnityEngine.Random.Range(0, candidates.Count)], 1.25f);
+            position += Vector3.up * HealthPickupSpawnHeight;
+            var prefab = Resources.Load<GameObject>("AvatarBossHealthPickup");
+            if (prefab == null)
+            {
+                Debug.LogWarning("[AvatarBossArena] Health pickup prefab is missing from Resources.", this);
+                return;
+            }
+
+            var pickupObject = Instantiate(prefab,
+                position,
+                Quaternion.Euler(0f, UnityEngine.Random.Range(0f, 360f), 0f),
+                transform);
+            pickupObject.name = "ArenaHealthPickup";
+            var pickup = pickupObject.GetComponent<HealthPickup>();
+            if (pickup == null)
+            {
+                Debug.LogWarning("[AvatarBossArena] Health pickup prefab has no HealthPickup component.", pickupObject);
+                Destroy(pickupObject);
+                return;
+            }
+            pickup.HealAmount = HealthPickupHealAmount;
+            m_HealthPickups.Add(pickup);
+        }
+
+        void CleanupHealthPickups()
+        {
+            m_HealthPickups.RemoveAll(pickup => pickup == null);
         }
 
         void CreateSectors()

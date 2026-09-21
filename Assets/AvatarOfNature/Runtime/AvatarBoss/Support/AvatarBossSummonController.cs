@@ -131,7 +131,7 @@ namespace Unity.FPS.AvatarBoss
         [ContextMenu("Force Start Summon (Test Only)")]
         public void ForceSummonNow()
         {
-            if (!m_Boss.SummonsActive
+            if (EnableSummons && !m_Boss.SummonsActive
                 && (m_Boss.HealingOrbs == null || !m_Boss.HealingOrbs.RecoveryActive))
                 StartSummon();
         }

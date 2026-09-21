@@ -33,7 +33,7 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float SpawnHeight = 1.4f;
         [Min(0.1f)] public float OrbRadius = 0.45f;
         [Range(1f, 2f)] public float VisualScaleMultiplier = 1.6f;
-        public bool HealEnabledInPhaseTwo = false;
+        public bool HealEnabledInPhaseTwo = true;
         [Min(0f)] public float CameraClearDistance = 2.5f;
         [Min(0f)] public float RecoveryCooldown = 40f;
 
@@ -87,6 +87,7 @@ namespace Unity.FPS.AvatarBoss
             return Boss != null
                 && Boss.BossHealth != null
                 && !Boss.IsDead
+                && Boss.PhaseTwo
                 && !Boss.SummonsActive
                 && Time.time >= m_NextRecoveryAllowedTime;
         }
@@ -277,7 +278,7 @@ namespace Unity.FPS.AvatarBoss
 
             m_Orbs.Remove(orb);
             if (reachedBoss && Boss != null && Boss.BossHealth != null && !Boss.IsDead
-                && (!Boss.PhaseTwo || HealEnabledInPhaseTwo))
+                && Boss.PhaseTwo && HealEnabledInPhaseTwo)
             {
                 var amount = Boss.BossHealth.MaxHealth * HealPercentOfMaxHealth;
                 Boss.BossHealth.Heal(amount);

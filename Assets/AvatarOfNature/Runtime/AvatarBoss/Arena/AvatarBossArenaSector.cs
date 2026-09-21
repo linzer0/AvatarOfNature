@@ -65,6 +65,15 @@ namespace Unity.FPS.AvatarBoss
             m_HitPoints = m_MaxHitPoints;
         }
 
+        /// <summary>Restores a destroyed sector to a fully usable state.</summary>
+        public void Regenerate()
+        {
+            StopCollapse();
+            ResetHitPoints(m_MaxHitPoints);
+            m_State = AvatarBossArenaSectorState.Intact;
+            RefreshVisuals();
+        }
+
         /// <summary>Consumes boss impact damage while the sector is still usable.</summary>
         public bool ApplyDamage(int amount)
         {

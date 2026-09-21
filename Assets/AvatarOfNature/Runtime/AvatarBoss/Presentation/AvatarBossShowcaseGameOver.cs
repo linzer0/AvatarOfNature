@@ -24,15 +24,21 @@ namespace Unity.FPS.AvatarBoss
         Text m_QuoteAuthorText;
         Text m_CountdownText;
         Text m_RestartLabel;
+        Button m_ContinueButton;
+        Text m_ContinueLabel;
         Button m_RestartButton;
         GameObject m_Player;
         Health m_PlayerHealth;
         AvatarBossController m_Boss;
         AvatarBossSummonController m_Summons;
         bool m_Shown;
+        bool m_Victory;
+        bool m_PauseInfoHidden;
         bool m_Subscribed;
+        Coroutine m_VictoryRoutine;
         float m_RestartAvailableAt;
         const float RestartDelay = 0f;
+        const float VictoryPresentationDelay = 1.5f;
 
         static readonly string[] DeathQuotes =
         {
@@ -80,15 +86,31 @@ namespace Unity.FPS.AvatarBoss
 
             m_PlayerHealth = player.GetComponent<Health>();
             m_PlayerHealth.OnDie += OnPlayerDie;
+            if (m_Boss.BossHealth != null)
+                m_Boss.BossHealth.OnDie += OnBossDie;
             m_Subscribed = true;
+
+            // The legacy FPS pause/options card is not part of the Boss Duel.
+            var behaviours = FindObjectsByType<Behaviour>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            foreach (var pauseMenu in behaviours)
+            {
+                if (pauseMenu == null || pauseMenu.GetType().Name != "InGameMenuManager")
+                    continue;
+                pauseMenu.SendMessage("ClosePauseMenu", SendMessageOptions.DontRequireReceiver);
+                pauseMenu.enabled = false;
+            }
+
+            var pauseInfo = GameObject.Find("GameManager/GameHUD/HUD/PauseMenuInfo");
+            if (pauseInfo != null)
+                pauseInfo.SetActive(false);
         }
 
         void OnDestroy()
         {
             if (m_Subscribed && m_PlayerHealth != null)
-            {
-                                m_PlayerHealth.OnDie -= OnPlayerDie;
-            }
+                m_PlayerHealth.OnDie -= OnPlayerDie;
+            if (m_Subscribed && m_Boss != null && m_Boss.BossHealth != null)
+                m_Boss.BossHealth.OnDie -= OnBossDie;
         }
 
         void OnPlayerDie()
@@ -99,8 +121,19 @@ namespace Unity.FPS.AvatarBoss
                 ShowOverlay();
         }
 
+        void OnBossDie()
+        {
+            m_Boss?.GetComponent<AvatarBossDuelController>()?.LogFightSummary("victory");
+            ScheduleVictoryOverlay();
+        }
+
         void Update()
         {
+            // Keep a polling fallback because the boss controller may process
+            // Health.OnDie before this scene-owned presentation subscribes.
+            if (!m_Shown && m_Boss != null && m_Boss.IsDead)
+                ScheduleVictoryOverlay();
+
             if (!m_Shown || m_RestartButton == null)
                 return;
 
@@ -117,31 +150,91 @@ namespace Unity.FPS.AvatarBoss
 
             m_RestartButton.interactable = true;
             if (m_RestartLabel != null)
-                m_RestartLabel.text = "RESTART BOSS FIGHT";
+                m_RestartLabel.text = m_Victory ? GetContinueLabel() : "RESTART BOSS FIGHT";
             if (m_CountdownText != null)
                 m_CountdownText.text = string.Empty;
         }
 
         void LateUpdate()
         {
+            HideLegacyPauseInfo();
             if (m_Shown)
                 KeepDeathScreenInputAvailable();
         }
 
-        void ShowOverlay()
+        void HideLegacyPauseInfo()
+        {
+            if (m_PauseInfoHidden)
+                return;
+            var pauseInfo = GameObject.Find("PauseMenuInfo");
+            if (pauseInfo == null)
+                return;
+            pauseInfo.SetActive(false);
+            m_PauseInfoHidden = true;
+        }
+
+        void ScheduleVictoryOverlay()
+        {
+            if (m_Shown || m_VictoryRoutine != null)
+                return;
+            m_VictoryRoutine = StartCoroutine(ShowVictoryAfterPresentation());
+        }
+
+        System.Collections.IEnumerator ShowVictoryAfterPresentation()
+        {
+            // Health.OnDie is raised before the final boss-death presentation
+            // has settled. Let the player see that moment before freezing the arena.
+            yield return new WaitForSecondsRealtime(VictoryPresentationDelay);
+            m_VictoryRoutine = null;
+            if (!m_Shown && m_Boss != null && m_Boss.IsDead)
+                ShowOverlay(true);
+        }
+
+        void ShowOverlay(bool victory = false)
         {
             if (m_Shown)
                 return;
             m_Shown = true;
+            m_Victory = victory;
 
             if (m_Overlay == null)
                 BuildUI();
 
-            int quoteIndex = Random.Range(0, DeathQuotes.Length);
-            if (m_QuoteText != null)
-                m_QuoteText.text = DeathQuotes[quoteIndex];
-            if (m_QuoteAuthorText != null)
-                m_QuoteAuthorText.text = "— " + DeathQuoteAuthors[quoteIndex];
+            if (m_Victory)
+            {
+                if (m_TitleText != null) m_TitleText.text = "ПОБЕДА!";
+                if (m_SubTitleText != null) m_SubTitleText.text = "Ты одолел Аватара Природы.";
+                if (m_QuoteText != null) m_QuoteText.text = "Сильная победа. Готов поднять планку?";
+                if (m_QuoteAuthorText != null) m_QuoteAuthorText.text = string.Empty;
+                if (m_RestartLabel != null) m_RestartLabel.text = GetContinueLabel();
+                if (m_RestartButton != null)
+                {
+                    m_RestartButton.onClick.RemoveAllListeners();
+                    m_RestartButton.onClick.AddListener(ContinueOnHarderDifficulty);
+                }
+                if (m_ContinueButton != null)
+                {
+                    m_ContinueButton.gameObject.SetActive(true);
+                    m_ContinueButton.onClick.AddListener(ReturnToDifficultySelect);
+                }
+                if (m_ContinueLabel != null)
+                    m_ContinueLabel.text = "BACK TO DIFFICULTY SELECT";
+            }
+            else
+            {
+                int quoteIndex = Random.Range(0, DeathQuotes.Length);
+                if (m_QuoteText != null)
+                    m_QuoteText.text = DeathQuotes[quoteIndex];
+                if (m_QuoteAuthorText != null)
+                    m_QuoteAuthorText.text = "— " + DeathQuoteAuthors[quoteIndex];
+                if (m_ContinueButton != null)
+                    m_ContinueButton.gameObject.SetActive(false);
+                if (m_RestartButton != null)
+                {
+                    m_RestartButton.onClick.RemoveAllListeners();
+                    m_RestartButton.onClick.AddListener(RestartBossFight);
+                }
+            }
 
             // Freeze the entire arena. The Game Over screen is a static death
             // moment, so camera/VFX/HUD updates must not continue behind it.
@@ -174,6 +267,34 @@ namespace Unity.FPS.AvatarBoss
                 m_Overlay.gameObject.SetActive(true);
 
             KeepDeathScreenInputAvailable();
+        }
+
+        string GetContinueLabel()
+        {
+            var difficulty = FindFirstObjectByType<AvatarBossDifficultyController>();
+            if (difficulty == null || difficulty.CurrentDifficulty != AvatarBossDifficulty.Hard)
+                return "CONTINUE ON HARDER DIFFICULTY";
+            return "REPLAY HARD MODE";
+        }
+
+        public void ContinueOnHarderDifficulty()
+        {
+            var difficulty = FindFirstObjectByType<AvatarBossDifficultyController>();
+            var current = difficulty != null ? difficulty.CurrentDifficulty : AvatarBossDifficulty.Normal;
+            var next = current == AvatarBossDifficulty.Easy
+                ? AvatarBossDifficulty.Normal
+                : AvatarBossDifficulty.Hard;
+            AvatarBossShowcaseSession.SetDifficulty(next);
+            RestoreArenaHud();
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("AvatarBossDuelArena");
+        }
+
+        public void ReturnToDifficultySelect()
+        {
+            RestoreArenaHud();
+            Time.timeScale = 1f;
+            SceneManager.LoadScene("AvatarBossShowcaseBootstrap");
         }
 
         void KeepDeathScreenInputAvailable()
@@ -354,6 +475,29 @@ namespace Unity.FPS.AvatarBoss
             m_CountdownText = root.transform.Find("GameOverCard/RestartCountdown")?.GetComponent<Text>();
             m_RestartButton = root.transform.Find("GameOverCard/RestartButton")?.GetComponent<Button>();
             m_RestartLabel = root.transform.Find("GameOverCard/RestartButton/ButtonLabel")?.GetComponent<Text>();
+            var card = root.transform.Find("GameOverCard");
+            if (m_TitleText == null && card != null)
+                m_TitleText = AddRuntimeText(card, "GameOverTitle", "", 42, new Color(0.95f, 0.82f, 0.35f, 1f), new Vector2(0f, 125f), new Vector2(650f, 54f), FontStyle.Bold);
+            if (m_SubTitleText == null && card != null)
+                m_SubTitleText = AddRuntimeText(card, "SubText", "", 23, Color.white, new Vector2(0f, 88f), new Vector2(650f, 34f), FontStyle.Normal);
+            if (m_QuoteText != null)
+                m_QuoteText.rectTransform.anchoredPosition = new Vector2(0f, 32f);
+            if (m_QuoteAuthorText != null)
+                m_QuoteAuthorText.rectTransform.anchoredPosition = new Vector2(0f, 5f);
+            if (m_ContinueButton == null && card != null)
+            {
+                var continueGo = new GameObject("ContinueButton");
+                continueGo.transform.SetParent(card, false);
+                var image = continueGo.AddComponent<Image>();
+                image.color = new Color(0.12f, 0.28f, 0.42f, 1f);
+                m_ContinueButton = continueGo.AddComponent<Button>();
+                m_ContinueButton.targetGraphic = image;
+                var rect = continueGo.GetComponent<RectTransform>();
+                rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = new Vector2(460f, 54f);
+                rect.anchoredPosition = new Vector2(0f, -155f);
+                m_ContinueLabel = AddRuntimeText(continueGo.transform, "ButtonLabel", "BACK TO DIFFICULTY SELECT", 19, Color.white, Vector2.zero, Vector2.zero, FontStyle.Normal, true);
+            }
 
             if (m_Overlay == null || m_RestartButton == null || m_RestartLabel == null)
             {
@@ -370,6 +514,36 @@ namespace Unity.FPS.AvatarBoss
             m_Overlay.gameObject.SetActive(false);
             m_RestartAvailableAt = Time.unscaledTime + RestartDelay;
             return true;
+        }
+
+        Text AddRuntimeText(Transform parent, string name, string value, int fontSize, Color color,
+            Vector2 position, Vector2 size, FontStyle style, bool stretch = false)
+        {
+            var go = new GameObject(name);
+            go.transform.SetParent(parent, false);
+            var text = go.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text.text = value;
+            text.fontSize = fontSize;
+            text.fontStyle = style;
+            text.alignment = TextAnchor.MiddleCenter;
+            text.horizontalOverflow = HorizontalWrapMode.Wrap;
+            text.verticalOverflow = VerticalWrapMode.Overflow;
+            text.color = color;
+            var rect = go.GetComponent<RectTransform>();
+            if (stretch)
+            {
+                rect.anchorMin = Vector2.zero;
+                rect.anchorMax = Vector2.one;
+                rect.offsetMin = rect.offsetMax = Vector2.zero;
+            }
+            else
+            {
+                rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0.5f);
+                rect.sizeDelta = size;
+                rect.anchoredPosition = position;
+            }
+            return text;
         }
     }
 }

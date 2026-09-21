@@ -18,7 +18,7 @@ namespace Unity.FPS.AvatarBoss
         [Range(0f, 1f)] public float DirectTargetChance = 0.55f;
         public float DriftDistanceMin = 2.5f;
         public float DriftDistanceMax = 5.5f;
-        [Tooltip("Radius inside which the spikes deal damage")]
+        [Tooltip("Horizontal gameplay radius around each spike impact point")]
         public float DamageRadius = 2.5f;
         [Range(1, 4)] public int TargetCellCount = 1;
 
@@ -178,9 +178,11 @@ namespace Unity.FPS.AvatarBoss
                 if (spike == null)
                     continue;
 
+                // The spike transform is the impact-point center after the rise.
+                // Do not add half the visual spike height here: that inflated the
+                // gameplay footprint and made Earth hit well outside its telegraph.
                 Vector3 center = spike.transform.position;
-                float fairnessRadius = DamageRadius + SpikeHeight * 0.5f;
-                Collider[] hits = Physics.OverlapSphere(center, fairnessRadius, Physics.AllLayers,
+                Collider[] hits = Physics.OverlapSphere(center, Mathf.Max(0f, DamageRadius), Physics.AllLayers,
                     QueryTriggerInteraction.Ignore);
 
                 var damaged = new HashSet<Health>();

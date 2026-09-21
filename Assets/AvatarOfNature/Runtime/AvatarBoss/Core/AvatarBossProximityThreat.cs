@@ -47,6 +47,8 @@ namespace Unity.FPS.AvatarBoss
         [Min(0f)] public float Damage = 20f;
         [Min(0f)] public float PushForce = 34f;
         [Min(0f)] public float PushLift = 0.8f;
+        [Tooltip("Difficulty-controlled physical knockback toggle. Contact damage remains active when disabled.")]
+        public bool KnockbackEnabled = true;
 
         [Header("Prototype feedback")]
         public Color TelegraphColor = new Color(1f, 0.24f, 0.06f, 0.8f);
@@ -153,7 +155,8 @@ namespace Unity.FPS.AvatarBoss
                 float distance = HorizontalDistance(transform.position, m_Player.transform.position);
                 if (distance <= ImpactRadius || wasOnHead)
                 {
-                    m_Player.ApplyExternalImpulse(pushDirection * PushForce + Vector3.up * PushLift);
+                    if (KnockbackEnabled)
+                        m_Player.ApplyExternalImpulse(pushDirection * PushForce + Vector3.up * PushLift);
                     Health playerHealth = m_Player.GetComponent<Health>();
                     playerHealth?.TakeDamage(Damage, gameObject);
                     EventManager.Broadcast(new CameraImpulseEvent

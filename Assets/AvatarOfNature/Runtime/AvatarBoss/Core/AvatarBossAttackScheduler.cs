@@ -199,7 +199,7 @@ namespace Unity.FPS.AvatarBoss
         bool TryStartRecovery()
         {
             if (!EnableRecovery || HealingOrbs == null || m_Boss == null
-                || m_Boss.IsDead || m_Boss.SummonsActive
+                || m_Boss.IsDead || !m_Boss.PhaseTwo || m_Boss.SummonsActive
                 || Time.time < InitialGraceTime
                 || HealingOrbs.RecoveryActive
                 || m_Boss.BossHealth == null
