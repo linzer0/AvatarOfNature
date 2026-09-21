@@ -48,6 +48,10 @@ namespace Unity.FPS.AvatarBoss
         [Tooltip("Summon anchor ring radius around the boss")]
         public float AnchorRadius = 13f;
 
+        [Header("Summon Prefabs")]
+        [SerializeField] GameObject m_HoverbotPrefab;
+        [SerializeField] GameObject m_TurretPrefab;
+
         public AvatarBossSummonPhase Phase { get; private set; } = AvatarBossSummonPhase.Idle;
 
         /// <summary>Number of intermissions that completed successfully.</summary>
@@ -68,9 +72,6 @@ namespace Unity.FPS.AvatarBoss
 
         int m_CurrentSummonCount;
 
-        GameObject m_HoverbotPrefab;
-        GameObject m_TurretPrefab;
-
         void Start()
         {
             m_Boss = GetComponentInParent<AvatarBossController>();
@@ -83,11 +84,8 @@ namespace Unity.FPS.AvatarBoss
                 return;
             }
 
-            // prefabs are loaded lazily from the standard Microgame asset paths
-            m_HoverbotPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/FPS/Prefabs/Enemies/Enemy_HoverBot.prefab");
-            m_TurretPrefab = UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>(
-                "Assets/FPS/Prefabs/Enemies/Enemy_Turret.prefab");
+            if (m_HoverbotPrefab == null || m_TurretPrefab == null)
+                Debug.LogWarning($"[{nameof(AvatarBossSummonController)}] Summon prefabs are not assigned; summon intermissions will be skipped.", this);
 
             m_NextSummonCheckTime = Time.time + FirstSummonDelay;
         }
